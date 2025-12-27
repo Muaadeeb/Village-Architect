@@ -11,6 +11,7 @@
             font-family: 'Crimson Pro', serif;
             background-color: #0f172a;
             color: #e2e8f0;
+            min-height: 100vh;
         }
         .medieval-font {
             font-family: 'MedievalSharp', cursive;
@@ -21,49 +22,99 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
             background-image: url("https://www.transparenttextures.com/patterns/old-paper.png");
         }
+        
         @media print {
             @page {
                 size: portrait;
                 margin: 0.5in;
             }
-            body { 
-                background-color: white !important; 
-                color: black !important;
-                padding: 0 !important;
+            
+            /* High Quality Print Overrides */
+            html, body {
+                background-color: #fef3c7 !important;
+                color: #1a1a1a !important;
+                height: auto !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            #root { width: 100% !important; }
-            .no-print { display: none !important; }
-            .parchment { 
-                box-shadow: none !important; 
-                background-color: white !important; 
-                color: black !important;
-                background-image: none !important;
+
+            #root {
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .parchment {
+                background-color: #fef3c7 !important;
+                box-shadow: none !important;
+                border: 1px solid #d4a373 !important;
                 padding: 0 !important;
-                border: none !important;
+                width: 100% !important;
+                max-width: none !important;
                 overflow: visible !important;
                 height: auto !important;
-                max-width: 100% !important;
                 margin: 0 !important;
+                position: static !important;
             }
-            .max-w-4xl { max-width: 100% !important; }
-            .break-inside-avoid { page-break-inside: avoid; }
-            section { page-break-after: auto; }
-            h2, h3 { page-break-after: avoid; }
+
+            .max-w-4xl {
+                max-width: 100% !important;
+            }
+
+            /* Critical for PDF completeness: prevent truncation */
+            .overflow-y-auto, 
+            .overflow-hidden,
+            .custom-scrollbar {
+                overflow: visible !important;
+                max-height: none !important;
+                height: auto !important;
+            }
+
+            /* Smart Page Breaks */
+            .break-inside-avoid {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                margin-bottom: 2rem !important;
+                display: block !important;
+            }
+
+            h2, h3, h4 {
+                page-break-after: avoid !important;
+            }
+
+            section {
+                page-break-inside: auto !important;
+                page-break-after: auto !important;
+                margin-bottom: 3rem !important;
+            }
+
+            /* Ensure background images/textures print if supported */
+            .parchment::before {
+                content: "";
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background-color: #fef3c7;
+                z-index: -1;
+            }
+
+            /* Table fixes for PDF */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
             
-            /* Force expansion of all scrollable or capped height elements */
-            .overflow-y-auto {
-                overflow: visible !important;
-                max-height: none !important;
-            }
-            [class*="max-h-"] {
-                max-height: none !important;
-            }
-            .overflow-hidden {
-                overflow: visible !important;
+            tr {
+                page-break-inside: avoid !important;
             }
         }
 
-        /* Custom Social Matrix Animations */
+        /* UI Animations */
         @keyframes pulse-subtle {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.85; transform: scale(1.01); }

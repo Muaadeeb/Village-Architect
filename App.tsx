@@ -231,7 +231,7 @@ const App: React.FC = () => {
 
       {village && (
         <div className="w-full max-w-4xl flex flex-col gap-6 relative">
-          <div className="parchment p-8 md:p-12 rounded-sm shadow-2xl border-2 border-stone-400/30 relative overflow-visible">
+          <div className="parchment p-8 md:p-12 rounded-sm shadow-2xl border-2 border-stone-400/30 relative overflow-visible h-auto">
             <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
               <Skull className="w-96 h-96" />
             </div>
@@ -242,7 +242,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Village Overview & Description */}
-            <section className="mb-12">
+            <section className="mb-12 break-inside-avoid">
               <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase tracking-wider">
                 <Scroll className="w-6 h-6 text-stone-700" /> Village Narrative Overview
               </div>
@@ -252,7 +252,7 @@ const App: React.FC = () => {
             </section>
 
             {/* Top Row: Distribution & Map */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 break-inside-avoid">
               <section>
                 <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b border-stone-800 mb-6 pb-1">
                   <Users className="w-6 h-6 text-stone-700" /> Village Distribution
@@ -285,7 +285,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Gossip & Atmosphere */}
-            <div className="grid grid-cols-1 gap-8 mb-16">
+            <div className="grid grid-cols-1 gap-8 mb-16 break-inside-avoid">
                <section>
                  <div className="flex justify-between items-center border-b-2 border-stone-800 mb-4 pb-1">
                     <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font">
@@ -492,7 +492,7 @@ const App: React.FC = () => {
             </section>
 
             {/* Secret Section */}
-            <section className="mb-12 bg-black/5 p-8 border-l-4 border-red-900 rounded-r shadow-sm no-print">
+            <section className="mb-12 bg-black/5 p-8 border-l-4 border-red-900 rounded-r shadow-sm no-print break-inside-avoid">
               <h3 className="text-2xl font-bold medieval-font mb-3 text-red-900 flex items-center gap-2">
                 <Skull className="w-7 h-7" /> The Town's Dark Secret (DM Eyes Only)
               </h3>
@@ -530,12 +530,12 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-12">
+              <div className="space-y-12 h-auto overflow-visible">
                 {village.residents.filter(r => r.name.toLowerCase().includes(npcFilter.toLowerCase())).map((npc, idx) => {
                   const standing = getStandingCategory(npc);
                   const alignDetails = getAlignmentDetails(npc.alignment);
                   return (
-                    <div key={idx} className="p-8 border-2 border-stone-400 bg-white/20 rounded shadow-xl relative group break-inside-avoid">
+                    <div key={idx} className="p-8 border-2 border-stone-400 bg-white/20 rounded shadow-xl relative group break-inside-avoid h-auto overflow-visible">
                       <div className="flex flex-col md:flex-row gap-8">
                         <div className="w-full md:w-1/3 flex flex-col items-center text-center">
                           <div className="relative w-full aspect-square bg-stone-800/10 mb-6 rounded shadow-inner border-2 border-stone-300 overflow-hidden group/portrait">
@@ -605,7 +605,7 @@ const App: React.FC = () => {
 
                               <div>
                                  <h5 className="text-[10px] font-black uppercase text-stone-400 mb-2">Social Matrix Insights</h5>
-                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar print:max-h-none print:overflow-visible">
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] md:max-h-none overflow-y-auto pr-2 custom-scrollbar print:max-h-none print:overflow-visible">
                                     {npc.relationships.map((rel, ridx) => {
                                        const styles = getRelationshipStyles(rel.score);
                                        return (
@@ -630,7 +630,7 @@ const App: React.FC = () => {
             </section>
 
             {/* GM Records */}
-            <section className="no-print">
+            <section className="no-print break-inside-avoid">
               <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
                 <BookOpen size={24} className="inline mr-2" /> Campaign Records
               </h3>
