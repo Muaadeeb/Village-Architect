@@ -21,14 +21,17 @@ export const generateVillageDetails = async (
     3. Weather: A single short, thematic phrase describing the current weather.
     4. Exactly 12 Businesses: 
        - Gritty names, rumors, 3-5 notable low-magic items/services.
-       - encounterHook: A short, actionable scenario (1-2 sentences) for a GM to use when players visit.
-    5. Two major landmarks:
-       - name, description, encounterHook.
-    6. Exactly 15 NPCs: 12 shop owners + 3 others. 
-       - FOR EACH NPC: 
-         - name, race, role, personality, trait, dark secret.
-         - SHADOWDARK COMBAT STATS: hp, ac, atk, dmg.
-       - FULL RELATIONSHIP MATRIX: Every single NPC must have a relationship entry for the other 14 NPCs. 
+       - encounterHook: A short, actionable scenario (1-2 sentences).
+    5. Two major landmarks: name, description, encounterHook.
+    6. Exactly 15 NPCs: 1shop owners + 3 others. 
+       - FOR EACH NPC: name, race, role, personality, trait, dark secret.
+       - SHADOWDARK COMBAT STATS: hp, ac, atk, dmg.
+       - FULL RELATIONSHIP MATRIX: Every NPC must have a relationship entry for the other 14 NPCs. 
+       - BELL CURVE SCORING: Relationship scores must follow a strict Gaussian distribution (1 to 10 scale). 
+         - Roughly 65% of scores should be 4-7 (Neutral/Acquaintances).
+         - Roughly 25% should be 2-3 or 8-9 (Active Dislike or Strong Friendship).
+         - Roughly 10% should be 1 or 10 (Mortal Enemies or Lifelong Bonds).
+         - NEVER generate a score below 1 or above 10.
     7. Main Quests: 3 high-stakes narrative arcs.
     8. Side Treks: 10 small, gritty errands or mysteries.
     9. GM Notes: DM-specific campaign hooks.
@@ -142,7 +145,8 @@ export const generateVillageMap = async (village: VillageData): Promise<string> 
 
   for (const part of response.candidates[0].content.parts) {
     if (part.inlineData) {
-      return `data:image/png;base64,${part.inlineData.data}`;
+      const base64EncodeString: string = part.inlineData.data;
+      return `data:image/png;base64,${base64EncodeString}`;
     }
   }
   

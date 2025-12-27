@@ -9,7 +9,7 @@ import {
   Flame, 
   Waves,
   Store,
-  Printer,
+  Printer, 
   Skull,
   ArrowRight,
   UserCircle,
@@ -41,7 +41,10 @@ import {
   Sword,
   Axe,
   Zap,
-  Castle
+  Castle,
+  Crown,
+  Frown,
+  Meh
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
@@ -177,10 +180,49 @@ const App: React.FC = () => {
     ...village.demographics.others.map(o => ({ name: `${o.race} (${o.count})`, value: o.count, color: '#dc2626' }))
   ] : [];
 
-  const getRelationshipStyles = (score: number) => {
-    if (score >= 8) return { line: 'bg-emerald-600', text: 'text-emerald-900', bg: 'bg-emerald-50', border: 'border-emerald-200', icon: <Heart size={10} className="text-emerald-600" /> };
-    if (score <= 3) return { line: 'bg-rose-600', text: 'text-rose-900', bg: 'bg-rose-50', border: 'border-rose-200', icon: <Swords size={10} className="text-rose-600" /> };
-    return { line: 'bg-stone-400', text: 'text-stone-800', bg: 'bg-stone-50', border: 'border-stone-200', icon: <Minus size={10} className="text-stone-400" /> };
+  const getRelationshipStyles = (rawScore: number) => {
+    // Ensure score is strictly 1-10 as requested
+    const score = Math.max(1, Math.min(10, Math.round(rawScore)));
+
+    if (score >= 8) {
+      return { 
+        line: 'bg-emerald-600', 
+        text: 'text-emerald-900', 
+        bg: 'bg-emerald-50', 
+        border: 'border-emerald-200', 
+        icon: <Heart size={10} className="text-emerald-600" />,
+        effects: 'animate-pulse-subtle'
+      };
+    }
+    if (score <= 3) {
+      return { 
+        line: 'bg-rose-600', 
+        text: 'text-rose-900', 
+        bg: 'bg-rose-50', 
+        border: 'border-rose-200', 
+        icon: <Swords size={10} className="text-rose-600" />,
+        effects: 'matrix-desaturated'
+      };
+    }
+    return { 
+      line: 'bg-stone-400', 
+      text: 'text-stone-800', 
+      bg: 'bg-stone-50', 
+      border: 'border-stone-200', 
+      icon: <Minus size={10} className="text-stone-400" />,
+      effects: ''
+    };
+  };
+
+  const getStandingCategory = (npc: DetailedNPC) => {
+    if (!npc.relationships.length) return { label: 'Unknown', color: 'text-stone-500', icon: <Meh size={12}/> };
+    const avg = npc.relationships.reduce((acc, r) => acc + r.score, 0) / npc.relationships.length;
+    
+    if (avg <= 3) return { label: 'Pariah', color: 'text-red-900', icon: <Frown size={12}/> };
+    if (avg <= 4.5) return { label: 'Outsider', color: 'text-stone-600', icon: <UserCircle size={12}/> };
+    if (avg <= 6.5) return { label: 'Resident', color: 'text-stone-900', icon: <Users size={12}/> };
+    if (avg <= 8) return { label: 'Well-Regarded', color: 'text-emerald-800', icon: <Heart size={12}/> };
+    return { label: 'Pillar of Community', color: 'text-amber-800', icon: <Crown size={12}/> };
   };
 
   return (
@@ -470,6 +512,8 @@ const App: React.FC = () => {
                 {village.residents.filter(r => r.name.toLowerCase().includes(npcFilter.toLowerCase())).map((npc, idx) => {
                   const isEditing = editingNpcIdx === idx;
                   const isPortraitLoading = portraitLoading[idx];
+                  const standing = getStandingCategory(npc);
+
                   return (
                     <div key={idx} className="p-8 border-2 border-stone-400 bg-white/20 rounded-lg shadow-xl relative group overflow-hidden">
                       {/* Edit Button */}
@@ -521,11 +565,16 @@ const App: React.FC = () => {
                           </div>
 
                           <div className="mb-4">
-                            <h4 className="text-4xl font-bold medieval-font text-stone-900 mb-0">{npc.name}</h4>
-                            <p className="text-amber-900 font-bold uppercase text-xs tracking-widest">{npc.race} — {npc.role}</p>
+                            <h4 className="text-4xl font-bold medieval-font text-stone-900 mb-0 leading-tight">{npc.name}</h4>
+                            <div className="flex items-center gap-2 mb-2">
+                               <p className="text-amber-900 font-bold uppercase text-[10px] tracking-widest">{npc.race} • {npc.role}</p>
+                               <div className={`text-[10px] font-bold px-2 py-0.5 bg-stone-800/5 rounded-full border border-stone-300 flex items-center gap-1 ${standing.color}`}>
+                                  {standing.icon} {standing.label}
+                               </div>
+                            </div>
                             
                             {/* Combat Stats Section */}
-                            <div className="mt-4 grid grid-cols-2 gap-2 bg-stone-800/5 p-3 rounded-sm border border-stone-800/10">
+                            <div className="mt-4 grid grid-cols-2 gap-2 bg-stone-800/5 p-3 rounded-sm border border-stone-800/10 shadow-inner">
                               <div className="flex items-center gap-2">
                                 <Shield size={14} className="text-stone-700" />
                                 <span className="text-xs font-bold text-stone-900">AC {npc.stats?.ac || 10}</span>
@@ -614,17 +663,17 @@ const App: React.FC = () => {
 
                         <div className="w-full md:w-2/3">
                           <h5 className="text-xs font-black uppercase tracking-widest text-stone-500 mb-4 flex items-center gap-2">
-                            <ArrowRight size={14} /> Full Social Matrix for {npc.name}
+                            <ArrowRight size={14} /> Social Matrix (Bell Curve Distribution)
                           </h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                             {npc.relationships.map((rel, ridx) => {
                               const styles = getRelationshipStyles(rel.score);
                               return (
-                                <div key={ridx} className={`p-3 rounded border ${styles.bg} ${styles.border} transition-all hover:bg-white`}>
+                                <div key={ridx} className={`p-3 rounded border transition-all duration-700 ${styles.bg} ${styles.border} ${styles.effects} hover:bg-white hover:shadow-lg hover:scale-[1.02]`}>
                                   <div className="flex justify-between items-center mb-1">
                                     <span className="font-bold text-xs">{rel.targetName}</span>
-                                    <div className={`text-[9px] font-black px-1.5 rounded border ${styles.border} ${styles.text} flex items-center gap-1`}>
-                                      {styles.icon} {rel.score} • {rel.feeling}
+                                    <div className={`text-[9px] font-black px-1.5 rounded border ${styles.border} ${styles.text} flex items-center gap-1 shadow-sm`}>
+                                      {styles.icon} {Math.max(1, Math.min(10, Math.round(rel.score)))} • {rel.feeling}
                                     </div>
                                   </div>
                                   <p className="text-[10px] text-stone-600 italic leading-tight">{rel.reason}</p>
@@ -690,7 +739,7 @@ const App: React.FC = () => {
             <h3 className="text-3xl medieval-font mb-4 italic">The matrix is yet unformed...</h3>
             <p className="text-slate-400 text-lg mb-8">
               Click "Manifest Village" to generate a massive Shadowdark dossier. 
-              Warning: Manifesting 15x15 relationship paths consumes significant stellar energy.
+              Warning: Manifesting 15x15 relationship paths with Gaussian distribution logic consumes significant stellar energy.
             </p>
           </div>
         </div>
@@ -702,9 +751,10 @@ const App: React.FC = () => {
             <Flame className="w-24 h-24 text-amber-500 animate-pulse" />
             <RefreshCw className="w-24 h-24 text-amber-600 animate-spin absolute top-0 left-0 opacity-20" />
           </div>
-          <div className="text-center">
+          <div className="text-center px-6">
             <h2 className="text-3xl medieval-font text-amber-500 mb-2">Calculating 210 Relationship Paths</h2>
-            <p className="text-slate-400 italic">Forging 3 main quests, 10 side treks, and a full social matrix...</p>
+            <p className="text-slate-400 italic">Distributing social matrix across a Gaussian curve...</p>
+            <p className="text-slate-500 text-sm mt-4">Forging 12 establishments, 15 portraits, and a parchment chart.</p>
           </div>
         </div>
       )}
