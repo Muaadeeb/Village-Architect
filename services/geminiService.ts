@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { VillageData, DetailedNPC } from "../types";
+import { VillageData, DetailedNPC, PointOfInterest } from "../types";
 
 export const generateVillageDetails = async (
   villageName: string,
@@ -17,18 +17,20 @@ export const generateVillageDetails = async (
     
     REQUIRED DATA:
     1. Geography: Moody description of the site by a river.
-    2. Dark Secret: The village's core rot or hidden horror.
-    3. Weather: A single short thematic phrase.
-    4. Exactly 12 Businesses: 
+    2. Description: Elaborate on the general mood and prevalent dangers of the village (Shadowdark style). This should be a 2-3 sentence overview that sets the scene for the GM.
+    3. Dark Secret: The village's core rot or hidden horror.
+    4. Weather: A single short thematic phrase.
+    5. Exactly 12 Businesses: 
        - Gritty names, rumors.
        - encounterHook: 1-2 sentences.
+       - gmNotes: 1-2 sentences of DM-only secrets or plot hooks specific to this location.
        - marketItems: Exactly 5 specific items for sale. Each must have:
          - name, 
          - price (Shadowdark style: "5 gp", "10 sp", "5 cp"),
          - availability ("Common", "Rare", "Scarce"),
          - description.
-    5. Two major landmarks: name, description, encounterHook.
-    6. Exactly 15 NPCs: 12 shop owners + 3 others. 
+    6. Two major landmarks: name, description, encounterHook.
+    7. Exactly 15 NPCs: 12 shop owners + 3 others. 
        - FOR EACH NPC: name, race, sex, role, personality, trait, alignment, dark secret.
        - SEX: Must be 'Male' or 'Female'.
        - ALIGNMENT: Must be 'Lawful', 'Neutral', or 'Chaotic'.
@@ -39,13 +41,14 @@ export const generateVillageDetails = async (
        - SHADOWDARK COMBAT STATS: hp, ac, atk, dmg.
        - FULL RELATIONSHIP MATRIX: Every NPC must have a relationship entry for the other 14 NPCs. 
        - BELL CURVE SCORING: Strict Gaussian distribution (1 to 10 scale). 
-    7. Main Quests: 3 high-stakes narrative arcs.
-    8. Side Treks: 10 small, gritty errands or mysteries.
-    9. GM Notes: DM-specific campaign hooks.
+    8. Main Quests: 3 high-stakes narrative arcs.
+    9. Side Treks: 10 small, gritty errands or mysteries.
+    10. GM Notes: DM-specific campaign hooks for the village overall.
 
     Output JSON schema:
     {
       "geography": "string",
+      "description": "string",
       "atmosphere": "string",
       "weather": "string",
       "darkSecret": "string",
@@ -53,7 +56,7 @@ export const generateVillageDetails = async (
       "gmNotes": "string",
       "businesses": [
         { 
-          "name": "string", "type": "string", "description": "string", "rumor": "string", "encounterHook": "string",
+          "name": "string", "type": "string", "description": "string", "rumor": "string", "encounterHook": "string", "gmNotes": "string",
           "marketItems": [ { "name": "string", "price": "string", "availability": "string", "description": "string" } ],
           "owner": { "name": "string", "race": "string", "sex": "Male|Female", "role": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string" } 
         }
@@ -87,6 +90,44 @@ export const generateVillageDetails = async (
     population: popCount,
     demographics: demographics
   };
+};
+
+export const generatePOI = async (village: VillageData): Promise<PointOfInterest> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const prompt = `
+    Generate a Shadowdark RPG "Point of Interest" located 1d6 miles from the village "${village.name}".
+    Narrative context: The village description is "${village.description}" and secret is "${village.darkSecret}".
+    Main Quests involve: ${village.mainQuests.map(q => q.title).join(", ")}.
+
+    Structure: A 5-room crawl (dungeon, lair, or ruin).
+    JSON Output Format:
+    {
+      "title": "Name of the location",
+      "type": "Dungeon|Lair|Ruin",
+      "location": "Distance and direction from village, plus descriptive landmark",
+      "background": "Gritty history linked to the village's secret or a main quest",
+      "rooms": [
+        {
+          "number": 1,
+          "name": "Room Name",
+          "description": "Atmospheric sensory details",
+          "threats": "Monsters, traps, or environmental hazards (Shadowdark style)",
+          "treasure": "Specific loot or useful items"
+        }
+      ]
+    }
+    Generate exactly 5 rooms.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json"
+    }
+  });
+
+  return JSON.parse(response.text || "{}");
 };
 
 export const generateVillageGossip = async (village: VillageData): Promise<string[]> => {
@@ -145,7 +186,7 @@ export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> =
 
 export const generateNPCPortrait = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Sex: ${npc.sex}. Race: ${npc.race}. Role: ${npc.role}. Alignment: ${npc.alignment}. Personality: ${npc.personality}. Trait: ${npc.trait}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
+  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Sex: ${npc.sex}. Race: ${npc.race}. Role: ${npc.role}. Alignment: ${npc.alignment}. Personality: ${npc.personality}. Traits: ${npc.trait}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',

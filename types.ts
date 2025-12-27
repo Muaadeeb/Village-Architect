@@ -47,6 +47,7 @@ export interface Business {
   marketItems: MarketItem[];
   rumor: string;
   encounterHook: string;
+  gmNotes: string;
 }
 
 export interface Landmark {
@@ -61,9 +62,26 @@ export interface Quest {
   reward: string;
 }
 
+export interface Room {
+  number: number;
+  name: string;
+  description: string;
+  threats: string;
+  treasure: string;
+}
+
+export interface PointOfInterest {
+  title: string;
+  type: string;
+  location: string;
+  background: string;
+  rooms: Room[];
+}
+
 export interface VillageData {
   name: string;
   population: number;
+  description: string;
   demographics: {
     humans: number;
     halflings: number;
@@ -82,4 +100,5 @@ export interface VillageData {
   sideTreks: Quest[];
   gmNotes: string;
   mapUrl?: string;
+  poi?: PointOfInterest;
 }

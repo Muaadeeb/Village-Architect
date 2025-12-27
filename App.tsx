@@ -5,16 +5,18 @@ import {
   generateNPCPortrait, 
   generateVillageMap, 
   generateMerchantVoice,
-  generateVillageGossip
+  generateVillageGossip,
+  generatePOI
 } from './services/geminiService';
-import { VillageData, DetailedNPC, Relationship } from './types';
+import { VillageData, DetailedNPC, Relationship, PointOfInterest, Business } from './types';
 import { 
   Scroll, RefreshCw, Users, Flame, Waves, Store, Printer, Skull, ArrowRight, UserCircle,
   EyeOff, MessageSquareQuote, BookOpen, Pencil, MapPin, Heart, Swords, Minus, Package,
   ShoppingBag, Sparkles, Search, Fingerprint, Edit2, Check, X, CloudFog, Wind, Wand2,
   Map as MapIcon, Compass, FileText, Shield, Activity, Sword, Axe, Zap, Castle, Crown,
   Frown, Meh, Volume2, Coins, Tag, Newspaper, BarChart3, Info, Scale, CircleDot, Ghost,
-  User as UserIcon, Share2
+  User as UserIcon, Share2, Mountain, Ghost as GhostIcon, Binoculars, AlertCircle,
+  Briefcase
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
@@ -149,7 +151,7 @@ const SocialWeb: React.FC<{ residents: DetailedNPC[] }> = ({ residents }) => {
 
   return (
     <div className="relative w-full aspect-[16/10] bg-stone-900/5 rounded border-2 border-stone-800/20 overflow-hidden cursor-crosshair">
-      <svg ref={containerRef} viewBox="0 0 800 500" className="w-full h-full">
+      <svg viewBox="0 0 800 500" className="w-full h-full">
         <defs>
           <filter id="shadow">
             <feDropShadow dx="0.5" dy="0.5" stdDeviation="0.5" floodOpacity="0.5"/>
@@ -246,6 +248,7 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext): Promise<Aud
 const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [mapLoading, setMapLoading] = useState(false);
+  const [poiLoading, setPoiLoading] = useState(false);
   const [gossipLoading, setGossipLoading] = useState(false);
   const [village, setVillage] = useState<VillageData | null>(null);
   const [gossip, setGossip] = useState<string[]>([]);
@@ -281,6 +284,19 @@ const App: React.FC = () => {
       setError("The shadows have obscured the path. Try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGeneratePOI = async () => {
+    if (!village || poiLoading) return;
+    setPoiLoading(true);
+    try {
+      const poiData = await generatePOI(village);
+      setVillage({ ...village, poi: poiData });
+    } catch (err) {
+      console.error("POI generation failed", err);
+    } finally {
+      setPoiLoading(false);
     }
   };
 
@@ -323,6 +339,13 @@ const App: React.FC = () => {
     } finally {
       setMapLoading(false);
     }
+  };
+
+  const updateBusinessGMNotes = (bIdx: number, newNotes: string) => {
+    if (!village) return;
+    const newBusinesses = [...village.businesses];
+    newBusinesses[bIdx] = { ...newBusinesses[bIdx], gmNotes: newNotes };
+    setVillage({ ...village, businesses: newBusinesses });
   };
 
   const playVoice = async (idx: number, npc: DetailedNPC) => {
@@ -424,6 +447,16 @@ const App: React.FC = () => {
               <p className="text-xl italic font-serif opacity-80 uppercase tracking-widest">Master Dossier & Complete Social Matrix</p>
             </div>
 
+            {/* Village Overview & Description */}
+            <section className="mb-12">
+              <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase tracking-wider">
+                <Scroll className="w-6 h-6 text-stone-700" /> Village Narrative Overview
+              </div>
+              <p className="text-xl italic font-serif leading-relaxed text-stone-900 bg-stone-800/5 p-6 border-l-4 border-stone-800 rounded-r">
+                "{village.description}"
+              </p>
+            </section>
+
             {/* Top Row: Distribution & Map */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
               <section>
@@ -457,7 +490,7 @@ const App: React.FC = () => {
               </section>
             </div>
 
-            {/* NEW: Social Web Visualization - Quick Reference */}
+            {/* Social Web Visualization */}
             <section className="mb-16 no-print">
               <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 flex items-center gap-2 uppercase tracking-wider">
                 <Share2 className="w-6 h-6 text-stone-700" /> Social Matrix Visualizer
@@ -503,6 +536,44 @@ const App: React.FC = () => {
                </section>
             </div>
 
+            {/* NEW: ESTABLISHMENT RECORDS */}
+            <section className="mb-16">
+              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider flex items-center gap-2">
+                <Briefcase size={24} className="text-stone-800" /> Establishment Records
+              </h3>
+              <p className="text-[11px] text-stone-600 italic mb-4 no-print">Keep specific notes on each shop, its secrets, or current plot developments.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {village.businesses.map((business, bIdx) => (
+                  <div key={bIdx} className="p-4 bg-white/40 border border-stone-300 rounded shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-bold text-stone-900 medieval-font text-xl">{business.name}</h4>
+                      <span className="text-[9px] font-black bg-stone-800 text-white px-2 py-0.5 rounded">{business.type}</span>
+                    </div>
+                    <p className="text-[10px] italic text-stone-600 mb-2 leading-tight">Proprietor: <span className="font-bold text-stone-800">{business.owner.name}</span></p>
+                    <p className="text-[11px] text-stone-700 mb-3 leading-relaxed">{business.description}</p>
+                    
+                    <div className="space-y-3 no-print">
+                      <div className="bg-amber-100/50 p-2 rounded border-l-2 border-amber-800">
+                        <p className="text-[9px] font-black text-amber-900 uppercase">Rumor</p>
+                        <p className="text-[10px] italic text-amber-800">"{business.rumor}"</p>
+                      </div>
+                      <div className="p-2 border border-stone-300 rounded bg-white/50">
+                        <label className="text-[9px] font-black text-stone-500 uppercase block mb-1 flex items-center gap-1">
+                          <Edit2 size={8} /> GM Establishment Notes
+                        </label>
+                        <textarea 
+                          className="w-full text-[10px] bg-transparent border-none focus:ring-0 italic text-stone-800 min-h-[50px] resize-none"
+                          placeholder="Store shop-specific secrets or hooks..."
+                          value={business.gmNotes}
+                          onChange={(e) => updateBusinessGMNotes(bIdx, e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             {/* Landmarks & Quests */}
             <section className="mb-16">
               <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
@@ -534,6 +605,67 @@ const App: React.FC = () => {
                    </div>
                  ))}
               </div>
+            </section>
+
+            {/* POINT OF INTEREST - "SESSION IN A BOX" */}
+            <section className="mb-16">
+              <div className="flex justify-between items-center border-b-2 border-stone-800 mb-6 pb-1">
+                <h3 className="text-2xl font-bold medieval-font uppercase tracking-wider flex items-center gap-2">
+                  <Binoculars size={24} /> Nearby Crawl: Session in a Box
+                </h3>
+                {!village.poi && (
+                  <button 
+                    onClick={handleGeneratePOI} 
+                    disabled={poiLoading}
+                    className="no-print flex items-center gap-1 text-[10px] bg-amber-900 text-white px-3 py-1 rounded hover:bg-amber-800 uppercase font-black tracking-tighter"
+                  >
+                    {poiLoading ? <RefreshCw size={10} className="animate-spin" /> : <Mountain size={10} />} Scout Nearby POI
+                  </button>
+                )}
+              </div>
+
+              {poiLoading && (
+                <div className="p-8 text-center animate-pulse">
+                  <GhostIcon className="w-12 h-12 mx-auto text-stone-400 mb-4" />
+                  <p className="text-stone-500 italic font-serif">Surveying local terrain for hidden dangers...</p>
+                </div>
+              )}
+
+              {village.poi && (
+                <div className="space-y-6">
+                  <div className="bg-stone-800/10 p-4 border-l-4 border-stone-800">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="text-3xl font-bold medieval-font leading-none">{village.poi.title}</h4>
+                      <span className="text-[10px] font-black bg-stone-800 text-white px-2 py-0.5 rounded">{village.poi.type}</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-stone-600 mb-2 flex items-center gap-1"><MapPin size={10} /> {village.poi.location}</p>
+                    <p className="text-sm italic text-stone-800 leading-relaxed font-serif">{village.poi.background}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-2 h-full">
+                    {village.poi.rooms.map((room, idx) => (
+                      <div key={idx} className="bg-white/40 border border-stone-300 p-3 rounded shadow-sm hover:shadow-md transition-shadow group">
+                        <div className="text-[10px] font-black text-stone-400 mb-1">ROOM {room.number}</div>
+                        <h5 className="font-bold text-stone-900 text-xs uppercase mb-2 border-b border-stone-200 pb-1">{room.name}</h5>
+                        <div className="space-y-2">
+                           <div>
+                             <p className="text-[9px] font-black text-stone-500 uppercase flex items-center gap-1"><EyeOff size={8} /> Atmosphere</p>
+                             <p className="text-[10px] italic leading-tight text-stone-700">{room.description}</p>
+                           </div>
+                           <div>
+                             <p className="text-[9px] font-black text-red-900 uppercase flex items-center gap-1"><Skull size={8} /> Danger</p>
+                             <p className="text-[10px] leading-tight text-red-800">{room.threats}</p>
+                           </div>
+                           <div>
+                             <p className="text-[9px] font-black text-amber-900 uppercase flex items-center gap-1"><Coins size={8} /> Treasure</p>
+                             <p className="text-[10px] leading-tight text-amber-800 font-bold">{room.treasure}</p>
+                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* Marketplace Ledger */}
