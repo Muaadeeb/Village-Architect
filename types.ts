@@ -7,6 +7,13 @@ export interface NPC {
   secret?: string;
 }
 
+export interface MarketItem {
+  name: string;
+  price: string;
+  availability: 'Common' | 'Rare' | 'Scarce';
+  description: string;
+}
+
 export interface CombatStats {
   hp: number;
   ac: number;
@@ -25,6 +32,7 @@ export interface DetailedNPC extends NPC {
   personality: string;
   relationships: Relationship[];
   portraitUrl?: string;
+  audioGreeting?: string;
   stats: CombatStats;
 }
 
@@ -34,6 +42,7 @@ export interface Business {
   description: string;
   owner: NPC;
   notableItems: string[];
+  marketItems: MarketItem[];
   rumor: string;
   encounterHook: string;
 }
