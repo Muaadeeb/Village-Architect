@@ -81,6 +81,21 @@ const App: React.FC = () => {
     }
   };
 
+  const handleGeneratePortrait = async (idx: number, npc: DetailedNPC) => {
+    if (!village) return;
+    setPortraitLoading(prev => ({ ...prev, [idx]: true }));
+    try {
+      const url = await generateNPCPortrait(npc);
+      const updatedResidents = [...village.residents];
+      updatedResidents[idx] = { ...updatedResidents[idx], portraitUrl: url };
+      setVillage({ ...village, residents: updatedResidents });
+    } catch (err) {
+      console.error("Portrait generation failed:", err);
+    } finally {
+      setPortraitLoading(prev => ({ ...prev, [idx]: false }));
+    }
+  };
+
   const handleRollGossip = async () => {
     if (!village || gossipLoading) return;
     setGossipLoading(true);
@@ -384,11 +399,33 @@ const App: React.FC = () => {
                     <div key={idx} className="p-8 border-2 border-stone-400 bg-white/20 rounded shadow-xl relative group">
                       <div className="flex flex-col lg:flex-row gap-8">
                         <div className="w-full lg:w-1/4 flex flex-col items-center text-center">
-                          <div className="relative w-full aspect-square bg-stone-800/10 mb-6 rounded shadow-inner border-2 border-stone-300 overflow-hidden">
-                            {npc.portraitUrl ? <img src={npc.portraitUrl} className="w-full h-full object-cover" /> : <UserCircle className="w-full h-full opacity-10 p-4" />}
+                          <div className="relative w-full aspect-square bg-stone-800/10 mb-6 rounded shadow-inner border-2 border-stone-300 overflow-hidden group/portrait">
+                            {npc.portraitUrl ? (
+                              <img src={npc.portraitUrl} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                {portraitLoading[idx] ? (
+                                  <RefreshCw className="w-12 h-12 animate-spin text-amber-600" />
+                                ) : (
+                                  <UserCircle className="w-full h-full opacity-10 p-4" />
+                                )}
+                              </div>
+                            )}
+
+                            {/* Manifest Portrait Button Overlay */}
+                            {!portraitLoading[idx] && (
+                              <button 
+                                onClick={() => handleGeneratePortrait(idx, npc)}
+                                className={`absolute inset-0 bg-stone-900/60 transition-opacity flex flex-col items-center justify-center gap-2 text-amber-500 font-bold medieval-font no-print ${npc.portraitUrl ? 'opacity-0 group-hover/portrait:opacity-100' : 'opacity-100'}`}
+                              >
+                                <Wand2 className="w-8 h-8 animate-bounce" />
+                                <span>{npc.portraitUrl ? 'Regenerate Portrait' : 'Manifest Portrait'}</span>
+                              </button>
+                            )}
+
                             <button 
-                              onClick={() => playVoice(idx, npc)}
-                              className="absolute bottom-2 right-2 p-3 bg-amber-600 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all no-print disabled:opacity-50"
+                              onClick={(e) => { e.stopPropagation(); playVoice(idx, npc); }}
+                              className="absolute bottom-2 right-2 p-3 bg-amber-600 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all no-print disabled:opacity-50 z-10"
                               disabled={voiceLoading[idx]}
                             >
                               {voiceLoading[idx] ? <RefreshCw className="animate-spin" size={20} /> : <Volume2 size={20} />}
