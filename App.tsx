@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { generateVillageDetails, generateNPCPortrait } from './services/geminiService';
+import { generateVillageDetails, generateNPCPortrait, generateVillageMap } from './services/geminiService';
 import { VillageData, DetailedNPC } from './types';
 import { 
   Scroll, 
@@ -32,7 +32,16 @@ import {
   CloudFog,
   Wind,
   Image as ImageIcon,
-  Wand2
+  Wand2,
+  Map as MapIcon,
+  Compass,
+  FileText,
+  Shield,
+  Activity,
+  Sword,
+  Axe,
+  Zap,
+  Castle
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
@@ -53,6 +62,7 @@ const WEATHER_TABLE = [
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const [mapLoading, setMapLoading] = useState(false);
   const [village, setVillage] = useState<VillageData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editableNotes, setEditableNotes] = useState("");
@@ -96,6 +106,19 @@ const App: React.FC = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateMap = async () => {
+    if (!village) return;
+    setMapLoading(true);
+    try {
+      const url = await generateVillageMap(village);
+      setVillage({ ...village, mapUrl: url });
+    } catch (err) {
+      console.error("Map generation failed:", err);
+    } finally {
+      setMapLoading(false);
     }
   };
 
@@ -233,6 +256,113 @@ const App: React.FC = () => {
               </section>
             </div>
 
+            {/* Map Section */}
+            <section className="mb-16">
+              <div className="flex justify-between items-end border-b-2 border-stone-800 mb-6 pb-2">
+                <h3 className="text-3xl font-bold medieval-font flex items-center gap-2 uppercase tracking-wider">
+                  <MapIcon className="w-8 h-8 text-stone-800" /> Village Cartography
+                </h3>
+                {!village.mapUrl && !mapLoading && (
+                  <button 
+                    onClick={handleGenerateMap}
+                    className="no-print flex items-center gap-2 bg-stone-800 hover:bg-stone-700 text-amber-500 px-4 py-2 rounded font-bold transition-all text-sm mb-1 shadow-md active:scale-95"
+                  >
+                    <Compass size={16} />
+                    Cartograph Village
+                  </button>
+                )}
+                {village.mapUrl && !mapLoading && (
+                   <button 
+                    onClick={handleGenerateMap}
+                    className="no-print flex items-center gap-2 bg-stone-200 hover:bg-stone-300 text-stone-800 px-4 py-2 rounded font-bold transition-all text-sm mb-1 border border-stone-400"
+                  >
+                    <RefreshCw size={14} />
+                    Update Map
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-8">
+                <div className="w-full relative aspect-[16/9] bg-stone-800/10 border-4 border-stone-800 rounded-sm overflow-hidden flex items-center justify-center shadow-2xl">
+                   {village.mapUrl ? (
+                    <img src={village.mapUrl} alt={`${village.name} Map`} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-4 text-stone-400">
+                       {mapLoading ? (
+                        <div className="flex flex-col items-center gap-4">
+                          <Compass className="w-16 h-16 animate-spin text-amber-600" />
+                          <p className="medieval-font text-xl text-stone-600 animate-pulse">Drafting the layout of {village.name}...</p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 opacity-30">
+                          <MapIcon className="w-32 h-32" />
+                          <p className="text-lg italic">The chart is currently blank.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Map Legend */}
+                <div className="bg-stone-800/5 p-8 border-2 border-stone-800/20 rounded-sm">
+                   <h4 className="text-xl font-bold medieval-font border-b border-stone-800 mb-6 flex items-center gap-2 uppercase">
+                      <FileText size={20} /> Map Legend: Key Establishments
+                   </h4>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-12">
+                      {village.businesses.map((biz, idx) => (
+                        <div key={idx} className="flex items-start gap-4">
+                           <div className="w-8 h-8 flex-shrink-0 bg-stone-800 text-amber-500 rounded-full flex items-center justify-center font-bold text-sm shadow-md border border-amber-500/30">
+                              {idx + 1}
+                           </div>
+                           <div>
+                              <p className="font-bold text-stone-900 leading-tight medieval-font">{biz.name}</p>
+                              <p className="text-[10px] text-stone-600 italic">Owned by {biz.owner.name} ({biz.owner.race})</p>
+                           </div>
+                        </div>
+                      ))}
+                      {/* Add Landmarks to legend */}
+                      {village.landmarks.map((landmark, idx) => (
+                         <div key={`landmark-${idx}`} className="flex items-start gap-4">
+                            <div className="w-8 h-8 flex-shrink-0 bg-amber-900 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md border border-white/20">
+                               L{idx + 1}
+                            </div>
+                            <div>
+                               <p className="font-bold text-stone-900 leading-tight medieval-font">{landmark.name}</p>
+                               <p className="text-[10px] text-stone-600 italic">Major Landmark</p>
+                            </div>
+                         </div>
+                      ))}
+                   </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Landmarks Section */}
+            <section className="mb-16">
+              <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 flex items-center gap-2 uppercase tracking-wider text-stone-800">
+                <Castle className="w-8 h-8" /> Landmarks of Note
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {village.landmarks.map((landmark, idx) => (
+                  <div key={idx} className="p-6 bg-stone-800/5 border border-stone-300 rounded relative group">
+                    <div className="absolute top-4 right-4 text-xs font-black bg-amber-900 text-white px-2 py-0.5 rounded shadow-sm border border-white/20">
+                      L{idx+1}
+                    </div>
+                    <h4 className="text-2xl font-bold medieval-font text-stone-900 mb-2">{landmark.name}</h4>
+                    <p className="text-sm italic leading-relaxed text-stone-700 mb-4">{landmark.description}</p>
+                    <div className="bg-stone-100 p-4 border-l-4 border-amber-800 shadow-sm rounded-r">
+                      <div className="text-[10px] font-black uppercase text-amber-900 flex items-center gap-1.5 mb-1.5">
+                        <Zap size={12} /> Encounter Hook
+                      </div>
+                      <p className="text-sm font-serif italic text-stone-800 leading-tight">
+                        {landmark.encounterHook}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             {/* Dark Secret */}
             <section className="mb-12 bg-black/5 p-8 border-l-4 border-red-900 rounded-r shadow-sm">
               <h3 className="text-2xl font-bold medieval-font mb-3 text-red-900 flex items-center gap-2">
@@ -283,8 +413,21 @@ const App: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {village.businesses.map((biz, idx) => (
                   <div key={idx} className="flex flex-col gap-2 p-4 bg-stone-300/10 rounded-sm border border-stone-300/30">
-                    <h4 className="text-xl font-bold medieval-font border-b border-stone-400">{biz.name}</h4>
-                    <p className="italic text-xs opacity-90 mb-2">{biz.description}</p>
+                    <div className="flex justify-between items-start border-b border-stone-400 mb-1">
+                      <h4 className="text-xl font-bold medieval-font">{biz.name}</h4>
+                      <span className="text-[10px] bg-stone-800 text-amber-500 px-1.5 rounded-full font-bold">{idx + 1}</span>
+                    </div>
+                    <p className="italic text-xs opacity-90 mb-2 leading-relaxed">{biz.description}</p>
+                    
+                    <div className="bg-amber-900/5 p-2 rounded-sm border-l-2 border-amber-800/30 mb-2">
+                      <div className="text-[9px] font-black uppercase text-amber-900 flex items-center gap-1 mb-1">
+                        <Zap size={10} /> Encounter Hook
+                      </div>
+                      <p className="text-[10px] italic leading-tight text-stone-800">
+                        {biz.encounterHook}
+                      </p>
+                    </div>
+
                     <div className="mb-2">
                       <div className="text-[10px] font-black uppercase text-stone-500 mb-1 flex items-center gap-1">
                         <ShoppingBag size={10} /> Notable Wares
@@ -293,8 +436,8 @@ const App: React.FC = () => {
                         {biz.notableItems.map((item, i) => <li key={i} className="flex items-center gap-1 italic"><Package size={8} /> {item}</li>)}
                       </ul>
                     </div>
-                    <div className="text-[10px] bg-amber-900/5 p-2 rounded italic mb-2">
-                       "{biz.rumor}"
+                    <div className="text-[10px] bg-stone-800/5 p-2 rounded italic mb-2 border border-stone-300/30">
+                       <MessageSquareQuote size={10} className="inline mr-1 text-stone-400" /> "{biz.rumor}"
                     </div>
                     <div className="text-[10px] mt-auto border-t border-stone-300/50 pt-2 text-stone-600">
                       <span className="font-bold">Proprietor:</span> {biz.owner.name} ({biz.owner.race})
@@ -381,6 +524,26 @@ const App: React.FC = () => {
                             <h4 className="text-4xl font-bold medieval-font text-stone-900 mb-0">{npc.name}</h4>
                             <p className="text-amber-900 font-bold uppercase text-xs tracking-widest">{npc.race} — {npc.role}</p>
                             
+                            {/* Combat Stats Section */}
+                            <div className="mt-4 grid grid-cols-2 gap-2 bg-stone-800/5 p-3 rounded-sm border border-stone-800/10">
+                              <div className="flex items-center gap-2">
+                                <Shield size={14} className="text-stone-700" />
+                                <span className="text-xs font-bold text-stone-900">AC {npc.stats?.ac || 10}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Activity size={14} className="text-rose-700" />
+                                <span className="text-xs font-bold text-stone-900">HP {npc.stats?.hp || 4}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Sword size={14} className="text-stone-700" />
+                                <span className="text-xs font-bold text-stone-900">ATK {npc.stats?.atk || "+0"}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Axe size={14} className="text-stone-700" />
+                                <span className="text-xs font-bold text-stone-900">DMG {npc.stats?.dmg || "1d4"}</span>
+                              </div>
+                            </div>
+
                             {/* Trait Field */}
                             <div className="mt-4">
                               <div className="text-[10px] font-black uppercase text-stone-500 flex items-center gap-1.5 mb-1">

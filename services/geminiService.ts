@@ -18,19 +18,17 @@ export const generateVillageDetails = async (
     REQUIRED DATA:
     1. Geography: Moody description of the site by a river.
     2. Dark Secret: The village's core rot or hidden horror.
-    3. Weather: A single short, thematic phrase describing the current weather (e.g., "Eerie, bone-white fog", "Freezing, relentless rain").
-    4. Exactly 12 Businesses: Gritty names, rumors, and 3-5 notable low-magic items/services each.
-    5. Two major landmarks.
+    3. Weather: A single short, thematic phrase describing the current weather.
+    4. Exactly 12 Businesses: 
+       - Gritty names, rumors, 3-5 notable low-magic items/services.
+       - encounterHook: A short, actionable scenario (1-2 sentences) for a GM to use when players visit.
+    5. Two major landmarks:
+       - name, description, encounterHook.
     6. Exactly 15 NPCs: 12 shop owners + 3 others. 
        - FOR EACH NPC: 
-         - name, 
-         - race (Human, Halfling, Dwarf, Elf, etc.), 
-         - role (Job/Station), 
-         - personality (How they behave), 
-         - trait (A SINGLE DEFINING CHARACTERISTIC OR PHYSICAL QUIRK, e.g., "Whistles through a missing tooth", "Obsessed with collecting blue stones"),
-         - a dark secret.
-       - FULL RELATIONSHIP MATRIX: Every single NPC (out of 15) must have a relationship entry for the other 14 NPCs. 
-       - Relationships must include a score (1-10), a feeling, and a concise 1-sentence reason. 
+         - name, race, role, personality, trait, dark secret.
+         - SHADOWDARK COMBAT STATS: hp, ac, atk, dmg.
+       - FULL RELATIONSHIP MATRIX: Every single NPC must have a relationship entry for the other 14 NPCs. 
     7. Main Quests: 3 high-stakes narrative arcs.
     8. Side Treks: 10 small, gritty errands or mysteries.
     9. GM Notes: DM-specific campaign hooks.
@@ -41,14 +39,25 @@ export const generateVillageDetails = async (
       "atmosphere": "string",
       "weather": "string",
       "darkSecret": "string",
-      "landmarks": ["string"],
+      "landmarks": [
+        { "name": "string", "description": "string", "encounterHook": "string" }
+      ],
       "gmNotes": "string",
       "businesses": [
-        { "name": "string", "type": "string", "description": "string", "rumor": "string", "notableItems": ["string"], "owner": { "name": "string", "race": "string", "role": "string", "trait": "string", "secret": "string" } }
+        { 
+          "name": "string", 
+          "type": "string", 
+          "description": "string", 
+          "rumor": "string", 
+          "notableItems": ["string"], 
+          "encounterHook": "string",
+          "owner": { "name": "string", "race": "string", "role": "string", "trait": "string", "secret": "string" } 
+        }
       ],
       "residents": [
         {
           "name": "string", "race": "string", "role": "string", "personality": "string", "trait": "string", "secret": "string",
+          "stats": { "hp": number, "ac": number, "atk": "string", "dmg": "string" },
           "relationships": [ { "targetName": "string", "score": number, "feeling": "string", "reason": "string" } ]
         }
       ],
@@ -105,4 +114,37 @@ export const generateNPCPortrait = async (npc: DetailedNPC): Promise<string> => 
   }
   
   throw new Error("Failed to generate image part.");
+};
+
+export const generateVillageMap = async (village: VillageData): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const businessNames = village.businesses.map(b => b.name).join(", ");
+  const prompt = `A top-down, hand-drawn fantasy village map of "${village.name}". 
+    The map is drawn on aged, stained parchment with black ink and quill. 
+    It features exactly 12 distinct buildings nestled along a moody river. 
+    The style is gritty, old-school RPG cartography (Shadowdark aesthetic). 
+    The buildings include locations like: ${businessNames}. 
+    Include clear markers or numbers (1-12) next to the main buildings. 
+    The lines are rough, sketchy, and atmospheric. No modern elements, no colors. 
+    High contrast, dramatic shadows, ink-wash style.`;
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash-image',
+    contents: {
+      parts: [{ text: prompt }],
+    },
+    config: {
+      imageConfig: {
+        aspectRatio: "16:9"
+      }
+    }
+  });
+
+  for (const part of response.candidates[0].content.parts) {
+    if (part.inlineData) {
+      return `data:image/png;base64,${part.inlineData.data}`;
+    }
+  }
+  
+  throw new Error("Failed to generate map image part.");
 };

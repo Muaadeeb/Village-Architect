@@ -7,6 +7,13 @@ export interface NPC {
   secret?: string;
 }
 
+export interface CombatStats {
+  hp: number;
+  ac: number;
+  atk: string;
+  dmg: string;
+}
+
 export interface Relationship {
   targetName: string;
   score: number;
@@ -18,6 +25,7 @@ export interface DetailedNPC extends NPC {
   personality: string;
   relationships: Relationship[];
   portraitUrl?: string;
+  stats: CombatStats;
 }
 
 export interface Business {
@@ -27,6 +35,13 @@ export interface Business {
   owner: NPC;
   notableItems: string[];
   rumor: string;
+  encounterHook: string;
+}
+
+export interface Landmark {
+  name: string;
+  description: string;
+  encounterHook: string;
 }
 
 export interface Quest {
@@ -50,9 +65,10 @@ export interface VillageData {
   weather: string;
   darkSecret: string;
   businesses: Business[];
-  landmarks: string[];
+  landmarks: Landmark[];
   residents: DetailedNPC[];
   mainQuests: Quest[];
   sideTreks: Quest[];
   gmNotes: string;
+  mapUrl?: string;
 }
