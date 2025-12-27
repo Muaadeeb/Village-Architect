@@ -23,8 +23,29 @@
             background-image: url("https://www.transparenttextures.com/patterns/old-paper.png");
         }
         @media print {
-            .no-print { display: none; }
-            .parchment { box-shadow: none; background-color: white; color: black; }
+            @page {
+                size: portrait;
+                margin: 0.5in;
+            }
+            body { 
+                background-color: white !important; 
+                color: black !important;
+                padding: 0 !important;
+            }
+            #root { width: 100% !important; }
+            .no-print { display: none !important; }
+            .parchment { 
+                box-shadow: none !important; 
+                background-color: white !important; 
+                color: black !important;
+                background-image: none !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+            .max-w-4xl { max-width: 100% !important; }
+            .break-inside-avoid { page-break-inside: avoid; }
+            section { page-break-after: auto; }
+            h2, h3 { page-break-after: avoid; }
         }
 
         /* Custom Social Matrix Animations */

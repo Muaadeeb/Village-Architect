@@ -13,7 +13,7 @@ import {
   EyeOff, MessageSquareQuote, BookOpen, Pencil, MapPin, Heart, Swords, Minus, Package,
   ShoppingBag, Sparkles, Search, Fingerprint, Edit2, Check, X, CloudFog, Wind, Wand2,
   Map as MapIcon, Compass, FileText, Shield, Activity, Sword, Axe, Zap, Castle, Crown,
-  Frown, Meh, Volume2, Coins, Tag, Newspaper, BarChart3, Info
+  Frown, Meh, Volume2, Coins, Tag, Newspaper, BarChart3, Info, Scale, CircleDot, Ghost
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
@@ -46,10 +46,8 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [editableNotes, setEditableNotes] = useState("");
   const [npcFilter, setNpcFilter] = useState("");
-  const [editingNpcIdx, setEditingNpcIdx] = useState<number | null>(null);
   const [portraitLoading, setPortraitLoading] = useState<Record<number, boolean>>({});
   const [voiceLoading, setVoiceLoading] = useState<Record<number, boolean>>({});
-  const [tempNpcData, setTempNpcData] = useState({ trait: "", personality: "", secret: "" });
   
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -65,7 +63,6 @@ const App: React.FC = () => {
   const handleGenerate = async () => {
     setLoading(true);
     setError(null);
-    setEditingNpcIdx(null);
     setPortraitLoading({});
     setVoiceLoading({});
     setGossip([]);
@@ -144,6 +141,14 @@ const App: React.FC = () => {
     }
   };
 
+  const getAlignmentDetails = (alignment: string) => {
+    switch(alignment) {
+      case 'Lawful': return { icon: <Scale size={14} />, color: 'text-blue-900', bg: 'bg-blue-50' };
+      case 'Chaotic': return { icon: <Zap size={14} />, color: 'text-purple-900', bg: 'bg-purple-50' };
+      default: return { icon: <CircleDot size={14} />, color: 'text-stone-700', bg: 'bg-stone-50' };
+    }
+  };
+
   const getRelationshipStyles = (rawScore: number) => {
     const score = Math.max(1, Math.min(10, Math.round(rawScore)));
     if (score >= 8) return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-900', icon: <Heart size={10} />, effects: 'animate-pulse-subtle' };
@@ -189,6 +194,12 @@ const App: React.FC = () => {
           <p className="text-slate-400 italic">"Full Dossier: Lives, Deaths, and Grudges in the Gloom."</p>
         </div>
         <div className="flex gap-4">
+          <button 
+            onClick={() => window.print()} 
+            className="bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold py-4 px-6 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-lg medieval-font border border-amber-900/50"
+          >
+            <Printer size={20} /> Print Dossier
+          </button>
           <button onClick={handleGenerate} disabled={loading} className="bg-amber-600 hover:bg-amber-700 disabled:bg-slate-700 text-white font-bold py-4 px-8 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-lg medieval-font">
             {loading ? <RefreshCw className="animate-spin" /> : <Scroll />} Manifest Village
           </button>
@@ -196,7 +207,7 @@ const App: React.FC = () => {
       </div>
 
       {village && (
-        <div className="w-full max-w-6xl flex flex-col gap-6 relative">
+        <div className="w-full max-w-4xl flex flex-col gap-6 relative">
           <div className="parchment p-8 md:p-12 rounded-sm shadow-2xl border-2 border-stone-400/30 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
               <Skull className="w-96 h-96" />
@@ -241,8 +252,8 @@ const App: React.FC = () => {
             </div>
 
             {/* Gossip & Atmosphere */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-               <section className="lg:col-span-2">
+            <div className="grid grid-cols-1 gap-8 mb-16">
+               <section>
                  <div className="flex justify-between items-center border-b-2 border-stone-800 mb-4 pb-1">
                     <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font">
                       <Newspaper className="w-6 h-6 text-stone-700" /> Town Gossip Log
@@ -251,14 +262,11 @@ const App: React.FC = () => {
                       <RefreshCw size={10} className={gossipLoading ? 'animate-spin' : ''} /> Roll for Gossip
                     </button>
                  </div>
-                 <div className="space-y-3">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                    {gossip.length === 0 ? (
-                     <div className="italic text-stone-500 text-sm">No tavern talk logged yet. Click "Roll for Gossip" to listen in.</div>
+                     <div className="italic text-stone-500 text-sm col-span-3">No tavern talk logged yet. Click "Roll for Gossip" to listen in.</div>
                    ) : gossip.map((item, idx) => (
                      <div key={idx} className="bg-stone-100 p-3 border-l-4 border-amber-800 shadow-sm relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-1 opacity-10 group-hover:opacity-100 transition-opacity">
-                          <Info size={12} className="text-stone-800" />
-                        </div>
                         <p className="text-sm italic text-stone-900 leading-tight">"{item}"</p>
                      </div>
                    ))}
@@ -268,7 +276,7 @@ const App: React.FC = () => {
                   <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1">
                     <CloudFog className="w-6 h-6 text-stone-700" /> Atmospheric Status
                   </h3>
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 bg-stone-800/10 border-l-4 border-stone-800 font-bold italic text-stone-900">
                        {village.weather}
                     </div>
@@ -281,38 +289,37 @@ const App: React.FC = () => {
             </div>
 
             {/* Landmarks & Quests */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-              <section>
-                <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
-                  <Castle size={24} className="inline mr-2" /> Key Landmarks
-                </h3>
-                <div className="space-y-6">
-                  {village.landmarks.map((l, i) => (
-                    <div key={i} className="p-4 bg-white/40 border border-stone-300 rounded shadow-sm">
-                      <h4 className="font-bold text-stone-900 medieval-font text-xl">{l.name}</h4>
-                      <p className="text-xs italic text-stone-600 mb-3">{l.description}</p>
-                      <div className="bg-amber-100 p-2 rounded text-[10px] font-bold text-amber-900 border-l-4 border-amber-900">
-                        HOOK: {l.encounterHook}
-                      </div>
+            <section className="mb-16">
+              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
+                <Castle size={24} className="inline mr-2" /> Key Landmarks
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {village.landmarks.map((l, i) => (
+                  <div key={i} className="p-4 bg-white/40 border border-stone-300 rounded shadow-sm">
+                    <h4 className="font-bold text-stone-900 medieval-font text-xl">{l.name}</h4>
+                    <p className="text-xs italic text-stone-600 mb-3">{l.description}</p>
+                    <div className="bg-amber-100 p-2 rounded text-[10px] font-bold text-amber-900 border-l-4 border-amber-900">
+                      HOOK: {l.encounterHook}
                     </div>
-                  ))}
-                </div>
-              </section>
-              <section>
-                <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
-                  <Swords size={24} className="inline mr-2" /> Local Quests
-                </h3>
-                <div className="space-y-4">
-                   {village.mainQuests.map((q, i) => (
-                     <div key={i} className="p-3 bg-stone-800/5 border-l-4 border-stone-800 rounded-r">
-                        <h4 className="font-bold text-sm text-stone-900 uppercase tracking-tighter">{q.title}</h4>
-                        <p className="text-[10px] italic text-stone-600 mb-1">{q.description}</p>
-                        <span className="text-[9px] font-bold bg-stone-800 text-amber-500 px-2 rounded-full">Reward: {q.reward}</span>
-                     </div>
-                   ))}
-                </div>
-              </section>
-            </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="mb-16">
+              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
+                <Swords size={24} className="inline mr-2" /> Local Quests
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 {village.mainQuests.map((q, i) => (
+                   <div key={i} className="p-3 bg-stone-800/5 border-l-4 border-stone-800 rounded-r">
+                      <h4 className="font-bold text-sm text-stone-900 uppercase tracking-tighter">{q.title}</h4>
+                      <p className="text-[10px] italic text-stone-600 mb-1">{q.description}</p>
+                      <span className="text-[9px] font-bold bg-stone-800 text-amber-500 px-2 rounded-full">Reward: {q.reward}</span>
+                   </div>
+                 ))}
+              </div>
+            </section>
 
             {/* Marketplace Ledger */}
             <section className="mb-16">
@@ -325,7 +332,7 @@ const App: React.FC = () => {
                     <tr>
                       <th className="py-2 px-2">Item Name</th>
                       <th className="py-2 px-2">Price</th>
-                      <th className="py-2 px-2">Stock Status</th>
+                      <th className="py-2 px-2">Stock</th>
                       <th className="py-2 px-2">Vendor</th>
                     </tr>
                   </thead>
@@ -367,7 +374,6 @@ const App: React.FC = () => {
                   <UserCircle className="w-8 h-8 text-stone-800" /> Resident Dossiers
                 </h3>
                 
-                {/* Social Health Summary */}
                 {socialOverview && (
                   <div className="flex gap-4 mb-1 bg-stone-800/5 p-2 rounded border border-stone-300">
                     <div className="flex items-center gap-1 text-xs font-bold text-red-900">
@@ -395,10 +401,11 @@ const App: React.FC = () => {
               <div className="space-y-12">
                 {village.residents.filter(r => r.name.toLowerCase().includes(npcFilter.toLowerCase())).map((npc, idx) => {
                   const standing = getStandingCategory(npc);
+                  const alignDetails = getAlignmentDetails(npc.alignment);
                   return (
-                    <div key={idx} className="p-8 border-2 border-stone-400 bg-white/20 rounded shadow-xl relative group">
-                      <div className="flex flex-col lg:flex-row gap-8">
-                        <div className="w-full lg:w-1/4 flex flex-col items-center text-center">
+                    <div key={idx} className="p-8 border-2 border-stone-400 bg-white/20 rounded shadow-xl relative group break-inside-avoid">
+                      <div className="flex flex-col md:flex-row gap-8">
+                        <div className="w-full md:w-1/3 flex flex-col items-center text-center">
                           <div className="relative w-full aspect-square bg-stone-800/10 mb-6 rounded shadow-inner border-2 border-stone-300 overflow-hidden group/portrait">
                             {npc.portraitUrl ? (
                               <img src={npc.portraitUrl} className="w-full h-full object-cover" />
@@ -412,7 +419,6 @@ const App: React.FC = () => {
                               </div>
                             )}
 
-                            {/* Manifest Portrait Button Overlay */}
                             {!portraitLoading[idx] && (
                               <button 
                                 onClick={() => handleGeneratePortrait(idx, npc)}
@@ -433,13 +439,19 @@ const App: React.FC = () => {
                           </div>
                           <h4 className="text-3xl font-bold medieval-font leading-tight">{npc.name}</h4>
                           <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">{npc.race} • {npc.role}</p>
-                          <div className={`text-[10px] font-black px-3 py-1 bg-stone-100 rounded-full border border-stone-300 shadow-sm flex items-center gap-1.5 ${standing.color}`}>
-                             {standing.icon} {standing.label}
+                          
+                          <div className="flex flex-col gap-2 w-full px-4">
+                            <div className={`text-[10px] font-black px-3 py-1 bg-stone-100 rounded-full border border-stone-300 shadow-sm flex items-center justify-center gap-1.5 ${standing.color}`}>
+                               {standing.icon} {standing.label}
+                            </div>
+                            <div className={`text-[10px] font-black px-3 py-1 ${alignDetails.bg} rounded-full border border-stone-300 shadow-sm flex items-center justify-center gap-1.5 ${alignDetails.color}`}>
+                               {alignDetails.icon} {npc.alignment}
+                            </div>
                           </div>
                         </div>
 
                         <div className="flex-1">
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                           <div className="grid grid-cols-1 gap-8">
                               <div>
                                  <h5 className="text-[10px] font-black uppercase text-stone-400 mb-2">Personality & Traits</h5>
                                  <p className="italic text-stone-700 border-l-4 border-stone-300 pl-4 mb-4 text-sm leading-relaxed">"{npc.personality}"</p>
@@ -452,14 +464,14 @@ const App: React.FC = () => {
                                     </span>
                                  </div>
                                  <div className="bg-red-50 p-2 border border-red-100 rounded no-print">
-                                    <h6 className="text-[9px] font-black text-red-900 uppercase mb-1">NPC Secret</h6>
+                                    <h6 className="text-[9px] font-black text-red-900 uppercase mb-1">Alignment-Based Secret</h6>
                                     <p className="text-[10px] italic text-red-800">{npc.secret}</p>
                                  </div>
                               </div>
 
                               <div>
                                  <h5 className="text-[10px] font-black uppercase text-stone-400 mb-2">Social Matrix Insights</h5>
-                                 <div className="grid grid-cols-1 gap-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                     {npc.relationships.map((rel, ridx) => {
                                        const styles = getRelationshipStyles(rel.score);
                                        return (
@@ -508,7 +520,7 @@ const App: React.FC = () => {
             <RefreshCw className="w-24 h-24 text-amber-600 animate-spin absolute top-0 left-0 opacity-10" />
           </div>
           <h2 className="text-3xl medieval-font text-amber-500 text-center uppercase tracking-tighter">Forging Village Matrix...</h2>
-          <p className="text-slate-400 italic text-center max-w-sm">Generating 210 relationships across a Gaussian distribution, sketching 12 shops, and tuning merchant voices.</p>
+          <p className="text-slate-400 italic text-center max-w-sm">Generating relationships across Shadowdark alignments, stocking shops, and drafting dark deeds.</p>
         </div>
       )}
     </div>

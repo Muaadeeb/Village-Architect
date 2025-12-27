@@ -29,7 +29,12 @@ export const generateVillageDetails = async (
          - description.
     5. Two major landmarks: name, description, encounterHook.
     6. Exactly 15 NPCs: 12 shop owners + 3 others. 
-       - FOR EACH NPC: name, race, role, personality, trait, dark secret.
+       - FOR EACH NPC: name, race, role, personality, trait, alignment, dark secret.
+       - ALIGNMENT: Must be 'Lawful', 'Neutral', or 'Chaotic'.
+       - THEMATIC CONSISTENCY: The NPC's personality and secret MUST reflect their alignment. 
+         - Lawful secrets involve rigid codes, cults of order, or oppressive law.
+         - Chaotic secrets involve madness, entropy, or rebellion.
+         - Neutral secrets involve survival, greed, or apathy.
        - SHADOWDARK COMBAT STATS: hp, ac, atk, dmg.
        - FULL RELATIONSHIP MATRIX: Every NPC must have a relationship entry for the other 14 NPCs. 
        - BELL CURVE SCORING: Strict Gaussian distribution (1 to 10 scale). 
@@ -49,12 +54,12 @@ export const generateVillageDetails = async (
         { 
           "name": "string", "type": "string", "description": "string", "rumor": "string", "encounterHook": "string",
           "marketItems": [ { "name": "string", "price": "string", "availability": "string", "description": "string" } ],
-          "owner": { "name": "string", "race": "string", "role": "string", "trait": "string", "secret": "string" } 
+          "owner": { "name": "string", "race": "string", "role": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string" } 
         }
       ],
       "residents": [
         {
-          "name": "string", "race": "string", "role": "string", "personality": "string", "trait": "string", "secret": "string",
+          "name": "string", "race": "string", "role": "string", "personality": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string",
           "stats": { "hp": number, "ac": number, "atk": "string", "dmg": "string" },
           "relationships": [ { "targetName": "string", "score": number, "feeling": "string", "reason": "string" } ]
         }
@@ -98,7 +103,7 @@ export const generateVillageGossip = async (village: VillageData): Promise<strin
   try {
     return JSON.parse(response.text || "[]");
   } catch {
-    return ["The shadows are growing long tonight.", "Keep your coins close and your dagger closer.", "Someone new is watching from the riverbank."];
+    return ["The shadows are growing long tonight.", "Keep your coins close and your daggers closer.", "Someone new is watching from the riverbank."];
   }
 };
 
@@ -109,9 +114,10 @@ export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> =
   
   const prompt = `You are ${npc.name}, a ${npc.race} ${npc.role} in a gritty Shadowdark village. 
     Personality: ${npc.personality}. 
+    Alignment: ${npc.alignment}.
     Trait: ${npc.trait}.
     Say a short (5-10 word) greeting to a group of weary adventurers entering your establishment. 
-    Make it sound appropriate for your personality (e.g. suspicious, greedy, or tired).`;
+    Make it sound appropriate for your personality and alignment (e.g. suspicious, greedy, rigid, or tired).`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
@@ -133,7 +139,7 @@ export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> =
 
 export const generateNPCPortrait = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Race: ${npc.race}. Role: ${npc.role}. Personality: ${npc.personality}. Trait: ${npc.trait}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
+  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Race: ${npc.race}. Role: ${npc.role}. Alignment: ${npc.alignment}. Personality: ${npc.personality}. Trait: ${npc.trait}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
