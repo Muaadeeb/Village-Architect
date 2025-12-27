@@ -4,6 +4,7 @@ export interface NPC {
   race: string;
   role: string;
   trait: string;
+  sex: 'Male' | 'Female';
   alignment: 'Lawful' | 'Neutral' | 'Chaotic';
   secret?: string;
 }

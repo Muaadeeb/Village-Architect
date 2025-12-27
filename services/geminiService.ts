@@ -29,7 +29,8 @@ export const generateVillageDetails = async (
          - description.
     5. Two major landmarks: name, description, encounterHook.
     6. Exactly 15 NPCs: 12 shop owners + 3 others. 
-       - FOR EACH NPC: name, race, role, personality, trait, alignment, dark secret.
+       - FOR EACH NPC: name, race, sex, role, personality, trait, alignment, dark secret.
+       - SEX: Must be 'Male' or 'Female'.
        - ALIGNMENT: Must be 'Lawful', 'Neutral', or 'Chaotic'.
        - THEMATIC CONSISTENCY: The NPC's personality and secret MUST reflect their alignment. 
          - Lawful secrets involve rigid codes, cults of order, or oppressive law.
@@ -54,12 +55,12 @@ export const generateVillageDetails = async (
         { 
           "name": "string", "type": "string", "description": "string", "rumor": "string", "encounterHook": "string",
           "marketItems": [ { "name": "string", "price": "string", "availability": "string", "description": "string" } ],
-          "owner": { "name": "string", "race": "string", "role": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string" } 
+          "owner": { "name": "string", "race": "string", "sex": "Male|Female", "role": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string" } 
         }
       ],
       "residents": [
         {
-          "name": "string", "race": "string", "role": "string", "personality": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string",
+          "name": "string", "race": "string", "sex": "Male|Female", "role": "string", "personality": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string",
           "stats": { "hp": number, "ac": number, "atk": "string", "dmg": "string" },
           "relationships": [ { "targetName": "string", "score": number, "feeling": "string", "reason": "string" } ]
         }
@@ -109,15 +110,20 @@ export const generateVillageGossip = async (village: VillageData): Promise<strin
 
 export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const voices = ['Kore', 'Puck', 'Charon', 'Fenrir', 'Zephyr'];
+  
+  // Voice categorization based on Gemini TTS profiles
+  const femaleVoices = ['Kore', 'Zephyr'];
+  const maleVoices = ['Puck', 'Charon', 'Fenrir'];
+  
+  const voices = npc.sex === 'Female' ? femaleVoices : maleVoices;
   const voice = voices[Math.floor(Math.random() * voices.length)];
   
-  const prompt = `You are ${npc.name}, a ${npc.race} ${npc.role} in a gritty Shadowdark village. 
+  const prompt = `You are ${npc.name}, a ${npc.sex} ${npc.race} ${npc.role} in a gritty Shadowdark village. 
     Personality: ${npc.personality}. 
     Alignment: ${npc.alignment}.
     Trait: ${npc.trait}.
     Say a short (5-10 word) greeting to a group of weary adventurers entering your establishment. 
-    Make it sound appropriate for your personality and alignment (e.g. suspicious, greedy, rigid, or tired).`;
+    Make it sound appropriate for your personality, sex, and alignment (e.g. suspicious, greedy, rigid, or tired).`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
@@ -139,7 +145,7 @@ export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> =
 
 export const generateNPCPortrait = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Race: ${npc.race}. Role: ${npc.role}. Alignment: ${npc.alignment}. Personality: ${npc.personality}. Trait: ${npc.trait}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
+  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Sex: ${npc.sex}. Race: ${npc.race}. Role: ${npc.role}. Alignment: ${npc.alignment}. Personality: ${npc.personality}. Trait: ${npc.trait}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',

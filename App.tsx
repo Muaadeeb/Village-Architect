@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { 
   generateVillageDetails, 
   generateNPCPortrait, 
@@ -7,17 +7,223 @@ import {
   generateMerchantVoice,
   generateVillageGossip
 } from './services/geminiService';
-import { VillageData, DetailedNPC } from './types';
+import { VillageData, DetailedNPC, Relationship } from './types';
 import { 
   Scroll, RefreshCw, Users, Flame, Waves, Store, Printer, Skull, ArrowRight, UserCircle,
   EyeOff, MessageSquareQuote, BookOpen, Pencil, MapPin, Heart, Swords, Minus, Package,
   ShoppingBag, Sparkles, Search, Fingerprint, Edit2, Check, X, CloudFog, Wind, Wand2,
   Map as MapIcon, Compass, FileText, Shield, Activity, Sword, Axe, Zap, Castle, Crown,
-  Frown, Meh, Volume2, Coins, Tag, Newspaper, BarChart3, Info, Scale, CircleDot, Ghost
+  Frown, Meh, Volume2, Coins, Tag, Newspaper, BarChart3, Info, Scale, CircleDot, Ghost,
+  User as UserIcon, Share2
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
-// Decoding Helpers for raw PCM from Gemini TTS
+// --- Force Directed Graph Logic ---
+interface Node extends DetailedNPC {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+}
+
+interface Edge {
+  source: string;
+  target: string;
+  score: number;
+  feeling: string;
+}
+
+const SocialWeb: React.FC<{ residents: DetailedNPC[] }> = ({ residents }) => {
+  const containerRef = useRef<SVGSVGElement>(null);
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+
+  // Initialize nodes
+  useEffect(() => {
+    const width = 800;
+    const height = 500;
+    const initialNodes = residents.map((r, i) => ({
+      ...r,
+      x: width / 2 + (Math.random() - 0.5) * 300,
+      y: height / 2 + (Math.random() - 0.5) * 300,
+      vx: 0,
+      vy: 0,
+    }));
+    setNodes(initialNodes);
+  }, [residents]);
+
+  // Simulation Loop
+  useEffect(() => {
+    let animationFrame: number;
+    const width = 800;
+    const height = 500;
+    const k = 0.05; // spring constant
+    const repulsion = 8000;
+    const friction = 0.9;
+
+    const update = () => {
+      setNodes(prevNodes => {
+        const newNodes = prevNodes.map(n => ({ ...n }));
+
+        // Apply Forces
+        for (let i = 0; i < newNodes.length; i++) {
+          const nodeA = newNodes[i];
+
+          // Repulsion from other nodes
+          for (let j = 0; j < newNodes.length; j++) {
+            if (i === j) continue;
+            const nodeB = newNodes[j];
+            const dx = nodeA.x - nodeB.x;
+            const dy = nodeA.y - nodeB.y;
+            const distanceSq = dx * dx + dy * dy + 0.1;
+            const force = repulsion / distanceSq;
+            const angle = Math.atan2(dy, dx);
+            nodeA.vx += Math.cos(angle) * force;
+            nodeA.vy += Math.sin(angle) * force;
+          }
+
+          // Spring Forces (Attraction)
+          nodeA.relationships.forEach(rel => {
+            const target = newNodes.find(n => n.name === rel.targetName);
+            if (target) {
+              const dx = target.x - nodeA.x;
+              const dy = target.y - nodeA.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              // Stronger attraction for extreme scores (loves or hates)
+              const strength = Math.abs(rel.score - 5) / 5 + 0.1;
+              const force = (distance - 150) * k * strength;
+              const angle = Math.atan2(dy, dx);
+              nodeA.vx += Math.cos(angle) * force;
+              nodeA.vy += Math.sin(angle) * force;
+            }
+          });
+
+          // Center Gravity
+          const dxCenter = width / 2 - nodeA.x;
+          const dyCenter = height / 2 - nodeA.y;
+          nodeA.vx += dxCenter * 0.005;
+          nodeA.vy += dyCenter * 0.005;
+
+          // Apply velocity and friction
+          nodeA.x += nodeA.vx;
+          nodeA.y += nodeA.vy;
+          nodeA.vx *= friction;
+          nodeA.vy *= friction;
+
+          // Constraints
+          nodeA.x = Math.max(50, Math.min(width - 50, nodeA.x));
+          nodeA.y = Math.max(50, Math.min(height - 50, nodeA.y));
+        }
+        return newNodes;
+      });
+      animationFrame = requestAnimationFrame(update);
+    };
+
+    animationFrame = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(animationFrame);
+  }, []);
+
+  const edges = useMemo(() => {
+    const e: Edge[] = [];
+    residents.forEach(r => {
+      r.relationships.forEach(rel => {
+        // Only add one direction to avoid double lines
+        if (r.name < rel.targetName) {
+          e.push({
+            source: r.name,
+            target: rel.targetName,
+            score: rel.score,
+            feeling: rel.feeling
+          });
+        }
+      });
+    });
+    return e;
+  }, [residents]);
+
+  const getEdgeColor = (score: number) => {
+    if (score >= 8) return '#10b981'; // Emerald
+    if (score <= 3) return '#ef4444'; // Red
+    return '#a8a29e'; // Stone
+  };
+
+  return (
+    <div className="relative w-full aspect-[16/10] bg-stone-900/5 rounded border-2 border-stone-800/20 overflow-hidden cursor-crosshair">
+      <svg ref={containerRef} viewBox="0 0 800 500" className="w-full h-full">
+        <defs>
+          <filter id="shadow">
+            <feDropShadow dx="0.5" dy="0.5" stdDeviation="0.5" floodOpacity="0.5"/>
+          </filter>
+        </defs>
+        
+        {/* Render Edges */}
+        {edges.map((edge, i) => {
+          const source = nodes.find(n => n.name === edge.source);
+          const target = nodes.find(n => n.name === edge.target);
+          if (!source || !target) return null;
+          
+          const isHighlighted = hoveredNode === source.name || hoveredNode === target.name;
+          const opacity = hoveredNode ? (isHighlighted ? 0.8 : 0.1) : (edge.score > 7 || edge.score < 4 ? 0.4 : 0.15);
+
+          return (
+            <line
+              key={i}
+              x1={source.x}
+              y1={source.y}
+              x2={target.x}
+              y2={target.y}
+              stroke={getEdgeColor(edge.score)}
+              strokeWidth={isHighlighted ? 2.5 : 1}
+              strokeOpacity={opacity}
+              className="transition-all duration-300"
+            />
+          );
+        })}
+
+        {/* Render Nodes */}
+        {nodes.map((node, i) => {
+          const isHighlighted = hoveredNode === node.name;
+          return (
+            <g 
+              key={i} 
+              onMouseEnter={() => setHoveredNode(node.name)}
+              onMouseLeave={() => setHoveredNode(null)}
+              className="cursor-pointer transition-transform duration-300"
+              style={{ transform: isHighlighted ? 'scale(1.1)' : 'scale(1)' }}
+            >
+              <circle
+                cx={node.x}
+                cy={node.y}
+                r={isHighlighted ? 12 : 8}
+                fill={isHighlighted ? "#1a1a1a" : "#44403c"}
+                stroke="#1a1a1a"
+                strokeWidth="1.5"
+                filter="url(#shadow)"
+              />
+              {isHighlighted && (
+                <text
+                  x={node.x}
+                  y={node.y - 20}
+                  textAnchor="middle"
+                  className="medieval-font font-bold text-[14px] fill-stone-900 pointer-events-none"
+                >
+                  {node.name}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      <div className="absolute bottom-2 left-2 flex gap-4 text-[9px] font-black uppercase tracking-widest text-stone-500 bg-white/50 px-2 py-1 rounded border border-stone-300/50 pointer-events-none">
+        <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Ally</div>
+        <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500"></span> Enemy</div>
+        <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-stone-400"></span> Neutral</div>
+      </div>
+    </div>
+  );
+};
+
+// --- Decoding Helpers for raw PCM from Gemini TTS ---
 function decodeBase64(base64: string) {
   const binaryString = atob(base64);
   const bytes = new Uint8Array(binaryString.length);
@@ -251,6 +457,15 @@ const App: React.FC = () => {
               </section>
             </div>
 
+            {/* NEW: Social Web Visualization - Quick Reference */}
+            <section className="mb-16 no-print">
+              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 flex items-center gap-2 uppercase tracking-wider">
+                <Share2 className="w-6 h-6 text-stone-700" /> Social Matrix Visualizer
+              </h3>
+              <p className="text-[11px] text-stone-600 italic mb-4">Hover over residents to isolate their network of loyalties and grudges.</p>
+              <SocialWeb residents={village.residents} />
+            </section>
+
             {/* Gossip & Atmosphere */}
             <div className="grid grid-cols-1 gap-8 mb-16">
                <section>
@@ -438,7 +653,9 @@ const App: React.FC = () => {
                             </button>
                           </div>
                           <h4 className="text-3xl font-bold medieval-font leading-tight">{npc.name}</h4>
-                          <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">{npc.race} • {npc.role}</p>
+                          <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">
+                             {npc.sex} • {npc.race} • {npc.role}
+                          </p>
                           
                           <div className="flex flex-col gap-2 w-full px-4">
                             <div className={`text-[10px] font-black px-3 py-1 bg-stone-100 rounded-full border border-stone-300 shadow-sm flex items-center justify-center gap-1.5 ${standing.color}`}>
