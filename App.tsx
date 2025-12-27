@@ -15,7 +15,7 @@ import {
   Map as MapIcon, Compass, FileText, Shield, Activity, Sword, Axe, Zap, Castle, Crown,
   Frown, Meh, Volume2, Coins, Tag, Newspaper, BarChart3, Info, Scale, CircleDot, Ghost,
   User as UserIcon, Mountain, Ghost as GhostIcon, Binoculars, AlertCircle,
-  Briefcase
+  Briefcase, FileDigit
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
@@ -113,8 +113,8 @@ const App: React.FC = () => {
     if (!village || gossipLoading) return;
     setGossipLoading(true);
     try {
-      const newGossip = await generateVillageGossip(village);
-      setGossip(prev => [...newGossip, ...prev].slice(0, 9));
+      const gossipData = await generateVillageGossip(village);
+      setGossip(prev => [...gossipData, ...prev].slice(0, 9));
     } catch (err) {
       console.error("Gossip failed", err);
     } finally {
@@ -208,6 +208,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
+      {/* HUD - Not Printed */}
       <div className="max-w-6xl w-full flex flex-col md:flex-row justify-between items-center gap-6 mb-12 no-print">
         <div className="text-center md:text-left">
           <h1 className="text-4xl md:text-5xl font-bold medieval-font text-amber-500 mb-2 flex items-center gap-3">
@@ -232,123 +233,132 @@ const App: React.FC = () => {
       {village && (
         <div className="w-full max-w-4xl flex flex-col gap-6 relative">
           <div className="parchment p-8 md:p-12 rounded-sm shadow-2xl border-2 border-stone-400/30 relative overflow-visible h-auto">
-            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-              <Skull className="w-96 h-96" />
-            </div>
-
-            <div className="border-b-2 border-stone-800 pb-6 mb-8 text-center">
-              <h2 className="text-7xl font-bold medieval-font mb-2 uppercase tracking-tighter">{village.name}</h2>
-              <p className="text-xl italic font-serif opacity-80 uppercase tracking-widest">Master Dossier & Complete Social Matrix</p>
-            </div>
-
-            {/* Village Overview & Description */}
-            <section className="mb-12 break-inside-avoid">
-              <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase tracking-wider">
-                <Scroll className="w-6 h-6 text-stone-700" /> Village Narrative Overview
+            
+            {/* Page 1: Title & Atmospheric Records */}
+            <section className="print:print-page-border">
+              <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none no-print">
+                <Skull className="w-96 h-96" />
               </div>
-              <p className="text-xl italic font-serif leading-relaxed text-stone-900 bg-stone-800/5 p-6 border-l-4 border-stone-800 rounded-r">
-                "{village.description}"
-              </p>
+
+              <div className="border-b-4 border-double border-stone-800 pb-6 mb-12 text-center">
+                <h2 className="text-7xl font-bold medieval-font mb-2 uppercase tracking-tighter">{village.name}</h2>
+                <div className="flex items-center justify-center gap-4 text-xs font-bold uppercase tracking-[0.2em] opacity-80">
+                  <span>Village Dossier</span>
+                  <div className="w-2 h-2 rounded-full bg-stone-800"></div>
+                  <span>Shadowdark RPG</span>
+                </div>
+              </div>
+
+              <div className="mb-12">
+                <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase">
+                  <Scroll className="w-6 h-6" /> Narrative Manifest
+                </div>
+                <p className="text-2xl italic font-serif leading-relaxed text-stone-900 bg-white/30 p-8 border-l-8 border-stone-800 rounded-r shadow-inner">
+                  "{village.description}"
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 break-inside-avoid">
+                <div>
+                  <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b border-stone-800 mb-6 pb-1">
+                    <Users className="w-6 h-6" /> Census Data
+                  </h3>
+                  <div className="h-64 w-full bg-white/20 p-4 rounded-lg border border-stone-200">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={chartData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                          {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                        </Pie>
+                        <Legend layout="vertical" align="right" verticalAlign="middle" />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center border-b border-stone-800 mb-4 pb-1">
+                    <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font">
+                      <MapIcon className="w-6 h-6" /> Local Chart
+                    </h3>
+                    <button onClick={handleGenerateMap} className="text-[10px] font-bold bg-stone-800 text-amber-500 px-2 py-1 rounded no-print hover:bg-stone-700">
+                      {mapLoading ? 'Drafting...' : 'Update Map'}
+                    </button>
+                  </div>
+                  <div className="w-full aspect-[16/9] bg-stone-900/10 border-2 border-stone-800 flex items-center justify-center overflow-hidden shadow-md">
+                     {village.mapUrl ? <img src={village.mapUrl} className="w-full h-full object-cover" /> : <div className="text-stone-400 italic">No visual chart drafted.</div>}
+                  </div>
+                </div>
+              </div>
             </section>
 
-            {/* Top Row: Distribution & Map */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 break-inside-avoid">
-              <section>
-                <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b border-stone-800 mb-6 pb-1">
-                  <Users className="w-6 h-6 text-stone-700" /> Village Distribution
-                </h3>
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={chartData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                        {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                      </Pie>
-                      <Legend layout="vertical" align="right" verticalAlign="middle" />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </section>
-
-              <section>
-                <div className="flex justify-between items-center border-b border-stone-800 mb-4 pb-1">
-                  <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font">
-                    <MapIcon className="w-6 h-6 text-stone-700" /> Local Cartography
-                  </h3>
-                  <button onClick={handleGenerateMap} className="text-[10px] font-bold bg-stone-800 text-amber-500 px-2 py-1 rounded no-print hover:bg-stone-700">
-                    {mapLoading ? 'Drawing...' : 'Update Map'}
-                  </button>
-                </div>
-                <div className="w-full aspect-[16/9] bg-stone-900/10 border-2 border-stone-800 flex items-center justify-center overflow-hidden">
-                   {village.mapUrl ? <img src={village.mapUrl} className="w-full h-full object-cover" /> : <div className="text-stone-400 italic">No chart drafted.</div>}
-                </div>
-              </section>
-            </div>
-
-            {/* Gossip & Atmosphere */}
-            <div className="grid grid-cols-1 gap-8 mb-16 break-inside-avoid">
-               <section>
-                 <div className="flex justify-between items-center border-b-2 border-stone-800 mb-4 pb-1">
-                    <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font">
-                      <Newspaper className="w-6 h-6 text-stone-700" /> Town Gossip Log
+            {/* Page 2: Gossip & Local Records */}
+            <section className="print:print-page-border">
+              <div className="grid grid-cols-1 gap-12 mb-16 break-inside-avoid">
+                 <div className="w-full">
+                   <div className="flex justify-between items-center border-b-2 border-stone-800 mb-4 pb-1">
+                      <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font uppercase">
+                        <Newspaper className="w-6 h-6" /> Tavern Intelligence
+                      </h3>
+                      <button onClick={handleRollGossip} disabled={gossipLoading} className="no-print flex items-center gap-1 text-[10px] bg-amber-900 text-white px-2 py-1 rounded hover:bg-amber-800 uppercase font-black">
+                        <RefreshCw size={10} className={gossipLoading ? 'animate-spin' : ''} /> Refresh Gossip
+                      </button>
+                   </div>
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     {gossip.length === 0 ? (
+                       <div className="italic text-stone-500 text-sm col-span-3">No tavern talk logged.</div>
+                     ) : gossip.map((item, idx) => (
+                       <div key={idx} className="bg-white/40 p-4 border-l-4 border-amber-800 shadow-sm relative overflow-hidden group">
+                          <p className="text-base italic text-stone-900 leading-tight">"{item}"</p>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+                 
+                 <div>
+                    <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase">
+                      <CloudFog className="w-6 h-6" /> Regional Status
                     </h3>
-                    <button onClick={handleRollGossip} disabled={gossipLoading} className="no-print flex items-center gap-1 text-[10px] bg-amber-900 text-white px-2 py-1 rounded hover:bg-amber-800">
-                      <RefreshCw size={10} className={gossipLoading ? 'animate-spin' : ''} /> Roll for Gossip
-                    </button>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                   {gossip.length === 0 ? (
-                     <div className="italic text-stone-500 text-sm col-span-3">No tavern talk logged yet. Click "Roll for Gossip" to listen in.</div>
-                   ) : gossip.map((item, idx) => (
-                     <div key={idx} className="bg-stone-100 p-3 border-l-4 border-amber-800 shadow-sm relative overflow-hidden group">
-                        <p className="text-sm italic text-stone-900 leading-tight">"{item}"</p>
-                     </div>
-                   ))}
-                 </div>
-               </section>
-               <section>
-                  <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1">
-                    <CloudFog className="w-6 h-6 text-stone-700" /> Atmospheric Status
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-stone-800/10 border-l-4 border-stone-800 font-bold italic text-stone-900">
-                       {village.weather}
-                    </div>
-                    <div className="text-sm leading-relaxed text-stone-700">
-                       <span className="font-black uppercase text-[10px] block mb-1">Geography:</span>
-                       {village.geography}
-                    </div>
-                  </div>
-               </section>
-            </div>
-
-            {/* ESTABLISHMENT RECORDS */}
-            <section className="mb-16">
-              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider flex items-center gap-2">
-                <Briefcase size={24} className="text-stone-800" /> Establishment Records
-              </h3>
-              <p className="text-[11px] text-stone-600 italic mb-4 no-print">Keep specific notes on each shop, its secrets, or current plot developments.</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {village.businesses.map((business, bIdx) => (
-                  <div key={bIdx} className="p-4 bg-white/40 border border-stone-300 rounded shadow-sm hover:shadow-md transition-shadow break-inside-avoid">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-bold text-stone-900 medieval-font text-xl">{business.name}</h4>
-                      <span className="text-[9px] font-black bg-stone-800 text-white px-2 py-0.5 rounded">{business.type}</span>
-                    </div>
-                    <p className="text-[10px] italic text-stone-600 mb-2 leading-tight">Proprietor: <span className="font-bold text-stone-800">{business.owner.name}</span></p>
-                    <p className="text-[11px] text-stone-700 mb-3 leading-relaxed">{business.description}</p>
-                    
-                    <div className="space-y-3 no-print">
-                      <div className="bg-amber-100/50 p-2 rounded border-l-2 border-amber-800">
-                        <p className="text-[9px] font-black text-amber-900 uppercase">Rumor</p>
-                        <p className="text-[10px] italic text-amber-800">"{business.rumor}"</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="p-6 bg-white/40 border-2 border-stone-800 font-bold italic text-stone-900 text-xl text-center flex items-center justify-center">
+                         {village.weather}
                       </div>
-                      <div className="p-2 border border-stone-300 rounded bg-white/50">
-                        <label className="text-[9px] font-black text-stone-500 uppercase block mb-1 flex items-center gap-1">
-                          <Edit2 size={8} /> GM Establishment Notes
+                      <div className="text-lg leading-relaxed text-stone-700">
+                         <span className="font-black uppercase text-[10px] block mb-1 opacity-50">Local Geography:</span>
+                         {village.geography}
+                      </div>
+                    </div>
+                 </div>
+              </div>
+            </section>
+
+            {/* Page 3: Establishments & Commerce */}
+            <section className="page-break-before print:print-page-border">
+              <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 flex items-center gap-2 uppercase tracking-wider">
+                <Briefcase size={28} /> Establishment Records
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
+                {village.businesses.map((business, bIdx) => (
+                  <div key={bIdx} className="p-6 bg-white/50 border-2 border-stone-300 rounded shadow-md break-inside-avoid relative overflow-visible">
+                    <div className="flex justify-between items-start mb-4">
+                      <h4 className="font-bold text-stone-900 medieval-font text-2xl uppercase tracking-tighter">{business.name}</h4>
+                      <span className="text-[10px] font-black bg-stone-800 text-white px-3 py-1 rounded uppercase">{business.type}</span>
+                    </div>
+                    <p className="text-xs italic text-stone-600 mb-3 border-b border-stone-200 pb-2">Proprietor: <span className="font-bold text-stone-900">{business.owner.name}</span></p>
+                    <p className="text-base text-stone-700 mb-4 leading-relaxed font-serif">{business.description}</p>
+                    
+                    <div className="space-y-4">
+                      <div className="bg-amber-100/60 p-3 rounded border-l-4 border-amber-800 shadow-inner">
+                        <p className="text-[10px] font-black text-amber-900 uppercase mb-1">Local Rumor</p>
+                        <p className="text-sm italic text-amber-900 leading-tight">"{business.rumor}"</p>
+                      </div>
+                      
+                      <div className="p-4 border-2 border-dashed border-stone-400 rounded bg-white/40">
+                        <label className="text-[9px] font-black text-stone-500 uppercase block mb-2 flex items-center gap-1">
+                          <Edit2 size={10} /> GM Establishment Notes
                         </label>
                         <textarea 
-                          className="w-full text-[10px] bg-transparent border-none focus:ring-0 italic text-stone-800 min-h-[50px] resize-none"
-                          placeholder="Store shop-specific secrets or hooks..."
+                          className="w-full text-base bg-transparent border-none focus:ring-0 italic text-stone-800 min-h-[80px] resize-none leading-relaxed"
+                          placeholder="Record shop secrets here..."
                           value={business.gmNotes}
                           onChange={(e) => updateBusinessGMNotes(bIdx, e.target.value)}
                         />
@@ -359,131 +369,135 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* Landmarks & Quests */}
-            <section className="mb-16">
-              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
-                <Castle size={24} className="inline mr-2" /> Key Landmarks
+            {/* Page 4: Hooks & Nearby Hazards */}
+            <section className="page-break-before print:print-page-border">
+              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-1 uppercase tracking-wider flex items-center gap-2">
+                <Swords size={28} /> Campaign Hooks & Points of Interest
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {village.landmarks.map((l, i) => (
-                  <div key={i} className="p-4 bg-white/40 border border-stone-300 rounded shadow-sm break-inside-avoid">
-                    <h4 className="font-bold text-stone-900 medieval-font text-xl">{l.name}</h4>
-                    <p className="text-xs italic text-stone-600 mb-3">{l.description}</p>
-                    <div className="bg-amber-100 p-2 rounded text-[10px] font-bold text-amber-900 border-l-4 border-amber-900">
-                      HOOK: {l.encounterHook}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="mb-16">
-              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
-                <Swords size={24} className="inline mr-2" /> Local Quests
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 {village.mainQuests.map((q, i) => (
-                   <div key={i} className="p-3 bg-stone-800/5 border-l-4 border-stone-800 rounded-r break-inside-avoid">
-                      <h4 className="font-bold text-sm text-stone-900 uppercase tracking-tighter">{q.title}</h4>
-                      <p className="text-[10px] italic text-stone-600 mb-1">{q.description}</p>
-                      <span className="text-[9px] font-bold bg-stone-800 text-amber-500 px-2 rounded-full">Reward: {q.reward}</span>
-                   </div>
-                 ))}
-              </div>
-            </section>
-
-            {/* POINT OF INTEREST - "SESSION IN A BOX" */}
-            <section className="mb-16">
-              <div className="flex justify-between items-center border-b-2 border-stone-800 mb-6 pb-1">
-                <h3 className="text-2xl font-bold medieval-font uppercase tracking-wider flex items-center gap-2">
-                  <Binoculars size={24} /> Nearby Crawl: Session in a Box
-                </h3>
-                {!village.poi && (
-                  <button 
-                    onClick={handleGeneratePOI} 
-                    disabled={poiLoading}
-                    className="no-print flex items-center gap-1 text-[10px] bg-amber-900 text-white px-3 py-1 rounded hover:bg-amber-800 uppercase font-black tracking-tighter"
-                  >
-                    {poiLoading ? <RefreshCw size={10} className="animate-spin" /> : <Mountain size={10} />} Scout Nearby POI
-                  </button>
-                )}
-              </div>
-
-              {poiLoading && (
-                <div className="p-8 text-center animate-pulse">
-                  <GhostIcon className="w-12 h-12 mx-auto text-stone-400 mb-4" />
-                  <p className="text-stone-500 italic font-serif">Surveying local terrain for hidden dangers...</p>
-                </div>
-              )}
-
-              {village.poi && (
-                <div className="space-y-6">
-                  <div className="bg-stone-800/10 p-4 border-l-4 border-stone-800 break-inside-avoid">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="text-3xl font-bold medieval-font leading-none">{village.poi.title}</h4>
-                      <span className="text-[10px] font-black bg-stone-800 text-white px-2 py-0.5 rounded">{village.poi.type}</span>
-                    </div>
-                    <p className="text-[11px] font-bold text-stone-600 mb-2 flex items-center gap-1"><MapPin size={10} /> {village.poi.location}</p>
-                    <p className="text-sm italic text-stone-800 leading-relaxed font-serif">{village.poi.background}</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-2 h-full">
-                    {village.poi.rooms.map((room, idx) => (
-                      <div key={idx} className="bg-white/40 border border-stone-300 p-3 rounded shadow-sm hover:shadow-md transition-shadow group break-inside-avoid">
-                        <div className="text-[10px] font-black text-stone-400 mb-1">ROOM {room.number}</div>
-                        <h5 className="font-bold text-stone-900 text-xs uppercase mb-2 border-b border-stone-200 pb-1">{room.name}</h5>
-                        <div className="space-y-2">
-                           <div>
-                             <p className="text-[9px] font-black text-stone-500 uppercase flex items-center gap-1"><EyeOff size={8} /> Atmosphere</p>
-                             <p className="text-[10px] italic leading-tight text-stone-700">{room.description}</p>
-                           </div>
-                           <div>
-                             <p className="text-[9px] font-black text-red-900 uppercase flex items-center gap-1"><Skull size={8} /> Danger</p>
-                             <p className="text-[10px] leading-tight text-red-800">{room.threats}</p>
-                           </div>
-                           <div>
-                             <p className="text-[9px] font-black text-amber-900 uppercase flex items-center gap-1"><Coins size={8} /> Treasure</p>
-                             <p className="text-[10px] leading-tight text-amber-800 font-bold">{room.treasure}</p>
-                           </div>
+              
+              <div className="grid grid-cols-1 gap-12 mb-12">
+                <div className="break-inside-avoid">
+                  <h4 className="text-xl font-bold medieval-font mb-4 flex items-center gap-2"><Castle /> Landmarks</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {village.landmarks.map((l, i) => (
+                      <div key={i} className="p-5 bg-white/40 border-2 border-stone-300 rounded shadow-sm break-inside-avoid">
+                        <h5 className="font-bold text-stone-900 medieval-font text-xl mb-1">{l.name}</h5>
+                        <p className="text-sm italic text-stone-600 mb-4 leading-snug">{l.description}</p>
+                        <div className="bg-amber-800/10 p-3 rounded text-sm font-bold text-amber-900 border-l-4 border-amber-900 italic">
+                          "{l.encounterHook}"
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
+
+                <div className="break-inside-avoid">
+                  <h4 className="text-xl font-bold medieval-font mb-4 flex items-center gap-2"><Scroll /> Local Quests</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     {village.mainQuests.map((q, i) => (
+                       <div key={i} className="p-4 bg-stone-800/5 border-l-8 border-stone-800 rounded-r shadow-sm">
+                          <h5 className="font-bold text-base text-stone-900 uppercase tracking-tighter mb-1">{q.title}</h5>
+                          <p className="text-sm italic text-stone-600 mb-2 leading-tight">{q.description}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black bg-stone-800 text-amber-400 px-3 py-1 rounded-full uppercase">Reward: {q.reward}</span>
+                          </div>
+                       </div>
+                     ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Session In A Box Sub-section */}
+              <div className="page-break-before">
+                <div className="flex justify-between items-center border-b-2 border-stone-800 mb-6 pb-2">
+                  <h4 className="text-2xl font-bold medieval-font uppercase tracking-wider flex items-center gap-2">
+                    <Binoculars size={24} /> Nearby Crawl: Session in a Box
+                  </h4>
+                  {!village.poi && (
+                    <button 
+                      onClick={handleGeneratePOI} 
+                      disabled={poiLoading}
+                      className="no-print flex items-center gap-1 text-[10px] bg-amber-900 text-white px-4 py-2 rounded hover:bg-amber-800 uppercase font-black"
+                    >
+                      {poiLoading ? <RefreshCw className="animate-spin" /> : <Mountain size={14} />} Scout Terrain
+                    </button>
+                  )}
+                </div>
+
+                {poiLoading && (
+                  <div className="p-16 text-center animate-pulse">
+                    <GhostIcon className="w-16 h-16 mx-auto text-stone-400 mb-4" />
+                    <p className="text-xl stone-500 italic font-serif">Surveying hidden hazards...</p>
+                  </div>
+                )}
+
+                {village.poi && (
+                  <div className="space-y-8">
+                    <div className="bg-stone-800/10 p-8 border-l-8 border-stone-800 break-inside-avoid shadow-inner">
+                      <div className="flex justify-between items-start mb-4">
+                        <h5 className="text-4xl font-bold medieval-font leading-none">{village.poi.title}</h5>
+                        <span className="text-xs font-black bg-stone-800 text-white px-4 py-1 rounded uppercase">{village.poi.type}</span>
+                      </div>
+                      <p className="text-sm font-bold text-stone-600 mb-4 flex items-center gap-1"><MapPin size={14} /> {village.poi.location}</p>
+                      <p className="text-lg italic text-stone-800 leading-relaxed font-serif bg-white/30 p-4 rounded">"{village.poi.background}"</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      {village.poi.rooms.map((room, idx) => (
+                        <div key={idx} className="bg-white/60 border-2 border-stone-400 p-4 rounded-sm shadow-md break-inside-avoid flex flex-col">
+                          <div className="text-[10px] font-black text-stone-400 mb-1">CHAMBER {room.number}</div>
+                          <h6 className="font-bold text-stone-900 text-sm uppercase mb-3 border-b-2 border-stone-800 pb-1">{room.name}</h6>
+                          <div className="space-y-4 flex-1">
+                             <div>
+                               <p className="text-[10px] font-black text-stone-500 uppercase flex items-center gap-1"><EyeOff size={10} /> Sense</p>
+                               <p className="text-xs italic leading-tight text-stone-700">{room.description}</p>
+                             </div>
+                             <div>
+                               <p className="text-[10px] font-black text-red-900 uppercase flex items-center gap-1"><Skull size={10} /> Threat</p>
+                               <p className="text-xs leading-tight text-red-800 font-bold">{room.threats}</p>
+                             </div>
+                             <div className="mt-auto pt-4">
+                               <p className="text-[10px] font-black text-amber-900 uppercase flex items-center gap-1"><Coins size={10} /> Loot</p>
+                               <p className="text-xs leading-tight text-amber-900 font-black bg-amber-100 p-2 rounded">{room.treasure}</p>
+                             </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </section>
 
-            {/* Marketplace Ledger */}
-            <section className="mb-16">
-              <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 flex items-center gap-2 uppercase tracking-wider">
-                <Coins className="w-8 h-8 text-stone-800" /> The Marketplace Ledger
+            {/* Page 5: Ledger Table */}
+            <section className="page-break-before print:print-page-border">
+              <h3 className="text-3xl font-bold medieval-font border-b-4 border-double border-stone-800 mb-8 pb-4 flex items-center gap-2 uppercase tracking-wider">
+                <Coins size={32} /> Marketplace Ledger
               </h3>
-              <div className="bg-stone-800/5 p-6 border-2 border-stone-800/20 rounded-sm">
-                <table className="w-full text-left text-sm font-serif border-collapse">
-                  <thead className="border-b-2 border-stone-800 uppercase text-xs">
+              <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm">
+                <table className="w-full text-left text-sm font-serif">
+                  <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black">
                     <tr>
-                      <th className="py-2 px-2">Item Name</th>
-                      <th className="py-2 px-2">Price</th>
-                      <th className="py-2 px-2">Stock</th>
-                      <th className="py-2 px-2">Vendor</th>
+                      <th className="py-3 px-4">Commodity Manifest</th>
+                      <th className="py-3 px-4">Appraised Price</th>
+                      <th className="py-3 px-4">Availability</th>
+                      <th className="py-3 px-4">Vendor</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-300">
+                  <tbody className="divide-y-2 divide-stone-300">
                     {village.businesses.flatMap(b => b.marketItems.map((item, idx) => (
-                      <tr key={`${b.name}-${idx}`} className="hover:bg-amber-100/30 transition-colors group break-inside-avoid">
-                        <td className="py-3 px-2 font-bold text-stone-900">
-                          <div className="flex items-center gap-2">
-                            <Tag size={12} className="text-stone-400 group-hover:text-amber-800" /> {item.name}
-                          </div>
-                          <div className="text-[9px] font-normal text-stone-500 hidden group-hover:block italic">{item.description}</div>
+                      <tr key={`${b.name}-${idx}`} className="break-inside-avoid group">
+                        <td className="py-4 px-4 align-top">
+                          <div className="font-bold text-stone-900 text-base mb-1">{item.name}</div>
+                          <div className="text-[10px] font-normal text-stone-500 italic leading-tight">{item.description}</div>
                         </td>
-                        <td className="py-3 px-2 italic font-bold text-amber-900">{item.price}</td>
-                        <td className="py-3 px-2">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.availability === 'Common' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                        <td className="py-4 px-4 align-top italic font-bold text-lg text-amber-900 whitespace-nowrap">{item.price}</td>
+                        <td className="py-4 px-4 align-top">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${item.availability === 'Common' ? 'bg-emerald-200 text-emerald-900' : 'bg-rose-200 text-rose-900'}`}>
                             {item.availability}
                           </span>
                         </td>
-                        <td className="py-3 px-2 text-stone-600 text-[10px] font-bold">{b.name}</td>
+                        <td className="py-4 px-4 align-top text-stone-700 text-xs font-black uppercase">{b.name}</td>
                       </tr>
                     )))}
                   </tbody>
@@ -491,60 +505,47 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* Secret Section */}
-            <section className="mb-12 bg-black/5 p-8 border-l-4 border-red-900 rounded-r shadow-sm no-print break-inside-avoid">
-              <h3 className="text-2xl font-bold medieval-font mb-3 text-red-900 flex items-center gap-2">
-                <Skull className="w-7 h-7" /> The Town's Dark Secret (DM Eyes Only)
+            {/* DM Secrets - Usually short, so keep it with Dossiers or start on new page */}
+            <section className="page-break-before bg-stone-900 text-stone-100 p-12 border-8 border-double border-red-900 shadow-2xl relative overflow-visible break-inside-avoid">
+              <h3 className="text-4xl font-bold medieval-font mb-6 text-red-500 flex items-center gap-3 border-none pb-0 uppercase tracking-tighter">
+                <Skull className="w-12 h-12" /> The Black Secret
               </h3>
-              <p className="text-2xl italic font-serif leading-relaxed text-stone-800">{village.darkSecret}</p>
+              <p className="text-3xl italic font-serif leading-relaxed text-red-200">{village.darkSecret}</p>
+              <div className="absolute top-2 right-4 text-[10px] font-black uppercase tracking-[0.5em] opacity-30">Eyes Only</div>
             </section>
 
-            {/* Social Matrix & Residents */}
-            <section className="mb-16">
-              <div className="flex flex-col md:flex-row justify-between items-end border-b-2 border-stone-800 mb-8 pb-2 gap-4">
-                <h3 className="text-3xl font-bold medieval-font flex items-center gap-2 uppercase tracking-wider">
-                  <UserCircle className="w-8 h-8 text-stone-800" /> Resident Dossiers
+            {/* FINAL MAJOR SECTION: RESIDENTS */}
+            <section className="page-break-before print:print-page-border">
+              <div className="flex flex-col md:flex-row justify-between items-end border-b-4 border-stone-800 mb-12 pb-4 gap-4">
+                <h3 className="text-4xl font-bold medieval-font flex items-center gap-2 uppercase tracking-wider border-none p-0">
+                  <UserCircle size={36} /> Master Resident Dossiers
                 </h3>
                 
-                {socialOverview && (
-                  <div className="flex gap-4 mb-1 bg-stone-800/5 p-2 rounded border border-stone-300 no-print">
-                    <div className="flex items-center gap-1 text-xs font-bold text-red-900">
-                      <Frown size={14} /> {socialOverview.pariah} Pariahs
-                    </div>
-                    <div className="flex items-center gap-1 text-xs font-bold text-stone-600">
-                      <Meh size={14} /> {socialOverview.resident} Residents
-                    </div>
-                    <div className="flex items-center gap-1 text-xs font-bold text-amber-800">
-                      <Crown size={14} /> {socialOverview.pillar} Pillars
-                    </div>
-                  </div>
-                )}
-
                 <div className="no-print relative mb-1">
                   <Search className="absolute left-2 top-2 w-4 h-4 text-stone-400" />
                   <input 
-                    type="text" placeholder="Search residents..." 
-                    className="pl-8 py-1 text-xs bg-white/50 border border-stone-300 rounded outline-none focus:ring-1 focus:ring-amber-500"
+                    type="text" placeholder="Filter residents..." 
+                    className="pl-8 py-2 text-sm bg-white border-2 border-stone-300 rounded focus:ring-2 focus:ring-amber-500 outline-none"
                     onChange={(e) => setNpcFilter(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="space-y-12 h-auto overflow-visible">
+              <div className="space-y-16">
                 {village.residents.filter(r => r.name.toLowerCase().includes(npcFilter.toLowerCase())).map((npc, idx) => {
                   const standing = getStandingCategory(npc);
                   const alignDetails = getAlignmentDetails(npc.alignment);
                   return (
-                    <div key={idx} className="p-8 border-2 border-stone-400 bg-white/20 rounded shadow-xl relative group break-inside-avoid h-auto overflow-visible">
-                      <div className="flex flex-col md:flex-row gap-8">
+                    <div key={idx} className="p-10 border-4 border-stone-800 bg-white/40 rounded-sm shadow-2xl relative group break-inside-avoid overflow-visible npc-card-print">
+                      <div className="flex flex-col md:flex-row gap-10">
                         <div className="w-full md:w-1/3 flex flex-col items-center text-center">
-                          <div className="relative w-full aspect-square bg-stone-800/10 mb-6 rounded shadow-inner border-2 border-stone-300 overflow-hidden group/portrait">
+                          <div className="relative w-full aspect-square bg-stone-800/10 mb-8 rounded-sm shadow-lg border-2 border-stone-800 overflow-hidden group/portrait">
                             {npc.portraitUrl ? (
                               <img src={npc.portraitUrl} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 {portraitLoading[idx] ? (
-                                  <RefreshCw className="w-12 h-12 animate-spin text-amber-600" />
+                                  <RefreshCw className="w-16 h-16 animate-spin text-amber-600" />
                                 ) : (
                                   <UserCircle className="w-full h-full opacity-10 p-4" />
                                 )}
@@ -554,67 +555,70 @@ const App: React.FC = () => {
                             {!portraitLoading[idx] && (
                               <button 
                                 onClick={() => handleGeneratePortrait(idx, npc)}
-                                className={`absolute inset-0 bg-stone-900/60 transition-opacity flex flex-col items-center justify-center gap-2 text-amber-500 font-bold medieval-font no-print ${npc.portraitUrl ? 'opacity-0 group-hover/portrait:opacity-100' : 'opacity-100'}`}
+                                className={`absolute inset-0 bg-stone-900/80 transition-opacity flex flex-col items-center justify-center gap-3 text-amber-400 font-bold medieval-font no-print ${npc.portraitUrl ? 'opacity-0 group-hover/portrait:opacity-100' : 'opacity-100'}`}
                               >
-                                <Wand2 className="w-8 h-8 animate-bounce" />
-                                <span>{npc.portraitUrl ? 'Regenerate Portrait' : 'Manifest Portrait'}</span>
+                                <Wand2 className="w-10 h-10" />
+                                <span className="text-lg">Manifest Portrait</span>
                               </button>
                             )}
 
                             <button 
                               onClick={(e) => { e.stopPropagation(); playVoice(idx, npc); }}
-                              className="absolute bottom-2 right-2 p-3 bg-amber-600 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all no-print disabled:opacity-50 z-10"
+                              className="absolute bottom-4 right-4 p-4 bg-amber-600 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all no-print disabled:opacity-50 z-10"
                               disabled={voiceLoading[idx]}
                             >
-                              {voiceLoading[idx] ? <RefreshCw className="animate-spin" size={20} /> : <Volume2 size={20} />}
+                              {voiceLoading[idx] ? <RefreshCw className="animate-spin" size={24} /> : <Volume2 size={24} />}
                             </button>
                           </div>
-                          <h4 className="text-3xl font-bold medieval-font leading-tight">{npc.name}</h4>
-                          <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">
+                          
+                          <h4 className="text-4xl font-bold medieval-font leading-none uppercase tracking-tighter mb-2">{npc.name}</h4>
+                          <p className="text-xs font-black text-stone-500 uppercase tracking-widest mb-4">
                              {npc.sex} • {npc.race} • {npc.role}
                           </p>
                           
-                          <div className="flex flex-col gap-2 w-full px-4">
-                            <div className={`text-[10px] font-black px-3 py-1 bg-stone-100 rounded-full border border-stone-300 shadow-sm flex items-center justify-center gap-1.5 ${standing.color}`}>
+                          <div className="flex flex-col gap-3 w-full px-4">
+                            <div className={`text-xs font-black px-4 py-2 bg-white rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${standing.color}`}>
                                {standing.icon} {standing.label}
                             </div>
-                            <div className={`text-[10px] font-black px-3 py-1 ${alignDetails.bg} rounded-full border border-stone-300 shadow-sm flex items-center justify-center gap-1.5 ${alignDetails.color}`}>
+                            <div className={`text-xs font-black px-4 py-2 bg-white rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${alignDetails.color}`}>
                                {alignDetails.icon} {npc.alignment}
                             </div>
                           </div>
                         </div>
 
                         <div className="flex-1">
-                           <div className="grid grid-cols-1 gap-8">
+                           <div className="grid grid-cols-1 gap-10">
                               <div>
-                                 <h5 className="text-[10px] font-black uppercase text-stone-400 mb-2">Personality & Traits</h5>
-                                 <p className="italic text-stone-700 border-l-4 border-stone-300 pl-4 mb-4 text-sm leading-relaxed">"{npc.personality}"</p>
-                                 <div className="flex flex-wrap gap-2 mb-4">
-                                    <span className="px-2 py-1 bg-stone-800 text-amber-500 text-[10px] font-bold rounded uppercase flex items-center gap-1">
-                                       <Fingerprint size={10} /> {npc.trait}
-                                    </span>
-                                    <span className="px-2 py-1 bg-rose-900 text-white text-[10px] font-bold rounded uppercase flex items-center gap-1">
-                                       <Shield size={10} /> AC {npc.stats.ac} | HP {npc.stats.hp}
-                                    </span>
+                                 <h5 className="text-xs font-black uppercase text-stone-400 mb-3 tracking-[0.2em]">Psychological Profile</h5>
+                                 <p className="italic text-xl text-stone-800 border-l-8 border-stone-800 pl-6 mb-6 leading-relaxed font-serif">"{npc.personality}"</p>
+                                 
+                                 <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="px-4 py-2 bg-stone-800 text-amber-400 text-xs font-bold rounded flex items-center justify-center gap-2 uppercase">
+                                       <Fingerprint size={12} /> {npc.trait}
+                                    </div>
+                                    <div className="px-4 py-2 bg-rose-900 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase">
+                                       <Shield size={12} /> AC {npc.stats.ac} | HP {npc.stats.hp}
+                                    </div>
                                  </div>
-                                 <div className="bg-red-50 p-2 border border-red-100 rounded no-print">
-                                    <h6 className="text-[9px] font-black text-red-900 uppercase mb-1">Alignment-Based Secret</h6>
-                                    <p className="text-[10px] italic text-red-800">{npc.secret}</p>
+                                 
+                                 <div className="bg-red-50/80 p-4 border-2 border-red-200 rounded-sm">
+                                    <h6 className="text-[10px] font-black text-red-900 uppercase mb-2 tracking-widest">Alignment Shadow Secret</h6>
+                                    <p className="text-sm italic text-red-800 font-serif leading-snug">{npc.secret}</p>
                                  </div>
                               </div>
 
                               <div>
-                                 <h5 className="text-[10px] font-black uppercase text-stone-400 mb-2">Social Matrix Insights</h5>
-                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] md:max-h-none overflow-y-auto pr-2 custom-scrollbar print:max-h-none print:overflow-visible">
+                                 <h5 className="text-xs font-black uppercase text-stone-400 mb-4 tracking-[0.2em]">Social Influence Matrix</h5>
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] md:max-h-none overflow-y-auto pr-2 custom-scrollbar print:max-h-none print:overflow-visible h-auto">
                                     {npc.relationships.map((rel, ridx) => {
                                        const styles = getRelationshipStyles(rel.score);
                                        return (
-                                          <div key={ridx} className={`p-2 rounded border text-[10px] transition-all duration-500 ${styles.bg} ${styles.border} ${styles.effects} break-inside-avoid`}>
-                                             <div className="flex justify-between font-bold mb-0.5">
+                                          <div key={ridx} className={`p-3 rounded border-2 transition-all duration-500 ${styles.bg} ${styles.border} ${styles.effects} break-inside-avoid flex flex-col justify-between`}>
+                                             <div className="flex justify-between font-black text-[10px] uppercase mb-1">
                                                 <span>{rel.targetName}</span>
                                                 <span className={styles.text}>{rel.score} • {rel.feeling}</span>
                                              </div>
-                                             <p className="italic opacity-70 leading-tight">{rel.reason}</p>
+                                             <p className="italic text-xs opacity-80 leading-tight font-serif">"{rel.reason}"</p>
                                           </div>
                                        );
                                     })}
@@ -629,15 +633,15 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* GM Records */}
-            <section className="no-print break-inside-avoid">
-              <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase tracking-wider">
-                <BookOpen size={24} className="inline mr-2" /> Campaign Records
+            {/* FINAL PAGE: GM ARCHIVE */}
+            <section className="page-break-before print:print-page-border no-print:hidden break-inside-avoid h-auto overflow-visible">
+              <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-4 uppercase tracking-wider">
+                <BookOpen size={36} /> Campaign Chronicle
               </h3>
-              <div className="p-6 bg-stone-300/20 border-2 border-dashed border-stone-400 rounded-lg">
+              <div className="p-10 bg-white/40 border-4 border-dashed border-stone-400 rounded-sm h-auto min-h-[400px]">
                  <textarea 
-                  className="w-full min-h-[200px] bg-transparent focus:ring-0 border-none italic text-lg font-serif text-stone-800 leading-relaxed outline-none"
-                  placeholder="Record party deeds, casualties, and shifted alliances here..."
+                  className="w-full h-full min-h-[400px] bg-transparent focus:ring-0 border-none italic text-2xl font-serif text-stone-800 leading-relaxed outline-none resize-none"
+                  placeholder="The chronicle of your deeds begins here..."
                   value={editableNotes}
                   onChange={(e) => setEditableNotes(e.target.value)}
                  />
@@ -647,14 +651,15 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center flex-col gap-6 p-6">
+        <div className="fixed inset-0 bg-stone-900/95 z-50 flex items-center justify-center flex-col gap-6 p-12">
           <div className="relative">
-            <Flame className="w-24 h-24 text-amber-500 animate-pulse" />
-            <RefreshCw className="w-24 h-24 text-amber-600 animate-spin absolute top-0 left-0 opacity-10" />
+            <Flame className="w-32 h-32 text-amber-500 animate-pulse" />
+            <RefreshCw className="w-32 h-32 text-amber-600 animate-spin absolute top-0 left-0 opacity-20" />
           </div>
-          <h2 className="text-3xl medieval-font text-amber-500 text-center uppercase tracking-tighter">Forging Village Matrix...</h2>
-          <p className="text-slate-400 italic text-center max-w-sm">Generating relationships across Shadowdark alignments, stocking shops, and drafting dark deeds.</p>
+          <h2 className="text-4xl medieval-font text-amber-500 text-center uppercase tracking-widest">Drafting the Dossier...</h2>
+          <p className="text-stone-400 italic text-center max-w-md text-lg">Weaving alliances, stocking the market, and unearthing deep-seated grudges across the Shadowdark.</p>
         </div>
       )}
     </div>

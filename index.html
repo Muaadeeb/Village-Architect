@@ -7,43 +7,67 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,700;1,400&family=MedievalSharp&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --parchment-bg: #fef3c7;
+            --ink-black: #1a1a1a;
+            --sepia-border: #d4a373;
+            --shadowdark-red: #7f1d1d;
+        }
+
         body {
             font-family: 'Crimson Pro', serif;
             background-color: #0f172a;
             color: #e2e8f0;
             min-height: 100vh;
         }
+
         .medieval-font {
             font-family: 'MedievalSharp', cursive;
         }
+
         .parchment {
-            background-color: #fef3c7;
-            color: #1a1a1a;
+            background-color: var(--parchment-bg);
+            color: var(--ink-black);
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
             background-image: url("https://www.transparenttextures.com/patterns/old-paper.png");
+            border: 2px solid var(--sepia-border);
         }
+
+        /* Interactive Elements */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
+
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.01); }
+        }
+        .animate-pulse-subtle { animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         
+        /* PRINT SPECIFIC STYLES - Focus on High Quality PDF */
         @media print {
             @page {
                 size: portrait;
-                margin: 0.5in;
+                margin: 0.4in;
             }
-            
-            /* High Quality Print Overrides */
-            html, body {
-                background-color: #fef3c7 !important;
-                color: #1a1a1a !important;
-                height: auto !important;
-                overflow: visible !important;
+
+            * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            #root {
-                width: 100% !important;
+            html, body {
+                background-color: var(--parchment-bg) !important;
+                color: var(--ink-black) !important;
                 height: auto !important;
                 overflow: visible !important;
-                position: static !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            #root {
+                width: 100% !important;
+                background-color: var(--parchment-bg) !important;
             }
 
             .no-print {
@@ -51,91 +75,69 @@
             }
 
             .parchment {
-                background-color: #fef3c7 !important;
+                background-color: var(--parchment-bg) !important;
                 box-shadow: none !important;
-                border: 1px solid #d4a373 !important;
+                border: none !important;
                 padding: 0 !important;
                 width: 100% !important;
                 max-width: none !important;
                 overflow: visible !important;
                 height: auto !important;
-                margin: 0 !important;
-                position: static !important;
+                background-image: none !important;
             }
 
-            .max-w-4xl {
-                max-width: 100% !important;
+            /* Thematic Container for Print */
+            .print-page-border {
+                border: 4px double var(--ink-black) !important;
+                padding: 1rem !important;
+                margin-bottom: 2rem !important;
+                background-color: rgba(255,255,255,0.2) !important;
             }
 
-            /* Critical for PDF completeness: prevent truncation */
-            .overflow-y-auto, 
-            .overflow-hidden,
-            .custom-scrollbar {
-                overflow: visible !important;
-                max-height: none !important;
-                height: auto !important;
+            /* Section Control */
+            section {
+                page-break-inside: auto !important;
+                margin-bottom: 3rem !important;
+                padding-bottom: 2rem !important;
+                border-bottom: 1px solid rgba(0,0,0,0.1) !important;
             }
 
-            /* Smart Page Breaks */
+            /* Page Breaks for Major Content */
+            .page-break-before {
+                page-break-before: always !important;
+                padding-top: 1rem !important;
+            }
+
             .break-inside-avoid {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                margin-bottom: 2rem !important;
                 display: block !important;
             }
 
-            h2, h3, h4 {
-                page-break-after: avoid !important;
+            /* Typography */
+            h2 { font-size: 4rem !important; line-height: 1 !important; margin-bottom: 1rem !important; }
+            h3 { font-size: 2rem !important; margin-top: 1rem !important; border-bottom: 2px solid var(--ink-black) !important; }
+            
+            /* Table Formatting */
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid rgba(0,0,0,0.15) !important; padding: 6px !important; }
+            thead { background-color: rgba(0,0,0,0.05) !important; }
+
+            /* NPC Dossier Print Polish */
+            .npc-card-print {
+                border: 2px solid var(--sepia-border) !important;
+                background-color: white !important;
+                margin-bottom: 2rem !important;
             }
 
-            section {
-                page-break-inside: auto !important;
-                page-break-after: auto !important;
-                margin-bottom: 3rem !important;
-            }
-
-            /* Ensure background images/textures print if supported */
-            .parchment::before {
+            /* Restore the "Old Paper" feel in PDF if possible, otherwise clean sepia */
+            body::before {
                 content: "";
                 position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background-color: #fef3c7;
-                z-index: -1;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background-color: var(--parchment-bg);
+                z-index: -10;
             }
-
-            /* Table fixes for PDF */
-            table {
-                width: 100% !important;
-                border-collapse: collapse !important;
-            }
-            
-            tr {
-                page-break-inside: avoid !important;
-            }
-        }
-
-        /* UI Animations */
-        @keyframes pulse-subtle {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.85; transform: scale(1.01); }
-        }
-        .animate-pulse-subtle {
-            animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        .matrix-desaturated {
-            filter: grayscale(0.6) contrast(0.9);
-            opacity: 0.85;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
         }
     </style>
 <script type="importmap">
