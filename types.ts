@@ -17,6 +17,7 @@ export interface Relationship {
 export interface DetailedNPC extends NPC {
   personality: string;
   relationships: Relationship[];
+  portraitUrl?: string;
 }
 
 export interface Business {
@@ -26,6 +27,12 @@ export interface Business {
   owner: NPC;
   notableItems: string[];
   rumor: string;
+}
+
+export interface Quest {
+  title: string;
+  description: string;
+  reward: string;
 }
 
 export interface VillageData {
@@ -40,9 +47,12 @@ export interface VillageData {
   };
   geography: string;
   atmosphere: string;
+  weather: string;
   darkSecret: string;
   businesses: Business[];
   landmarks: string[];
   residents: DetailedNPC[];
+  mainQuests: Quest[];
+  sideTreks: Quest[];
   gmNotes: string;
 }
