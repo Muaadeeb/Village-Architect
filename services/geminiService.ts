@@ -44,7 +44,8 @@ export const generateVillageDetails = async (
        - BELL CURVE SCORING: Strict Gaussian distribution (1 to 10 scale). 
     9. Main Quests: 3 high-stakes narrative arcs.
     10. Side Treks: 10 small, gritty errands or mysteries.
-    11. GM Notes: DM-specific campaign hooks for the village overall.
+    11. Current Events: Exactly 3 high-impact events happening NOW in the village.
+    12. GM Notes: DM-specific campaign hooks for the village overall.
 
     Output JSON schema:
     {
@@ -56,6 +57,7 @@ export const generateVillageDetails = async (
       "darkSecret": "string",
       "landmarks": [ { "name": "string", "description": "string", "encounterHook": "string" } ],
       "gmNotes": "string",
+      "currentEvents": ["string", "string", "string"],
       "businesses": [
         { 
           "name": "string", "type": "string", "description": "string", "rumor": "string", "encounterHook": "string", "gmNotes": "string",

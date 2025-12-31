@@ -15,9 +15,218 @@ import {
   Map as MapIcon, Compass, FileText, Shield, Activity, Sword, Axe, Zap, Castle, Crown,
   Frown, Meh, Volume2, Coins, Tag, Newspaper, BarChart3, Info, Scale, CircleDot, Ghost,
   User as UserIcon, Mountain, Ghost as GhostIcon, Binoculars, AlertCircle,
-  Briefcase, FileDigit, Dices, CloudRain, Sun, ThermometerSnowflake, HeartCrack, Goal
+  Briefcase, FileDigit, Dices, CloudRain, Sun, ThermometerSnowflake, HeartCrack, Goal,
+  ZapOff, Calendar, MapPinned
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
+
+// --- Constants: 1d100 Tables ---
+
+const PC_HOOKS = [
+  "Inherited a derelict shack from a distant relative who died under mysterious circumstances.",
+  "Searching for a sibling who was last seen entering the village tavern a month ago.",
+  "Hired as an escort for a merchant who vanished the moment you reached the village outskirts.",
+  "Born here; your family has farmed this soil for six generations, but the crop just failed.",
+  "On the run from a debt collector in a distant city; this place seemed isolated enough to hide.",
+  "A local NPC owes you a blood debt from a war fought years ago.",
+  "You carry a letter for the local priest, but the seal is broken and the parchment is damp.",
+  "You were left at the local orphanage as a babe and have finally returned to find your true name.",
+  "An ancient map you found in a crypt points directly to the center of this village.",
+  "You are a distant cousin of the village elder, come to attend a family funeral.",
+  "A dream led you here; the village landmark from your nightmares is real.",
+  "You are a disgraced soldier looking for work as a mercenary for the local businesses.",
+  "Sent by a guild to investigate reports of a rare mineral found in the nearby river.",
+  "Looking for the thief who stole your master's spellbook; the trail ends at the village gates.",
+  "You have a recurring infection that only the local herbalist is rumored to be able to cure.",
+  "Searching for the legendary 'Black Smith' of the village to repair a shattered heirloom.",
+  "The village is on the path of your pilgrimage to a distant mountain shrine.",
+  "You were part of a caravan that was raided nearby; you are the sole survivor.",
+  "An old friend sent you a frantic message: 'Do not come to the village.' You came anyway.",
+  "You are a bounty hunter trailing a dangerous chaotic mage through the region.",
+  "Returning to reclaim the family home which was seized by the local lord for unpaid taxes.",
+  "A local shop owner is your only contact for selling 'difficult' goods.",
+  "You were cursed by a witch and told the only cure lies in the heart of this village.",
+  "The local tavern is famous for a brew you've been tasked to sample for a noble.",
+  "Looking for a quiet place to retire from a life of violence, but the atmosphere feels off.",
+  "Your mentor's grave is here, and you've come to pay your respects.",
+  "You are a tax collector sent from the capital to find out why the village is late.",
+  "A fortune teller told you that you would meet your future spouse in this village.",
+  "The village's 'Dark Secret' is something you've heard rumors of since childhood.",
+  "Looking for an apprentice who ran away to join a cult rumored to operate nearby.",
+  "You are a travelling bard looking for new stories in isolated places.",
+  "Hired to deliver a chest of 'special' seeds to the local farrier.",
+  "You believe your father's murderer is hiding among the local residents.",
+  "A mysterious benefactor paid for your travel here and told you to 'wait for the signal.'",
+  "You are an architect sent to survey the village landmarks for a historical society.",
+  "Looking for a specific book in the local archive that supposedly contains the secret to a lost vault.",
+  "You are a half-elf looking for the elven parent who abandoned you here.",
+  "Sent to inspect the village's defenses against a rising tide of undead in the region.",
+  "You have a blood-link to the village's founder and feel a strange pull toward the land.",
+  "Searching for the truth about a 'ghost ship' seen on the river near the village.",
+  "You were once a guard here and have returned to find out what happened to your old squad.",
+  "An NPC is your former lover; things ended badly, but you need their help now.",
+  "Looking for a rare herb that only grows in the shadow of the local landmarks.",
+  "You are a scholar studying the unique demographics of this isolated community.",
+  "You have a bounty on your head and heard the local law is 'flexible.'",
+  "A merchant you trust told you that the village's blacksmith is selling enchanted steel.",
+  "Your family crest is carved into one of the old stones in the village center.",
+  "Sent to buy a specific type of livestock only bred in this valley.",
+  "You are a monk looking for a quiet place to meditate, but the village's morale is disturbing.",
+  "Searching for the components of a ritual that requires 'soil from a place of deep secrets.'",
+  "You found a locket with a portrait of a local resident and want to return it.",
+  "You are a spy for a rival lord, sent to assess the village's loyalty.",
+  "Looking for work as a laborer; the harvest season is approaching.",
+  "You were told a legendary hero lives here in hiding.",
+  "Searching for your lost child; the last person to see them was a local shop owner.",
+  "You carry a curse that makes you feel at home only in dark, damp places like this.",
+  "Hired by a wizard to capture a 'living shadow' rumored to haunt the village outskirts.",
+  "Looking for the source of a strange disease that started in this village and is spreading.",
+  "You are a cartographer making a map of the Shadowdark and this is your last stop.",
+  "A local resident owes you their life and you've come to collect a favor.",
+  "Searching for the entrance to a 'sunken city' that is supposedly under the river.",
+  "You are a former criminal looking for an honest life, but your past has followed you.",
+  "Hired to bring a message of war to the village elder.",
+  "You have a map to a treasure hidden within the village's own walls.",
+  "Looking for a priest who can perform an exorcism on a possessed item you carry.",
+  "Searching for the 'White Raven' – a legendary NPC only found in this village.",
+  "You were born during an eclipse here and believe your destiny is tied to the site.",
+  "Hired to investigate a series of mysterious disappearances at a nearby Point of Interest.",
+  "You are a chef looking for a rare spice that grows near the riverbank.",
+  "Searching for the tomb of a saint rumored to be hidden under a local landmark.",
+  "You have a debt to a local business that you've finally come to repay.",
+  "Looking for a safe place to stash a dangerous artifact.",
+  "You are an artist wanting to capture the 'beauty of the gloom' in this village.",
+  "Searching for a specific halfling who stole your family's favorite silver spoon.",
+  "You are a hunter following the trail of a beast that has been terrorizing the region.",
+  "Sent to deliver a crate of expensive wine to a local shop owner for a private party.",
+  "You have a premonition that the village is about to be destroyed.",
+  "Looking for a teacher who can help you master a strange power you've discovered.",
+  "You are a halfling looking for a community that won't judge your 'special' talents.",
+  "Searching for the 'Heart of the Village' – a gemstone rumored to keep the river flowing.",
+  "You are a merchant looking to open a new trade route through this isolated valley.",
+  "Hired to find a missing noble who was last seen entering the village.",
+  "Looking for a priest who can cleanse your soul of a dark deed.",
+  "Searching for a specific dwarf who knows the location of a lost mine.",
+  "You are a traveller who got lost in the fog and stumbled upon the village.",
+  "Hired to investigate why the local river has turned a strange shade of black.",
+  "Looking for a quiet place to write your memoirs.",
+  "Searching for a local legend who can tell you the history of the landmarks.",
+  "You are a mercenary captain looking for new recruits in a desperate place.",
+  "Hired to find out who is responsible for the 'Current Events' in the village.",
+  "You are a pilgrim who has lost their way and needs shelter.",
+  "Looking for a doctor who can heal a wound that won't close.",
+  "Searching for a local shop owner who sold you a defective 'magic' item.",
+  "You have a strange birthmark that matches the carvings on the village gates.",
+  "Hired to deliver a 'message in a bottle' that you found in the river.",
+  "You are a survivor of a plague looking for a new home.",
+  "Searching for the truth about your parents' mysterious deaths in this village.",
+  "You have been 'summoned' by a local NPC through a dream or vision.",
+  "Hired to protect the village from an imminent threat mentioned in a main quest.",
+  "You are here because you have nowhere else left to go."
+];
+
+const VILLAGE_EVENTS = [
+  "A local child has gone missing, and their favorite toy was found near the river.",
+  "The river has suddenly turned an oily black, and the fish are dying.",
+  "A travelling circus has arrived, but their animals look starved and their clowns never smile.",
+  "A strange fog has rolled in and hasn't lifted for three days; people are hearing voices in it.",
+  "The local tavern has run out of ale, and the patrons are becoming violent.",
+  "A group of fanatical cultists has set up a shrine at one of the landmarks.",
+  "A local resident has been found dead, with their heart neatly removed.",
+  "The village gates have been found smashed open from the *inside*.",
+  "A rare eclipse is occurring, and the animals are acting in a frenzy.",
+  "A mysterious merchant is selling 'dream-inducing' herbs that have the village addicted.",
+  "The river level has dropped drastically, revealing ancient ruins beneath the surface.",
+  "A pack of dire wolves has been howling outside the village walls every night.",
+  "A local shop owner has suddenly become incredibly wealthy and refuses to say why.",
+  "The village elder has fallen into a coma, and their skin is turning to stone.",
+  "A fire has broken out in the warehouse, and the town's winter supplies are burning.",
+  "A group of bedraggled refugees has arrived, claiming a 'shadow' is following them.",
+  "The bells of the local church are ringing on their own at midnight.",
+  "A local resident claims to have found a 'door to another world' in their cellar.",
+  "The village's morale has plummeted after a beloved figure was accused of a crime.",
+  "A strange 'black rain' is falling, and it's causing the plants to wither and die.",
+  "A bounty hunter has arrived, looking for someone among the residents.",
+  "The local farrier's horses have all died in their sleep, with no marks on them.",
+  "A travelling bard is singing a song that contains secrets only the GM should know.",
+  "A local landmark has suddenly started glowing with a sickly green light.",
+  "The village well has dried up, and the residents are fighting over the last drops of water.",
+  "A group of soldiers has arrived to 'tax' the village, but they look like bandits.",
+  "A local shop owner has been found talking to a reflection that isn't their own.",
+  "The village's 'Dark Secret' is being whispered about in the streets.",
+  "A strange 'metal bird' has crashed into the river, and it's emitting a humming sound.",
+  "A local resident has suddenly started speaking a language no one understands.",
+  "A 'weeping' statue has been found at one of the landmarks; the tears are blood.",
+  "The village's grain supply has been infested with a strange, glowing fungus.",
+  "A group of 'holy' men has arrived, but they are demanding sacrifices.",
+  "A local resident has been seen entering a Point of Interest and hasn't returned.",
+  "The village gates have been sealed by a mysterious order of mages.",
+  "A local shop owner has been accused of being a 'chaotic agent.'",
+  "A strange 'clockwork' device has been found in the village square, and it's ticking.",
+  "The river has started flowing backwards, carrying strange debris with it.",
+  "A local resident has been found 'turned to shadow,' standing perfectly still.",
+  "A group of miners has returned from the nearby mountains, looking terrified.",
+  "The village's morale has suddenly turned 'Defiant' against an unseen threat.",
+  "A mysterious 'plague' is causing people to lose their memories of the last year.",
+  "A local shop owner has been found murdered, with a strange symbol carved into their forehead.",
+  "The village's demographics are shifting as 'others' arrive in large numbers.",
+  "A strange 'blue light' is seen in the sky every night, hovering over the village.",
+  "A local resident claims to be the 'reincarnation' of the village founder.",
+  "The village's landmarks are being vandalized with 'chaotic' symbols.",
+  "A group of 'mercenaries' has arrived to protect the village, but they are causing trouble.",
+  "A local shop owner has been found 'fused' to their own merchandise.",
+  "The river is producing a constant, low-frequency hum that is driving people mad.",
+  "A 'giant' has been seen in the distance, slowly walking toward the village.",
+  "A local resident has been found 'empty' – alive but with no personality or soul.",
+  "The village's 'Dark Secret' is starting to manifest physically in the environment.",
+  "A group of 'halflings' has arrived, looking for a place to hide a dangerous item.",
+  "A mysterious 'doorway' has appeared in the middle of the village square.",
+  "A local shop owner is selling 'lucky' charms that actually bring bad luck.",
+  "The river has frozen solid, even though it's the middle of summer.",
+  "A 'ghost ship' has docked at the village pier, but no one is on board.",
+  "A local resident has been seen 'floating' a few inches off the ground.",
+  "The village's morale has turned 'Fearful' after a series of strange occurrences.",
+  "A group of 'dwarves' has arrived, claiming the village is built on top of their mine.",
+  "A local shop owner has been found 'inside out,' yet still alive.",
+  "The village's landmarks are starting to 'move' or change position.",
+  "A mysterious 'black box' has been found at the riverbank, and it's emitting heat.",
+  "A local resident has been found 'transformed' into an animal.",
+  "The village's grain supply is being eaten by a swarm of 'shadow insects.'",
+  "A group of 'elves' has arrived, looking for a 'stolen' artifact.",
+  "A local shop owner has been found 'living' in their own shadow.",
+  "The river is producing 'bubbles' that contain images of the future.",
+  "A 'giant eye' has opened in the sky, watching the village.",
+  "A local resident has been seen 'talking' to the wind.",
+  "The village's 'Dark Secret' is being broadcast through a magical resonance.",
+  "A group of 'cultists' has taken over one of the businesses.",
+  "A mysterious 'white wolf' has been seen leading people into the gloom.",
+  "A local resident has been found 'turned to gold,' but it's cold to the touch.",
+  "The village's morale has turned 'Resentful' against the current leadership.",
+  "A group of 'travellers' has arrived, but they have no shadows.",
+  "A local shop owner is selling 'items from the future.'",
+  "The river is flowing with 'liquid light' instead of water.",
+  "A 'giant hand' has emerged from the ground, holding a local resident.",
+  "A local resident has been found 'merged' with a landmark.",
+  "The village's 'Dark Secret' has been revealed to everyone.",
+  "A group of 'bandits' has laid siege to the village.",
+  "A mysterious 'portal' has opened in the tavern cellar.",
+  "A local shop owner is actually a 'dragon' in disguise.",
+  "The river is producing a 'fog' that makes people invisible.",
+  "A 'giant snake' has been seen swimming in the river.",
+  "A local resident has been found 'turned to glass.'",
+  "The village's morale has turned 'Apathetic' as the darkness grows.",
+  "A group of 'heroes' has arrived, but they look like they've already failed.",
+  "A mysterious 'voice' is coming from the village well.",
+  "A local shop owner is selling 'soul-trapping' mirrors.",
+  "The river is producing 'gold coins' that disappear after an hour.",
+  "A 'giant bird' has built a nest on top of a landmark.",
+  "A local resident has been seen 'walking on water.'",
+  "The village's 'Dark Secret' is about to consume the entire town.",
+  "A group of 'demons' has been summoned by accident.",
+  "A mysterious 'clock' is counting down to an unknown event.",
+  "A local shop owner is selling 'the meaning of life.'",
+  "The village has been 'shifted' into another dimension."
+];
 
 // --- Decoding Helpers for raw PCM from Gemini TTS ---
 function decodeBase64(base64: string) {
@@ -75,6 +284,8 @@ const App: React.FC = () => {
   const [portraitLoading, setPortraitLoading] = useState<Record<number, boolean>>({});
   const [voiceLoading, setVoiceLoading] = useState<Record<number, boolean>>({});
   const [lastWeatherRoll, setLastWeatherRoll] = useState<number | null>(null);
+  const [lastEventRoll, setLastEventRoll] = useState<number | null>(null);
+  const [lastHookRoll, setLastHookRoll] = useState<number | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -94,6 +305,8 @@ const App: React.FC = () => {
     setVoiceLoading({});
     setGossip([]);
     setLastWeatherRoll(null);
+    setLastEventRoll(null);
+    setLastHookRoll(null);
     try {
       const pop = Math.floor(Math.random() * (300 - 200) + 200);
       const data = await generateVillageDetails("Cinderglade", pop, calculateDemographics(pop));
@@ -106,10 +319,9 @@ const App: React.FC = () => {
     }
   };
 
-  const rollWeather = () => {
-    const roll = Math.floor(Math.random() * 20) + 1;
-    setLastWeatherRoll(roll);
-  };
+  const rollWeather = () => setLastWeatherRoll(Math.floor(Math.random() * 20) + 1);
+  const rollEvent = () => setLastEventRoll(Math.floor(Math.random() * 100) + 1);
+  const rollHook = () => setLastHookRoll(Math.floor(Math.random() * 100) + 1);
 
   const handleGeneratePOI = async () => {
     if (!village || poiLoading) return;
@@ -215,30 +427,9 @@ const App: React.FC = () => {
 
   const getRelationshipStyles = (rawScore: number) => {
     const score = Math.max(1, Math.min(10, Math.round(rawScore)));
-    // Positive (Score 8+)
-    if (score >= 8) return { 
-      bg: 'bg-emerald-100', 
-      border: 'border-emerald-600', 
-      text: 'text-emerald-900', 
-      icon: <Heart size={14} className="text-emerald-700" />, 
-      effects: 'animate-pulse-subtle' 
-    };
-    // Negative (Score 3-)
-    if (score <= 3) return { 
-      bg: 'bg-rose-100', 
-      border: 'border-rose-600', 
-      text: 'text-rose-900', 
-      icon: <Swords size={14} className="text-rose-700" />, 
-      effects: 'matrix-desaturated' 
-    };
-    // Neutral (Score 4-7)
-    return { 
-      bg: 'bg-stone-100', 
-      border: 'border-stone-400', 
-      text: 'text-stone-800', 
-      icon: <Minus size={14} className="text-stone-600" />, 
-      effects: '' 
-    };
+    if (score >= 8) return { bg: 'bg-emerald-100', border: 'border-emerald-600', text: 'text-emerald-900', icon: <Heart size={14} className="text-emerald-700" />, effects: 'animate-pulse-subtle' };
+    if (score <= 3) return { bg: 'bg-rose-100', border: 'border-rose-600', text: 'text-rose-900', icon: <Swords size={14} className="text-rose-700" />, effects: 'matrix-desaturated' };
+    return { bg: 'bg-stone-100', border: 'border-stone-400', text: 'text-stone-800', icon: <Minus size={14} className="text-stone-600" />, effects: '' };
   };
 
   const getStandingCategory = (npc: DetailedNPC) => {
@@ -247,18 +438,6 @@ const App: React.FC = () => {
     if (avg >= 7.5) return { label: 'Pillar', color: 'text-amber-800', icon: <Crown size={12}/> };
     return { label: 'Resident', color: 'text-stone-900', icon: <Users size={12}/> };
   };
-
-  const socialOverview = useMemo(() => {
-    if (!village) return null;
-    const stats = { pariah: 0, resident: 0, pillar: 0 };
-    village.residents.forEach(r => {
-      const standing = getStandingCategory(r).label;
-      if (standing === 'Pariah') stats.pariah++;
-      else if (standing === 'Pillar') stats.pillar++;
-      else stats.resident++;
-    });
-    return stats;
-  }, [village]);
 
   const chartData = village ? [
     { name: 'Humans', value: village.demographics.humans, color: '#4b5563' },
@@ -339,6 +518,22 @@ const App: React.FC = () => {
                 </div>
               </div>
 
+              {/* Current Events Section */}
+              <div className="mb-12 break-inside-avoid">
+                <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase">
+                  <Calendar className="w-6 h-6" /> Current Events
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {village.currentEvents.map((event, idx) => (
+                    <div key={idx} className="bg-amber-800/5 p-4 border-l-4 border-amber-900 shadow-sm relative overflow-hidden group">
+                      <div className="text-[10px] font-black text-amber-900/40 mb-1 uppercase">SITUATION {idx + 1}</div>
+                      <p className="text-base italic text-stone-900 font-bold leading-tight">"{event}"</p>
+                      <ZapOff className="absolute -bottom-2 -right-2 w-8 h-8 text-amber-900/10" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 break-inside-avoid">
                 <div>
                   <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b border-stone-800 mb-6 pb-1">
@@ -410,6 +605,98 @@ const App: React.FC = () => {
                     </div>
                  </div>
               </div>
+            </section>
+
+            {/* 1d100 VILLAGE EVENTS TABLE */}
+            <section className="page-break-before print:print-page-border">
+              <div className="flex flex-col md:flex-row justify-between items-center border-b-4 border-stone-800 mb-8 pb-4 gap-4">
+                <h3 className="text-4xl font-bold medieval-font flex items-center gap-4 uppercase tracking-wider border-none p-0">
+                  <Activity size={36} /> 1d100 Village Events
+                </h3>
+                <button 
+                  onClick={rollEvent}
+                  className="no-print bg-amber-600 hover:bg-amber-700 text-white font-black py-2 px-6 rounded flex items-center gap-2 uppercase tracking-tighter shadow-lg transition-transform active:scale-95"
+                >
+                  <Dices size={20} /> Roll d100
+                </button>
+              </div>
+
+              <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm overflow-hidden h-auto">
+                <div className="max-h-[600px] overflow-y-auto custom-scrollbar print:max-h-none print:overflow-visible">
+                  <table className="w-full text-left text-sm font-serif">
+                    <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black sticky top-0 z-10">
+                      <tr>
+                        <th className="py-3 px-4 w-16">d100</th>
+                        <th className="py-3 px-4">The Gritty Occurrence</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-300">
+                      {VILLAGE_EVENTS.map((event, idx) => {
+                        const d100 = idx + 1;
+                        const isRolled = lastEventRoll === d100;
+                        return (
+                          <tr 
+                            key={idx} 
+                            className={`transition-colors duration-500 text-stone-950 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}
+                          >
+                            <td className="py-2 px-4 font-black border-r border-stone-300">{d100}</td>
+                            <td className="py-2 px-4 italic font-bold leading-snug">{event}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] italic text-stone-600 font-bold text-right no-print">
+                "Roll d100 whenever the narrative slows or a day passes."
+              </p>
+            </section>
+
+            {/* 1d100 PC HOOKS TABLE */}
+            <section className="page-break-before print:print-page-border">
+              <div className="flex flex-col md:flex-row justify-between items-center border-b-4 border-stone-800 mb-8 pb-4 gap-4">
+                <h3 className="text-4xl font-bold medieval-font flex items-center gap-4 uppercase tracking-wider border-none p-0">
+                  <MapPinned size={36} /> 1d100 PC Ties & Hooks
+                </h3>
+                <button 
+                  onClick={rollHook}
+                  className="no-print bg-amber-600 hover:bg-amber-700 text-white font-black py-2 px-6 rounded flex items-center gap-2 uppercase tracking-tighter shadow-lg transition-transform active:scale-95"
+                >
+                  <Dices size={20} /> Roll d100
+                </button>
+              </div>
+
+              <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm overflow-hidden h-auto">
+                <div className="max-h-[600px] overflow-y-auto custom-scrollbar print:max-h-none print:overflow-visible">
+                  <table className="w-full text-left text-sm font-serif">
+                    <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black sticky top-0 z-10">
+                      <tr>
+                        <th className="py-3 px-4 w-16">d100</th>
+                        <th className="py-3 px-4">The Reason You Are Here</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-300">
+                      {PC_HOOKS.map((hook, idx) => {
+                        const d100 = idx + 1;
+                        const isRolled = lastHookRoll === d100;
+                        return (
+                          <tr 
+                            key={idx} 
+                            className={`transition-colors duration-500 text-stone-950 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}
+                          >
+                            <td className="py-2 px-4 font-black border-r border-stone-300">{d100}</td>
+                            <td className="py-2 px-4 italic font-bold leading-snug">{hook}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] italic text-stone-600 font-bold text-right no-print">
+                "Roll d100 for each player character to establish their connection to the village."
+              </p>
             </section>
 
             {/* Page 3: Establishments & Commerce */}

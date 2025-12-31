@@ -99,6 +99,7 @@ export interface VillageData {
   residents: DetailedNPC[];
   mainQuests: Quest[];
   sideTreks: Quest[];
+  currentEvents: string[];
   gmNotes: string;
   mapUrl?: string;
   poi?: PointOfInterest;
