@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { VillageData, DetailedNPC, PointOfInterest } from "../types";
 
@@ -19,8 +18,9 @@ export const generateVillageDetails = async (
     1. Geography: Moody description of the site by a river.
     2. Description: Elaborate on the general mood and prevalent dangers of the village (Shadowdark style). This should be a 2-3 sentence overview that sets the scene for the GM.
     3. Dark Secret: The village's core rot or hidden horror.
-    4. Weather: A single short thematic phrase.
-    5. Exactly 12 Businesses: 
+    4. Morale: A single metric representing the collective spirit. Must be exactly one of: 'Hopeful', 'Fearful', 'Resentful', 'Apathetic', 'Defiant'. This should be heavily influenced by the dark secret and current dangers.
+    5. Weather: A single short thematic phrase.
+    6. Exactly 12 Businesses: 
        - Gritty names, rumors.
        - encounterHook: 1-2 sentences.
        - gmNotes: 1-2 sentences of DM-only secrets or plot hooks specific to this location.
@@ -29,27 +29,29 @@ export const generateVillageDetails = async (
          - price (Shadowdark style: "5 gp", "10 sp", "5 cp"),
          - availability ("Common", "Rare", "Scarce"),
          - description.
-    6. Two major landmarks: name, description, encounterHook.
-    7. Exactly 15 NPCs: 12 shop owners + 3 others. 
-       - FOR EACH NPC: name, race, sex, role, personality, trait, alignment, dark secret.
+    7. Two major landmarks: name, description, encounterHook.
+    8. Exactly 15 NPCs: 12 shop owners + 3 others. 
+       - FOR EACH NPC: name, race, sex, role, personality, trait, alignment, motivation, dark secret.
+       - MOTIVATION: A brief (2-5 words) primary drive or goal (e.g., 'Protect family', 'Seek revenge', 'Accumulate wealth', 'Survive', 'Uncover ancient truth'). This MUST be reflected in their relationships and secret.
        - SEX: Must be 'Male' or 'Female'.
        - ALIGNMENT: Must be 'Lawful', 'Neutral', or 'Chaotic'.
-       - THEMATIC CONSISTENCY: The NPC's personality and secret MUST reflect their alignment. 
+       - THEMATIC CONSISTENCY: The NPC's personality, secret, and motivation MUST reflect their alignment. 
          - Lawful secrets involve rigid codes, cults of order, or oppressive law.
          - Chaotic secrets involve madness, entropy, or rebellion.
          - Neutral secrets involve survival, greed, or apathy.
        - SHADOWDARK COMBAT STATS: hp, ac, atk, dmg.
        - FULL RELATIONSHIP MATRIX: Every NPC must have a relationship entry for the other 14 NPCs. 
        - BELL CURVE SCORING: Strict Gaussian distribution (1 to 10 scale). 
-    8. Main Quests: 3 high-stakes narrative arcs.
-    9. Side Treks: 10 small, gritty errands or mysteries.
-    10. GM Notes: DM-specific campaign hooks for the village overall.
+    9. Main Quests: 3 high-stakes narrative arcs.
+    10. Side Treks: 10 small, gritty errands or mysteries.
+    11. GM Notes: DM-specific campaign hooks for the village overall.
 
     Output JSON schema:
     {
       "geography": "string",
       "description": "string",
       "atmosphere": "string",
+      "morale": "Hopeful|Fearful|Resentful|Apathetic|Defiant",
       "weather": "string",
       "darkSecret": "string",
       "landmarks": [ { "name": "string", "description": "string", "encounterHook": "string" } ],
@@ -58,12 +60,12 @@ export const generateVillageDetails = async (
         { 
           "name": "string", "type": "string", "description": "string", "rumor": "string", "encounterHook": "string", "gmNotes": "string",
           "marketItems": [ { "name": "string", "price": "string", "availability": "string", "description": "string" } ],
-          "owner": { "name": "string", "race": "string", "sex": "Male|Female", "role": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string" } 
+          "owner": { "name": "string", "race": "string", "sex": "Male|Female", "role": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "motivation": "string", "secret": "string" } 
         }
       ],
       "residents": [
         {
-          "name": "string", "race": "string", "sex": "Male|Female", "role": "string", "personality": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "secret": "string",
+          "name": "string", "race": "string", "sex": "Male|Female", "role": "string", "personality": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "motivation": "string", "secret": "string",
           "stats": { "hp": number, "ac": number, "atk": "string", "dmg": "string" },
           "relationships": [ { "targetName": "string", "score": number, "feeling": "string", "reason": "string" } ]
         }
@@ -163,8 +165,9 @@ export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> =
     Personality: ${npc.personality}. 
     Alignment: ${npc.alignment}.
     Trait: ${npc.trait}.
+    Motivation: ${npc.motivation}.
     Say a short (5-10 word) greeting to a group of weary adventurers entering your establishment. 
-    Make it sound appropriate for your personality, sex, and alignment (e.g. suspicious, greedy, rigid, or tired).`;
+    Make it sound appropriate for your personality, sex, alignment, and motivation.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
@@ -186,7 +189,7 @@ export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> =
 
 export const generateNPCPortrait = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Sex: ${npc.sex}. Race: ${npc.race}. Role: ${npc.role}. Alignment: ${npc.alignment}. Personality: ${npc.personality}. Traits: ${npc.trait}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
+  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Sex: ${npc.sex}. Race: ${npc.race}. Role: ${npc.role}. Alignment: ${npc.alignment}. Personality: ${npc.personality}. Traits: ${npc.trait}. Motivation: ${npc.motivation}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',

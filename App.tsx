@@ -15,7 +15,7 @@ import {
   Map as MapIcon, Compass, FileText, Shield, Activity, Sword, Axe, Zap, Castle, Crown,
   Frown, Meh, Volume2, Coins, Tag, Newspaper, BarChart3, Info, Scale, CircleDot, Ghost,
   User as UserIcon, Mountain, Ghost as GhostIcon, Binoculars, AlertCircle,
-  Briefcase, FileDigit
+  Briefcase, FileDigit, Dices, CloudRain, Sun, ThermometerSnowflake, HeartCrack, Goal
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
@@ -39,6 +39,29 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext): Promise<Aud
   return buffer;
 }
 
+const WEATHER_TABLE = [
+  "Clear skies, bright sun, gentle breeze",
+  "Warm and humid, haze on the horizon",
+  "Cool and crisp morning, warming by midday",
+  "Overcast but dry, low gray clouds",
+  "Light drizzle that comes and goes",
+  "Steady rain, puddles forming",
+  "Sudden downpour, visibility reduced",
+  "Thunderstorm with occasional lightning",
+  "Heavy fog, sound carries strangely",
+  "Patchy fog that burns off by noon",
+  "Strong winds, loose debris blowing",
+  "Gusty winds with shifting directions",
+  "Cold snap, breath visible in the air",
+  "Heatwave, oppressive and draining",
+  "Light snowfall, soft and quiet",
+  "Heavy snow, travel slowed",
+  "Sleet or freezing rain, surfaces slick",
+  "Hailstorm, small pellets rattling down",
+  "Unseasonably strange weather (GM’s choice)",
+  "Dramatic shift: roll twice and combine"
+];
+
 const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [mapLoading, setMapLoading] = useState(false);
@@ -51,6 +74,7 @@ const App: React.FC = () => {
   const [npcFilter, setNpcFilter] = useState("");
   const [portraitLoading, setPortraitLoading] = useState<Record<number, boolean>>({});
   const [voiceLoading, setVoiceLoading] = useState<Record<number, boolean>>({});
+  const [lastWeatherRoll, setLastWeatherRoll] = useState<number | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -69,6 +93,7 @@ const App: React.FC = () => {
     setPortraitLoading({});
     setVoiceLoading({});
     setGossip([]);
+    setLastWeatherRoll(null);
     try {
       const pop = Math.floor(Math.random() * (300 - 200) + 200);
       const data = await generateVillageDetails("Cinderglade", pop, calculateDemographics(pop));
@@ -79,6 +104,11 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const rollWeather = () => {
+    const roll = Math.floor(Math.random() * 20) + 1;
+    setLastWeatherRoll(roll);
   };
 
   const handleGeneratePOI = async () => {
@@ -172,6 +202,17 @@ const App: React.FC = () => {
     }
   };
 
+  const getMoraleDetails = (morale: string) => {
+    switch(morale) {
+      case 'Hopeful': return { icon: <Sun size={24} />, color: 'text-emerald-900', bg: 'bg-emerald-100', border: 'border-emerald-800' };
+      case 'Fearful': return { icon: <Skull size={24} />, color: 'text-red-900', bg: 'bg-red-100', border: 'border-red-800' };
+      case 'Resentful': return { icon: <HeartCrack size={24} />, color: 'text-orange-900', bg: 'bg-orange-100', border: 'border-orange-800' };
+      case 'Apathetic': return { icon: <Meh size={24} />, color: 'text-stone-700', bg: 'bg-stone-200', border: 'border-stone-500' };
+      case 'Defiant': return { icon: <Shield size={24} />, color: 'text-indigo-900', bg: 'bg-indigo-100', border: 'border-indigo-800' };
+      default: return { icon: <Activity size={24} />, color: 'text-stone-900', bg: 'bg-stone-100', border: 'border-stone-800' };
+    }
+  };
+
   const getRelationshipStyles = (rawScore: number) => {
     const score = Math.max(1, Math.min(10, Math.round(rawScore)));
     if (score >= 8) return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-900', icon: <Heart size={10} />, effects: 'animate-pulse-subtle' };
@@ -249,13 +290,32 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mb-12">
-                <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase">
-                  <Scroll className="w-6 h-6" /> Narrative Manifest
+              <div className="mb-12 flex flex-col md:flex-row gap-8">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase">
+                    <Scroll className="w-6 h-6" /> Narrative Manifest
+                  </div>
+                  <p className="text-2xl italic font-serif leading-relaxed text-stone-900 bg-white/30 p-8 border-l-8 border-stone-800 rounded-r shadow-inner">
+                    "{village.description}"
+                  </p>
                 </div>
-                <p className="text-2xl italic font-serif leading-relaxed text-stone-900 bg-white/30 p-8 border-l-8 border-stone-800 rounded-r shadow-inner">
-                  "{village.description}"
-                </p>
+                
+                {/* Morale Widget */}
+                <div className="w-full md:w-64 break-inside-avoid">
+                  <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase">
+                    <Activity className="w-6 h-6" /> Town Morale
+                  </div>
+                  {(() => {
+                    const details = getMoraleDetails(village.morale);
+                    return (
+                      <div className={`p-6 rounded border-4 flex flex-col items-center justify-center text-center shadow-md ${details.bg} ${details.border} ${details.color}`}>
+                        <div className="mb-2">{details.icon}</div>
+                        <div className="text-2xl font-black medieval-font uppercase tracking-tighter">{village.morale}</div>
+                        <p className="text-[10px] mt-2 font-bold opacity-70 italic">Collective spirit in the wake of gloom.</p>
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 break-inside-avoid">
@@ -505,7 +565,7 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* DM Secrets - Usually short, so keep it with Dossiers or start on new page */}
+            {/* DM Secrets */}
             <section className="page-break-before bg-stone-900 text-stone-100 p-12 border-8 border-double border-red-900 shadow-2xl relative overflow-visible break-inside-avoid">
               <h3 className="text-4xl font-bold medieval-font mb-6 text-red-500 flex items-center gap-3 border-none pb-0 uppercase tracking-tighter">
                 <Skull className="w-12 h-12" /> The Black Secret
@@ -514,7 +574,59 @@ const App: React.FC = () => {
               <div className="absolute top-2 right-4 text-[10px] font-black uppercase tracking-[0.5em] opacity-30">Eyes Only</div>
             </section>
 
-            {/* FINAL MAJOR SECTION: RESIDENTS */}
+            {/* WEATHER TABLE SECTION */}
+            <section className="page-break-before print:print-page-border">
+              <div className="flex flex-col md:flex-row justify-between items-center border-b-4 border-stone-800 mb-8 pb-4 gap-4">
+                <h3 className="text-4xl font-bold medieval-font flex items-center gap-4 uppercase tracking-wider border-none p-0">
+                  <CloudRain size={36} /> Weather Patterns
+                </h3>
+                <button 
+                  onClick={rollWeather}
+                  className="no-print bg-amber-600 hover:bg-amber-700 text-white font-black py-2 px-6 rounded flex items-center gap-2 uppercase tracking-tighter shadow-lg transition-transform active:scale-95"
+                >
+                  <Dices size={20} /> Roll d20
+                </button>
+              </div>
+
+              <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm">
+                <table className="w-full text-left text-sm font-serif">
+                  <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black">
+                    <tr>
+                      <th className="py-3 px-4 w-16">d20</th>
+                      <th className="py-3 px-4">Weather Manifestation</th>
+                      <th className="py-3 px-4 no-print">Effect Category</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-300">
+                    {WEATHER_TABLE.map((weather, idx) => {
+                      const d20 = idx + 1;
+                      const isRolled = lastWeatherRoll === d20;
+                      return (
+                        <tr 
+                          key={idx} 
+                          className={`transition-colors duration-500 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}
+                        >
+                          <td className="py-2 px-4 font-black">{d20}</td>
+                          <td className="py-2 px-4 italic">{weather}</td>
+                          <td className="py-2 px-4 no-print">
+                            {d20 <= 4 && <span className="text-[10px] font-black text-emerald-700 uppercase flex items-center gap-1"><Sun size={12}/> Clear</span>}
+                            {d20 >= 5 && d20 <= 10 && <span className="text-[10px] font-black text-blue-700 uppercase flex items-center gap-1"><CloudRain size={12}/> Precipitation</span>}
+                            {d20 >= 11 && d20 <= 12 && <span className="text-[10px] font-black text-stone-700 uppercase flex items-center gap-1"><Wind size={12}/> Wind</span>}
+                            {d20 >= 13 && d20 <= 18 && <span className="text-[10px] font-black text-indigo-700 uppercase flex items-center gap-1"><ThermometerSnowflake size={12}/> Extremes</span>}
+                            {d20 >= 19 && <span className="text-[10px] font-black text-red-700 uppercase flex items-center gap-1"><Zap size={12}/> Anomalous</span>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-4 text-[10px] italic text-stone-500 text-right no-print">
+                "Roll d20 once per game day or whenever travel resumes."
+              </p>
+            </section>
+
+            {/* RESIDENTS SECTION */}
             <section className="page-break-before print:print-page-border">
               <div className="flex flex-col md:flex-row justify-between items-end border-b-4 border-stone-800 mb-12 pb-4 gap-4">
                 <h3 className="text-4xl font-bold medieval-font flex items-center gap-2 uppercase tracking-wider border-none p-0">
@@ -592,7 +704,10 @@ const App: React.FC = () => {
                                  <h5 className="text-xs font-black uppercase text-stone-400 mb-3 tracking-[0.2em]">Psychological Profile</h5>
                                  <p className="italic text-xl text-stone-800 border-l-8 border-stone-800 pl-6 mb-6 leading-relaxed font-serif">"{npc.personality}"</p>
                                  
-                                 <div className="grid grid-cols-2 gap-4 mb-6">
+                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                                    <div className="px-4 py-2 bg-indigo-800 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase">
+                                       <Goal size={12} /> {npc.motivation}
+                                    </div>
                                     <div className="px-4 py-2 bg-stone-800 text-amber-400 text-xs font-bold rounded flex items-center justify-center gap-2 uppercase">
                                        <Fingerprint size={12} /> {npc.trait}
                                     </div>

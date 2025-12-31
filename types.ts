@@ -1,4 +1,3 @@
-
 export interface NPC {
   name: string;
   race: string;
@@ -7,6 +6,7 @@ export interface NPC {
   sex: 'Male' | 'Female';
   alignment: 'Lawful' | 'Neutral' | 'Chaotic';
   secret?: string;
+  motivation: string;
 }
 
 export interface MarketItem {
@@ -82,6 +82,7 @@ export interface VillageData {
   name: string;
   population: number;
   description: string;
+  morale: 'Hopeful' | 'Fearful' | 'Resentful' | 'Apathetic' | 'Defiant';
   demographics: {
     humans: number;
     halflings: number;
