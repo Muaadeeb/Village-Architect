@@ -42,6 +42,7 @@ export const generateVillageDetails = async (
        - SHADOWDARK COMBAT STATS: hp, ac, atk, dmg.
        - FULL RELATIONSHIP MATRIX: Every NPC must have a relationship entry for the other 14 NPCs. 
        - BELL CURVE SCORING: Strict Gaussian distribution (1 to 10 scale). 
+       - RELATIONSHIP REASON: MUST be a short, descriptive phrase (3-6 words) explaining *why* they feel this way (e.g., "Always pays on time", "Suspects them of theft", "Secretly in love with them", "Repaired their favorite boots"). DO NOT use single words.
     9. Main Quests: 3 high-stakes narrative arcs.
     10. Side Treks: 10 small, gritty errands or mysteries.
     11. Current Events: Exactly 3 high-impact events happening NOW in the village.

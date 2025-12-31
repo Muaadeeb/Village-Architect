@@ -427,9 +427,30 @@ const App: React.FC = () => {
 
   const getRelationshipStyles = (rawScore: number) => {
     const score = Math.max(1, Math.min(10, Math.round(rawScore)));
-    if (score >= 8) return { bg: 'bg-emerald-100', border: 'border-emerald-600', text: 'text-emerald-900', icon: <Heart size={14} className="text-emerald-700" />, effects: 'animate-pulse-subtle' };
-    if (score <= 3) return { bg: 'bg-rose-100', border: 'border-rose-600', text: 'text-rose-900', icon: <Swords size={14} className="text-rose-700" />, effects: 'matrix-desaturated' };
-    return { bg: 'bg-stone-100', border: 'border-stone-400', text: 'text-stone-800', icon: <Minus size={14} className="text-stone-600" />, effects: '' };
+    // Positive (Score 8+)
+    if (score >= 8) return { 
+      bg: 'bg-emerald-100', 
+      border: 'border-emerald-600', 
+      text: 'text-emerald-900', 
+      icon: <Heart size={14} className="text-emerald-700" />, 
+      effects: 'animate-pulse-subtle' 
+    };
+    // Negative (Score 3-)
+    if (score <= 3) return { 
+      bg: 'bg-rose-100', 
+      border: 'border-rose-600', 
+      text: 'text-rose-900', 
+      icon: <Swords size={14} className="text-rose-700" />, 
+      effects: 'matrix-desaturated' 
+    };
+    // Neutral (Score 4-7)
+    return { 
+      bg: 'bg-stone-100', 
+      border: 'border-stone-400', 
+      text: 'text-stone-800', 
+      icon: <Minus size={14} className="text-stone-600" />, 
+      effects: '' 
+    };
   };
 
   const getStandingCategory = (npc: DetailedNPC) => {
@@ -595,7 +616,7 @@ const App: React.FC = () => {
                       <CloudFog className="w-6 h-6" /> Regional Status
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="p-6 bg-white/40 border-2 border-stone-800 font-bold italic text-stone-900 text-xl text-center flex items-center justify-center">
+                      <div className="p-6 bg-white/40 border-2 border-stone-800 font-bold italic text-stone-900 text-xl text-center flex items-center justify-center text-stone-950">
                          {village.weather}
                       </div>
                       <div className="text-lg leading-relaxed text-stone-700">
@@ -607,11 +628,11 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* 1d100 VILLAGE EVENTS TABLE */}
+            {/* 1d100 ADDITIONAL VILLAGE EVENTS TABLE */}
             <section className="page-break-before print:print-page-border">
               <div className="flex flex-col md:flex-row justify-between items-center border-b-4 border-stone-800 mb-8 pb-4 gap-4">
                 <h3 className="text-4xl font-bold medieval-font flex items-center gap-4 uppercase tracking-wider border-none p-0">
-                  <Activity size={36} /> 1d100 Village Events
+                  <Activity size={36} /> 1d100 Additional Village Events
                 </h3>
                 <button 
                   onClick={rollEvent}
@@ -626,8 +647,8 @@ const App: React.FC = () => {
                   <table className="w-full text-left text-sm font-serif">
                     <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black sticky top-0 z-10">
                       <tr>
-                        <th className="py-3 px-4 w-16">d100</th>
-                        <th className="py-3 px-4">The Gritty Occurrence</th>
+                        <th className="py-3 px-4 w-16 text-amber-500">d100</th>
+                        <th className="py-3 px-4 text-amber-500">The Gritty Occurrence</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stone-300">
@@ -672,8 +693,8 @@ const App: React.FC = () => {
                   <table className="w-full text-left text-sm font-serif">
                     <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black sticky top-0 z-10">
                       <tr>
-                        <th className="py-3 px-4 w-16">d100</th>
-                        <th className="py-3 px-4">The Reason You Are Here</th>
+                        <th className="py-3 px-4 w-16 text-amber-500">d100</th>
+                        <th className="py-3 px-4 text-amber-500">The Reason You Are Here</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stone-300">
@@ -846,18 +867,18 @@ const App: React.FC = () => {
                 <table className="w-full text-left text-sm font-serif">
                   <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black">
                     <tr>
-                      <th className="py-3 px-4">Commodity Manifest</th>
-                      <th className="py-3 px-4">Appraised Price</th>
-                      <th className="py-3 px-4">Availability</th>
-                      <th className="py-3 px-4">Vendor</th>
+                      <th className="py-3 px-4 text-amber-500">Commodity Manifest</th>
+                      <th className="py-3 px-4 text-amber-500">Appraised Price</th>
+                      <th className="py-3 px-4 text-amber-500">Availability</th>
+                      <th className="py-3 px-4 text-amber-500">Vendor</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y-2 divide-stone-300">
                     {village.businesses.flatMap(b => b.marketItems.map((item, idx) => (
-                      <tr key={`${b.name}-${idx}`} className="break-inside-avoid group">
+                      <tr key={`${b.name}-${idx}`} className="break-inside-avoid group text-stone-950 font-bold">
                         <td className="py-4 px-4 align-top">
                           <div className="font-bold text-stone-900 text-base mb-1">{item.name}</div>
-                          <div className="text-[10px] font-normal text-stone-500 italic leading-tight">{item.description}</div>
+                          <div className="text-[10px] font-normal text-stone-700 italic leading-tight">{item.description}</div>
                         </td>
                         <td className="py-4 px-4 align-top italic font-bold text-lg text-amber-900 whitespace-nowrap">{item.price}</td>
                         <td className="py-4 px-4 align-top">
@@ -900,9 +921,9 @@ const App: React.FC = () => {
                 <table className="w-full text-left text-sm font-serif">
                   <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black">
                     <tr>
-                      <th className="py-3 px-4 w-16">d20</th>
-                      <th className="py-3 px-4">Weather Manifestation</th>
-                      <th className="py-3 px-4 no-print">Effect Category</th>
+                      <th className="py-3 px-4 w-16 text-amber-500">d20</th>
+                      <th className="py-3 px-4 text-amber-500">Weather Manifestation</th>
+                      <th className="py-3 px-4 no-print text-amber-500">Effect Category</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-300">
@@ -1044,7 +1065,7 @@ const App: React.FC = () => {
                                                 </span>
                                                 <span className={`${styles.text} whitespace-nowrap bg-white/50 px-1 rounded`}>{rel.score} • {rel.feeling}</span>
                                              </div>
-                                             <p className="italic text-xs opacity-80 leading-tight font-serif text-stone-900">"{rel.reason}"</p>
+                                             <p className="italic text-xs opacity-80 leading-tight font-serif text-stone-950 font-bold">"{rel.reason}"</p>
                                           </div>
                                        );
                                     })}
