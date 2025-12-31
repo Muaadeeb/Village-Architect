@@ -17,7 +17,7 @@ import {
   User as UserIcon, Mountain, Ghost as GhostIcon, Binoculars, AlertCircle,
   Briefcase, FileDigit, Dices, CloudRain, Sun, ThermometerSnowflake, HeartCrack, Goal,
   ZapOff, Calendar, MapPinned, Moon, SunMedium, UserSearch, Tent, Ghost as MonsterIcon,
-  HandHelping, MessageCircle
+  HandHelping, MessageCircle, Save, FolderOpen, Download
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
@@ -437,6 +437,7 @@ const App: React.FC = () => {
   const [lastMonsterRoll, setLastMonsterRoll] = useState<number | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const calculateDemographics = (total: number) => {
     const humans = Math.floor(total * 0.85);
@@ -472,6 +473,53 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSave = () => {
+    if (!village) return;
+    const dataToSave = { ...village, gmNotes: editableNotes };
+    const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${village.name.toLowerCase().replace(/\s+/g, '_')}_dossier.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const loadedData = JSON.parse(event.target?.result as string);
+        setVillage(loadedData);
+        setEditableNotes(loadedData.gmNotes || "");
+        // Reset rolls on load
+        setLastWeatherRoll(null);
+        setLastEventRoll(null);
+        setLastHookRoll(null);
+        setLastDayInsideRoll(null);
+        setLastNightInsideRoll(null);
+        setLastDayOutsideRoll(null);
+        setLastNightOutsideRoll(null);
+        setLastSocialRoll(null);
+        setLastMonsterRoll(null);
+      } catch (err) {
+        alert("Failed to read the ancient scroll. Is it valid JSON?");
+      }
+    };
+    reader.readAsText(file);
+    // Reset input so the same file can be loaded twice if needed
+    e.target.value = '';
   };
 
   const rollWeather = () => setLastWeatherRoll(Math.floor(Math.random() * 20) + 1);
@@ -631,14 +679,34 @@ const App: React.FC = () => {
           </h1>
           <p className="text-slate-400 italic">"Full Dossier: Lives, Deaths, and Grudges in the Gloom."</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4 justify-center">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            className="hidden" 
+            accept=".json"
+          />
+          <button 
+            onClick={handleLoadClick}
+            className="bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"
+          >
+            <FolderOpen size={18} /> Load
+          </button>
+          <button 
+            onClick={handleSave}
+            disabled={!village}
+            className="bg-stone-800 hover:bg-stone-700 disabled:opacity-50 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"
+          >
+            <Save size={18} /> Save
+          </button>
           <button 
             onClick={() => window.print()} 
-            className="bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold py-4 px-6 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-lg medieval-font border border-amber-900/50"
+            className="bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"
           >
-            <Printer size={20} /> Print Dossier
+            <Printer size={18} /> Print
           </button>
-          <button onClick={handleGenerate} disabled={loading} className="bg-amber-600 hover:bg-amber-700 disabled:bg-slate-700 text-white font-bold py-4 px-8 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-lg medieval-font">
+          <button onClick={handleGenerate} disabled={loading} className="bg-amber-600 hover:bg-amber-700 disabled:bg-slate-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font">
             {loading ? <RefreshCw className="animate-spin" /> : <Scroll />} Manifest Village
           </button>
         </div>
