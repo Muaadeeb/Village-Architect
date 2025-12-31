@@ -196,9 +196,9 @@ const App: React.FC = () => {
 
   const getAlignmentDetails = (alignment: string) => {
     switch(alignment) {
-      case 'Lawful': return { icon: <Scale size={14} />, color: 'text-blue-900', bg: 'bg-blue-50' };
-      case 'Chaotic': return { icon: <Zap size={14} />, color: 'text-purple-900', bg: 'bg-purple-50' };
-      default: return { icon: <CircleDot size={14} />, color: 'text-stone-700', bg: 'bg-stone-50' };
+      case 'Lawful': return { icon: <Scale size={14} />, color: 'text-blue-900', bg: 'bg-blue-100' };
+      case 'Chaotic': return { icon: <Zap size={14} />, color: 'text-purple-900', bg: 'bg-purple-100' };
+      default: return { icon: <CircleDot size={14} />, color: 'text-stone-800', bg: 'bg-stone-200' };
     }
   };
 
@@ -215,9 +215,30 @@ const App: React.FC = () => {
 
   const getRelationshipStyles = (rawScore: number) => {
     const score = Math.max(1, Math.min(10, Math.round(rawScore)));
-    if (score >= 8) return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-900', icon: <Heart size={10} />, effects: 'animate-pulse-subtle' };
-    if (score <= 3) return { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-900', icon: <Swords size={10} />, effects: 'matrix-desaturated' };
-    return { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-800', icon: <Minus size={10} />, effects: '' };
+    // Positive (Score 8+)
+    if (score >= 8) return { 
+      bg: 'bg-emerald-100', 
+      border: 'border-emerald-600', 
+      text: 'text-emerald-900', 
+      icon: <Heart size={14} className="text-emerald-700" />, 
+      effects: 'animate-pulse-subtle' 
+    };
+    // Negative (Score 3-)
+    if (score <= 3) return { 
+      bg: 'bg-rose-100', 
+      border: 'border-rose-600', 
+      text: 'text-rose-900', 
+      icon: <Swords size={14} className="text-rose-700" />, 
+      effects: 'matrix-desaturated' 
+    };
+    // Neutral (Score 4-7)
+    return { 
+      bg: 'bg-stone-100', 
+      border: 'border-stone-400', 
+      text: 'text-stone-800', 
+      icon: <Minus size={14} className="text-stone-600" />, 
+      effects: '' 
+    };
   };
 
   const getStandingCategory = (npc: DetailedNPC) => {
@@ -604,16 +625,16 @@ const App: React.FC = () => {
                       return (
                         <tr 
                           key={idx} 
-                          className={`transition-colors duration-500 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}
+                          className={`transition-colors duration-500 text-stone-950 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}
                         >
-                          <td className="py-2 px-4 font-black">{d20}</td>
-                          <td className="py-2 px-4 italic">{weather}</td>
+                          <td className="py-2 px-4 font-black border-r border-stone-300">{d20}</td>
+                          <td className="py-2 px-4 italic font-bold">{weather}</td>
                           <td className="py-2 px-4 no-print">
-                            {d20 <= 4 && <span className="text-[10px] font-black text-emerald-700 uppercase flex items-center gap-1"><Sun size={12}/> Clear</span>}
-                            {d20 >= 5 && d20 <= 10 && <span className="text-[10px] font-black text-blue-700 uppercase flex items-center gap-1"><CloudRain size={12}/> Precipitation</span>}
-                            {d20 >= 11 && d20 <= 12 && <span className="text-[10px] font-black text-stone-700 uppercase flex items-center gap-1"><Wind size={12}/> Wind</span>}
-                            {d20 >= 13 && d20 <= 18 && <span className="text-[10px] font-black text-indigo-700 uppercase flex items-center gap-1"><ThermometerSnowflake size={12}/> Extremes</span>}
-                            {d20 >= 19 && <span className="text-[10px] font-black text-red-700 uppercase flex items-center gap-1"><Zap size={12}/> Anomalous</span>}
+                            {d20 <= 4 && <span className="text-[10px] font-black text-emerald-800 uppercase flex items-center gap-1"><Sun size={12}/> Clear</span>}
+                            {d20 >= 5 && d20 <= 10 && <span className="text-[10px] font-black text-blue-800 uppercase flex items-center gap-1"><CloudRain size={12}/> Precipitation</span>}
+                            {d20 >= 11 && d20 <= 12 && <span className="text-[10px] font-black text-stone-800 uppercase flex items-center gap-1"><Wind size={12}/> Wind</span>}
+                            {d20 >= 13 && d20 <= 18 && <span className="text-[10px] font-black text-indigo-900 uppercase flex items-center gap-1"><ThermometerSnowflake size={12}/> Extremes</span>}
+                            {d20 >= 19 && <span className="text-[10px] font-black text-red-900 uppercase flex items-center gap-1"><Zap size={12}/> Anomalous</span>}
                           </td>
                         </tr>
                       );
@@ -621,7 +642,7 @@ const App: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-              <p className="mt-4 text-[10px] italic text-stone-500 text-right no-print">
+              <p className="mt-4 text-[10px] italic text-stone-600 font-bold text-right no-print">
                 "Roll d20 once per game day or whenever travel resumes."
               </p>
             </section>
@@ -692,7 +713,7 @@ const App: React.FC = () => {
                             <div className={`text-xs font-black px-4 py-2 bg-white rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${standing.color}`}>
                                {standing.icon} {standing.label}
                             </div>
-                            <div className={`text-xs font-black px-4 py-2 bg-white rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${alignDetails.color}`}>
+                            <div className={`text-xs font-black px-4 py-2 ${alignDetails.bg} rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${alignDetails.color}`}>
                                {alignDetails.icon} {npc.alignment}
                             </div>
                           </div>
@@ -728,12 +749,15 @@ const App: React.FC = () => {
                                     {npc.relationships.map((rel, ridx) => {
                                        const styles = getRelationshipStyles(rel.score);
                                        return (
-                                          <div key={ridx} className={`p-3 rounded border-2 transition-all duration-500 ${styles.bg} ${styles.border} ${styles.effects} break-inside-avoid flex flex-col justify-between`}>
-                                             <div className="flex justify-between font-black text-[10px] uppercase mb-1">
-                                                <span>{rel.targetName}</span>
-                                                <span className={styles.text}>{rel.score} • {rel.feeling}</span>
+                                          <div key={ridx} className={`p-3 rounded border-2 transition-all duration-500 ${styles.bg} ${styles.border} ${styles.effects} break-inside-avoid flex flex-col justify-between shadow-sm`}>
+                                             <div className="flex justify-between font-black text-[10px] uppercase mb-1 items-center gap-1">
+                                                <span className="flex items-center gap-1.5 truncate">
+                                                   <span className="flex-shrink-0">{styles.icon}</span> 
+                                                   <span className="truncate">{rel.targetName}</span>
+                                                </span>
+                                                <span className={`${styles.text} whitespace-nowrap bg-white/50 px-1 rounded`}>{rel.score} • {rel.feeling}</span>
                                              </div>
-                                             <p className="italic text-xs opacity-80 leading-tight font-serif">"{rel.reason}"</p>
+                                             <p className="italic text-xs opacity-80 leading-tight font-serif text-stone-900">"{rel.reason}"</p>
                                           </div>
                                        );
                                     })}
