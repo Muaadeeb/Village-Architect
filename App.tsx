@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { 
   generateVillageDetails, 
@@ -378,7 +377,7 @@ const ENCOUNTERS_MONSTERS = [
   { icon: <Droplets size={16} />, who: "Roper", attitude: "Hostile", text: "A fence post suddenly shoots out sticky tentacles." },
   { icon: <Skull size={16} />, who: "Lich", attitude: "Wary", text: "A skeletal figure is reading a book by a landmark." },
   { icon: <Gust size={16} />, who: "Behir", attitude: "Hostile", text: "A blue reptile exhales lightning down the street." },
-  { icon: <Droplets size={16} />, who: "Kraken-Limb", attitude: "Hostile", text: "A massive tentacle reaches from the river." },
+  { icon: <Droplets size={16} />, who: "Kraken-Limb", attitude: "Hostile", text: "A single massive tentacle reaches from the river." },
   { icon: <Activity size={16} />, who: "Purple Worm", attitude: "Hostile", text: "The village shakes as a fifty-foot worm surfaces." },
   { icon: <Target size={16} />, who: "The Tarasque-Lite", attitude: "Hostile", text: "A mountain-sized beast is seen walking toward you." }
 ];
@@ -447,7 +446,6 @@ const App: React.FC = () => {
   const [lastEventRoll, setLastEventRoll] = useState<number | null>(null);
   const [lastHookRoll, setLastHookRoll] = useState<number | null>(null);
   
-  // Demographics Override State
   const [isOverrideEnabled, setIsOverrideEnabled] = useState(false);
   const [demoOverrides, setDemoOverrides] = useState<DemoOverride[]>([
     { race: "Human", percent: 85 },
@@ -457,7 +455,6 @@ const App: React.FC = () => {
   ]);
   const [showDemoSettings, setShowDemoSettings] = useState(false);
 
-  // Encounter Rolls
   const [lastDayInsideRoll, setLastDayInsideRoll] = useState<number | null>(null);
   const [lastNightInsideRoll, setLastNightInsideRoll] = useState<number | null>(null);
   const [lastMonsterRoll, setLastMonsterRoll] = useState<number | null>(null);
@@ -930,6 +927,70 @@ const App: React.FC = () => {
                   <h4 className="text-xl font-bold medieval-font mb-4 flex items-center gap-2"><Scroll /> Local Quests</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{village.mainQuests.map((q, i) => (<div key={i} className="p-4 bg-stone-800/5 border-l-8 border-stone-800 rounded-r shadow-sm"><h5 className="font-bold text-base text-stone-900 uppercase tracking-tighter mb-1">{q.title}</h5><p className="text-sm italic text-stone-600 mb-2 leading-tight">{q.description}</p><div className="flex items-center gap-2"><span className="text-[10px] font-black bg-stone-800 text-amber-400 px-3 py-1 rounded-full uppercase">Reward: {q.reward}</span></div></div>))}</div>
                 </div>
+              </div>
+            </section>
+
+            {/* Restored NPC Section */}
+            <section className="page-break-before print:print-page-border">
+              <div className="flex flex-col md:flex-row justify-between items-end border-b-4 border-stone-800 mb-12 pb-4 gap-4">
+                <h3 className="text-4xl font-bold medieval-font flex items-center gap-2 uppercase tracking-wider border-none p-0">
+                  <UserCircle size={36} /> Master Resident Dossiers
+                </h3>
+                <div className="no-print relative mb-1">
+                  <Search className="absolute left-2 top-2 w-4 h-4 text-stone-400" />
+                  <input type="text" placeholder="Filter residents..." className="pl-8 py-2 text-sm bg-white border-2 border-stone-300 rounded focus:ring-2 focus:ring-amber-500 outline-none" onChange={(e) => setNpcFilter(e.target.value)} />
+                </div>
+              </div>
+              <div className="space-y-16">
+                {village.residents.filter(r => r.name.toLowerCase().includes(npcFilter.toLowerCase())).map((npc, idx) => {
+                  const standing = getStandingCategory(npc);
+                  const alignDetails = getAlignmentDetails(npc.alignment);
+                  return (
+                    <div key={idx} className="p-10 border-4 border-stone-800 bg-white/40 rounded-sm shadow-2xl relative group break-inside-avoid overflow-visible npc-card-print">
+                      <div className="flex flex-col md:flex-row gap-10">
+                        <div className="w-full md:w-1/3 flex flex-col items-center text-center">
+                          <div className="relative w-full aspect-square bg-stone-800/10 mb-8 rounded-sm shadow-lg border-2 border-stone-800 overflow-hidden group/portrait">
+                            {npc.portraitUrl ? <img src={npc.portraitUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">{portraitLoading[idx] ? <RefreshCw className="w-16 h-16 animate-spin text-amber-600" /> : <UserCircle className="w-full h-full opacity-10 p-4" />}</div>}
+                            {!portraitLoading[idx] && <button onClick={() => handleGeneratePortrait(idx, npc)} className={`absolute inset-0 bg-stone-900/80 transition-opacity flex flex-col items-center justify-center gap-3 text-amber-400 font-bold medieval-font no-print ${npc.portraitUrl ? 'opacity-0 group-hover/portrait:opacity-100' : 'opacity-100'}`}><Wand2 className="w-10 h-10" /><span className="text-lg">Manifest Portrait</span></button>}
+                            <button onClick={(e) => { e.stopPropagation(); playVoice(idx, npc); }} className="absolute bottom-4 right-4 p-4 bg-amber-600 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all no-print disabled:opacity-50 z-10">{voiceLoading[idx] ? <RefreshCw className="animate-spin" size={24} /> : <Volume2 size={24} />}</button>
+                          </div>
+                          <h4 className="text-4xl font-bold medieval-font leading-none uppercase tracking-tighter mb-2">{npc.name}</h4>
+                          <p className="text-xs font-black text-stone-500 uppercase tracking-widest mb-4">{npc.sex} • {npc.race} • {npc.role}</p>
+                          <div className="flex flex-col gap-3 w-full px-4">
+                            <div className={`text-xs font-black px-4 py-2 bg-white rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${standing.color}`}>{standing.icon} {standing.label}</div>
+                            <div className={`text-xs font-black px-4 py-2 ${alignDetails.bg} rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${alignDetails.color}`}>{alignDetails.icon} {npc.alignment}</div>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                           <div className="grid grid-cols-1 gap-10">
+                              <div>
+                                 <h5 className="text-xs font-black uppercase text-stone-400 mb-3 tracking-[0.2em]">Psychological Profile</h5>
+                                 <p className="italic text-xl text-stone-800 border-l-8 border-stone-800 pl-6 mb-6 leading-relaxed font-serif">"{npc.personality}"</p>
+                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                                    <div className="px-4 py-2 bg-indigo-800 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase"><Goal size={12} /> {npc.motivation}</div>
+                                    <div className="px-4 py-2 bg-stone-800 text-amber-400 text-xs font-bold rounded flex items-center justify-center gap-2 uppercase"><Fingerprint size={12} /> {npc.trait}</div>
+                                    <div className="px-4 py-2 bg-rose-900 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase"><Shield size={12} /> AC {npc.stats.ac} | HP {npc.stats.hp}</div>
+                                 </div>
+                                 <div className="bg-red-50/80 p-4 border-2 border-red-200 rounded-sm">
+                                    <h6 className="text-[10px] font-black text-red-900 uppercase mb-2 tracking-widest">Alignment Shadow Secret</h6>
+                                    <p className="text-sm italic text-red-800 font-serif leading-snug">{npc.secret}</p>
+                                 </div>
+                              </div>
+                              <div>
+                                 <h5 className="text-xs font-black uppercase text-stone-400 mb-4 tracking-[0.2em]">Social Influence Matrix</h5>
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] md:max-h-none overflow-y-auto pr-2 custom-scrollbar print:max-h-none print:overflow-visible h-auto">
+                                    {npc.relationships.map((rel, ridx) => {
+                                       const styles = getRelationshipStyles(rel.score);
+                                       return (<div key={ridx} className={`p-3 rounded border-2 transition-all duration-500 ${styles.bg} ${styles.border} ${styles.effects} break-inside-avoid flex flex-col justify-between shadow-sm`}><div className="flex justify-between font-black text-[10px] uppercase mb-1 items-center gap-1"><span className="flex items-center gap-1.5 truncate"><span className="flex-shrink-0">{styles.icon}</span> <span className="truncate">{rel.targetName}</span></span><span className={`${styles.text} whitespace-nowrap bg-white/50 px-1 rounded`}>{rel.score} • {rel.feeling}</span></div><p className="italic text-xs opacity-80 leading-tight font-serif text-stone-950 font-bold">"{rel.reason}"</p></div>);
+                                    })}
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
 
