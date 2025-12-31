@@ -598,11 +598,11 @@ const App: React.FC = () => {
             <div className="absolute bottom-6 left-8 text-[12px] font-black uppercase tracking-[1.5em] opacity-30 text-red-400 no-print">Eyes Only • GM Secret</div>
           </section>
 
-          {/* PAGE 9: Master Resident Dossiers */}
+          {/* PAGE 9: Master Resident Dossiers (RESTYLED) */}
           <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
             <PageNumber n={9} />
             <h3 className="text-5xl font-bold medieval-font border-b-4 border-stone-800 mb-12 pb-4 text-black flex items-center gap-4 uppercase"><UserCircle size={48} /> Master Resident Dossiers</h3>
-            <div className="space-y-24">
+            <div className="space-y-32">
               {village.residents.map((npc, idx) => {
                 const standing = getStandingCategory(npc);
                 const alignmentColor = npc.alignment === 'Lawful' ? 'bg-blue-100 border-blue-800 text-blue-900' : 
@@ -610,88 +610,94 @@ const App: React.FC = () => {
                                      'bg-stone-100 border-stone-800 text-stone-900';
 
                 return (
-                  <div key={idx} className="p-8 md:p-12 border-4 border-stone-800 bg-white/60 rounded-sm shadow-2xl relative break-inside-avoid group overflow-hidden">
-                    <div className="flex flex-col md:flex-row gap-12">
-                      <div className="w-full md:w-1/3 flex flex-col items-center shrink-0">
-                        <div className="relative w-full aspect-square bg-stone-900/10 mb-6 border-4 border-stone-800 overflow-hidden shadow-lg group-hover:border-amber-900 transition-colors">
-                          {npc.portraitUrl ? (
-                            <img src={npc.portraitUrl} className="w-full h-full object-cover" alt={npc.name} />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center opacity-10"><UserCircle size={140} /></div>
-                          )}
-                          <button onClick={() => handleGeneratePortrait(idx, npc)} className="absolute inset-0 bg-stone-900/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-amber-500 no-print font-bold gap-2"><Wand2 size={40} /> Manifest Portrait</button>
-                          <button onClick={() => playVoice(idx, npc)} className="absolute bottom-4 right-4 p-4 bg-amber-600 text-white rounded-full no-print shadow-2xl hover:scale-110 transition-transform">{voiceLoading[idx] ? <RefreshCw className="animate-spin" /> : <Volume2 size={24} />}</button>
+                  <div key={idx} className="break-inside-avoid relative">
+                    <div className="p-8 md:p-10 border-4 border-stone-800 bg-white/60 rounded-sm shadow-2xl mb-8">
+                      <div className="flex flex-col md:flex-row gap-12">
+                        {/* LEFT COLUMN: Identity */}
+                        <div className="w-full md:w-1/3 flex flex-col items-center shrink-0">
+                          <div className="relative w-full aspect-square bg-stone-900/10 mb-6 border-4 border-stone-800 overflow-hidden shadow-lg group">
+                            {npc.portraitUrl ? (
+                              <img src={npc.portraitUrl} className="w-full h-full object-cover" alt={npc.name} />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center opacity-10"><UserCircle size={140} /></div>
+                            )}
+                            <button onClick={() => handleGeneratePortrait(idx, npc)} className="absolute inset-0 bg-stone-900/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-amber-500 no-print font-bold gap-2"><Wand2 size={40} /> Manifest Portrait</button>
+                            <button onClick={() => playVoice(idx, npc)} className="absolute bottom-4 right-4 p-4 bg-amber-600 text-white rounded-full no-print shadow-2xl hover:scale-110 transition-transform">{voiceLoading[idx] ? <RefreshCw className="animate-spin" /> : <Volume2 size={24} />}</button>
+                          </div>
+                          <h4 className="text-4xl font-bold medieval-font text-black uppercase leading-none mb-1 text-center">{npc.name}</h4>
+                          <p className="text-[12px] font-black text-stone-600 uppercase mb-6 tracking-widest">{npc.sex} • {npc.race} • {npc.role}</p>
+                          
+                          <div className="flex flex-col gap-3 w-full" id={`alignment-area-${idx}`}>
+                            <div className={`text-[11px] font-black px-4 py-2.5 border-2 border-stone-800 rounded bg-white w-full flex items-center justify-center gap-2 shadow-sm ${standing.color}`}>{standing.icon} {standing.label}</div>
+                            <div className={`text-[11px] font-black px-4 py-2.5 border-2 rounded w-full flex items-center justify-center gap-2 uppercase tracking-[0.2em] shadow-sm ${alignmentColor}`}><Scale size={14}/> {npc.alignment}</div>
+                          </div>
                         </div>
-                        <h4 className="text-4xl font-bold medieval-font text-black uppercase leading-none mb-1 text-center">{npc.name}</h4>
-                        <p className="text-[12px] font-black text-stone-600 uppercase mb-4 tracking-widest">{npc.sex} • {npc.race} • {npc.role}</p>
-                        
-                        <div className="flex flex-col gap-3 w-full">
-                          <div className={`text-[11px] font-black px-4 py-2 border-2 border-stone-800 rounded bg-white w-full flex items-center justify-center gap-2 shadow-sm ${standing.color}`}>{standing.icon} {standing.label}</div>
-                          <div className={`text-[11px] font-black px-4 py-2 border-2 rounded w-full flex items-center justify-center gap-2 uppercase tracking-[0.2em] shadow-sm ${alignmentColor}`}><Scale size={14}/> {npc.alignment}</div>
+
+                        {/* RIGHT COLUMN: Profile & Bio */}
+                        <div className="flex-1 space-y-8">
+                          <div>
+                            <h5 className="text-[11px] font-black uppercase text-stone-500 mb-2 tracking-[0.2em] flex items-center gap-2"><BookOpen size={14}/> Psychological Profile</h5>
+                            <p className="italic text-2xl text-black font-black leading-relaxed border-l-8 border-stone-800 pl-6 bg-white/30 p-4 rounded-r shadow-inner">"{npc.personality}"</p>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="p-5 bg-stone-800 text-amber-500 rounded-lg border-2 border-stone-900 shadow-lg font-black text-sm">
+                              <span className="block opacity-50 mb-1 uppercase text-[10px] tracking-widest">Motivation</span>
+                              <Goal size={16} className="inline mr-2 mb-1"/> {npc.motivation}
+                            </div>
+                            <div className="p-5 bg-stone-800 text-amber-500 rounded-lg border-2 border-stone-900 shadow-lg font-black text-sm">
+                              <span className="block opacity-50 mb-1 uppercase text-[10px] tracking-widest">Characteristic</span>
+                              <Fingerprint size={16} className="inline mr-2 mb-1"/> {npc.trait}
+                            </div>
+                            
+                            {/* FIXED COMBAT STATS BOX */}
+                            <div className="p-4 bg-white border-2 border-stone-800 rounded-lg shadow-lg flex justify-between items-center overflow-hidden">
+                                <div className="flex flex-col items-center flex-1 border-r border-stone-200">
+                                    <Shield size={24} className="text-stone-800 mb-1" />
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-[10px] font-bold uppercase text-stone-500">AC</span>
+                                        <span className="text-2xl font-black text-black">{npc.stats.ac}</span>
+                                    </div>
+                                    <span className="text-[8px] uppercase opacity-60 font-black">Armor</span>
+                                </div>
+                                <div className="flex flex-col items-center flex-1">
+                                    <Heart size={24} className="text-red-700 mb-1" />
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-[10px] font-bold uppercase text-stone-500">HP</span>
+                                        <span className="text-2xl font-black text-black">{npc.stats.hp}</span>
+                                    </div>
+                                    <span className="text-[8px] uppercase opacity-60 font-black">Health</span>
+                                </div>
+                            </div>
+
+                            <div className="p-5 bg-red-100 text-red-950 rounded-lg border-2 border-red-800 shadow-lg font-black text-sm border-dashed">
+                              <span className="block opacity-70 mb-1 uppercase text-[10px] tracking-widest text-red-800">Alignment Shadow Secret</span>
+                              <Skull size={16} className="inline mr-2 mb-1 text-red-900"/> {npc.secret}
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="flex-1 space-y-10">
-                        <div>
-                          <h5 className="text-[11px] font-black uppercase text-stone-500 mb-3 tracking-[0.2em] flex items-center gap-2"><BookOpen size={14}/> Psychological Profile</h5>
-                          <p className="italic text-2xl text-black font-black leading-relaxed border-l-8 border-stone-800 pl-6 bg-white/30 p-4 rounded-r shadow-inner">"{npc.personality}"</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="p-5 bg-stone-800 text-amber-500 rounded-lg border-2 border-stone-900 shadow-lg font-black text-sm">
-                            <span className="block opacity-50 mb-1 uppercase text-[10px] tracking-widest">Motivation</span>
-                            <Goal size={16} className="inline mr-2 mb-1"/> {npc.motivation}
-                          </div>
-                          <div className="p-5 bg-stone-800 text-amber-500 rounded-lg border-2 border-stone-900 shadow-lg font-black text-sm">
-                            <span className="block opacity-50 mb-1 uppercase text-[10px] tracking-widest">Characteristic</span>
-                            <Fingerprint size={16} className="inline mr-2 mb-1"/> {npc.trait}
-                          </div>
-                          
-                          {/* Re-formatted Battle Stat Block - Fixed Overflow */}
-                          <div className="p-4 bg-white border-2 border-stone-800 rounded-lg shadow-lg font-black flex justify-between items-center min-w-0">
-                            <div className="flex items-center gap-3 min-w-0 flex-1 justify-center">
-                              <div className="flex flex-col items-center shrink-0">
-                                <Shield size={28} className="text-stone-800" />
-                                <span className="text-[8px] uppercase opacity-60">Armor</span>
-                              </div>
-                              <span className="text-3xl font-black whitespace-nowrap">AC {npc.stats.ac}</span>
-                            </div>
-                            <div className="w-[1.5px] h-10 bg-stone-200 mx-2 shrink-0"></div>
-                            <div className="flex items-center gap-3 min-w-0 flex-1 justify-center">
-                              <div className="flex flex-col items-center shrink-0">
-                                <Heart size={28} className="text-red-700" />
-                                <span className="text-[8px] uppercase opacity-60">Health</span>
-                              </div>
-                              <span className="text-3xl font-black whitespace-nowrap">HP {npc.stats.hp}</span>
-                            </div>
-                          </div>
-
-                          <div className="p-5 bg-red-100 text-red-950 rounded-lg border-2 border-red-800 shadow-lg font-black text-sm border-dashed">
-                            <span className="block opacity-70 mb-1 uppercase text-[10px] tracking-widest text-red-800">Alignment Shadow Secret</span>
-                            <Skull size={16} className="inline mr-2 mb-1 text-red-900"/> {npc.secret}
-                          </div>
-                        </div>
-
-                        <div className="break-inside-avoid">
-                          <h5 className="text-[11px] font-black uppercase text-stone-500 mb-4 tracking-[0.2em] flex items-center gap-2 border-b border-stone-200 pb-2"><Swords size={14}/> Social Matrix Connections</h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 w-full">
-                            {npc.relationships.map((rel, r) => {
-                              const s = getRelationshipStyles(rel.score);
-                              return (
-                                <div key={r} className={`p-3 border-2 rounded-lg ${s.bg} ${s.border} shadow-sm group/rel transition-all hover:bg-white flex flex-col min-h-[70px]`}>
-                                  <div className="flex justify-between items-start text-[10px] font-black text-black uppercase mb-1">
-                                    <span className="flex items-center gap-1 leading-tight w-[70%] line-clamp-2">{s.icon} {rel.targetName}</span>
-                                    <div className="flex flex-col items-end">
-                                      <span className="px-1.5 rounded border border-stone-200 bg-white/70">{rel.score}</span>
-                                      <span className={`text-[7px] mt-0.5 px-1 rounded-sm border bg-white/50 ${s.text}`}>{rel.feeling}</span>
-                                    </div>
-                                  </div>
-                                  <p className="text-[8.5px] italic font-black text-stone-900 leading-tight line-clamp-2 mt-auto">"{rel.reason}"</p>
+                    {/* SOCIAL MATRIX - MOVED & REFORMATTED */}
+                    <div className="w-full">
+                      <h5 className="text-[11px] font-black uppercase text-stone-500 mb-4 tracking-[0.3em] flex items-center gap-2 border-b-2 border-stone-300 pb-1 w-full"><Swords size={16}/> Social Matrix Connections</h5>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                        {npc.relationships.map((rel, r) => {
+                          const s = getRelationshipStyles(rel.score);
+                          return (
+                            <div key={r} className={`p-3 border-2 rounded shadow-sm flex flex-col transition-all hover:bg-white hover:scale-[1.02] ${s.bg} ${s.border}`}>
+                              <div className="flex justify-between items-start text-[10px] font-black text-black uppercase mb-1.5">
+                                <span className="flex items-center gap-1 leading-none truncate pr-2" title={rel.targetName}>{s.icon} {rel.targetName}</span>
+                                <div className="shrink-0 flex flex-col items-end">
+                                    <span className="bg-white/80 px-1 border border-stone-300 rounded leading-none text-[11px] mb-0.5">{rel.score}</span>
+                                    <span className={`text-[7px] border border-stone-200 bg-white/60 px-1 rounded-sm ${s.text}`}>{rel.feeling}</span>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </div>
+                              </div>
+                              <p className="text-[8.5px] italic font-black text-stone-900 leading-tight line-clamp-2 mt-auto">"{rel.reason}"</p>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
