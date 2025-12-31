@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-// --- Constants: 1d100 Tables ---
+// --- Constants: 1d100 Tables (Low to Mid Level) ---
 
 const ENCOUNTERS_DAY_INSIDE = [
   { icon: <UserSearch size={16} />, who: "Pickpocket", attitude: "Hostile", text: "A nimble-fingered youth attempts to lift a pouch from a PC's belt." },
@@ -84,8 +84,8 @@ const ENCOUNTERS_MONSTERS = [
   { icon: <Axe size={16} />, who: "Owlbear Cub", attitude: "Wary", text: "A beaked beast-ling growls; the mother is nearby." },
   { icon: <MonsterIcon size={16} />, who: "Harpy", attitude: "Hostile", text: "A screeching humanoid with bird-wings dives from above." },
   { icon: <MonsterIcon size={16} />, who: "Cockatrice", attitude: "Hostile", text: "A lizard-like bird attempts to peck at exposed skin." },
-  { icon: <Bug size={16} />, who: "Rust Monster", attitude: "Neutral", text: "A strange creature sniffs at the party's metal gear." },
-  { icon: <Waves size={16} />, who: "Deep-One", attitude: "Hostile", text: "A fish-man climbs out of the river, croaking." },
+  { icon: <Bug size={16} />, who: "Rust Monster", attitude: "Neutral", text: "A creature sniffs at metal gear. It just wants to eat the iron." },
+  { icon: <Waves size={16} />, who: "River Ghoul", attitude: "Hostile", text: "A water-logged undead climbs out of the river, croaking." },
   { icon: <Skull size={16} />, who: "Wight", attitude: "Hostile", text: "A gaunt undead in rotted mail raises a life-draining blade." },
   { icon: <Axe size={16} />, who: "Bugbear", attitude: "Hostile", text: "A hairy brute steps from the gloom with a heavy mace." },
   { icon: <Target size={16} />, who: "Goblin Sniper", attitude: "Hostile", text: "A green figure aims a blowgun from the shadows." },
@@ -98,7 +98,7 @@ const ENCOUNTERS_MONSTERS = [
   { icon: <Target size={16} />, who: "Werewolf", attitude: "Hostile", text: "A half-man, half-wolf predator leaps from a thatched roof." },
   { icon: <Activity size={16} />, who: "Giant Snake", attitude: "Hostile", text: "A twenty-foot constrictor drops from a rafter." },
   { icon: <Target size={16} />, who: "Hill Giant", attitude: "Wary", text: "A hungry giant is searching for livestock (or small people)." },
-  { icon: <Activity size={16} />, who: "Dire Wolf", attitude: "Hostile", text: "A massive, intelligence predator snarling in the dark." },
+  { icon: <Activity size={16} />, who: "Dire Wolf", attitude: "Hostile", text: "A massive predator snarling in the dark." },
   { icon: <Users size={16} />, who: "Bandit Patrol", attitude: "Hostile", text: "A group of 1d6 deserters looking for easy gold." },
   { icon: <Bug size={16} />, who: "Giant Toad", attitude: "Neutral", text: "A massive amphibian watching for something to swallow whole." },
   { icon: <Activity size={16} />, who: "Brown Bear", attitude: "Wary", text: "A powerful beast protecting its territory near a landmark." },
@@ -142,12 +142,29 @@ const App: React.FC = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Demographics Calculation Logic
+  const calculateDemographics = (total: number) => {
+    const humans = Math.floor(total * 0.85);
+    const halflings = Math.floor(total * 0.08);
+    const dwarves = Math.floor(total * 0.04);
+    const elves = Math.floor(total * 0.02);
+    const remaining = total - (humans + halflings + dwarves + elves);
+    return {
+      humans,
+      halflings,
+      dwarves,
+      elves,
+      others: remaining > 0 ? [{ race: 'Half-Orc', count: remaining }] : []
+    };
+  };
+
   const handleGenerate = async () => {
     setLoading(true);
     setError(null);
     try {
       const pop = Math.floor(Math.random() * 100 + 200);
-      const data = await generateVillageDetails("Cinderglade", pop, {});
+      const demo = calculateDemographics(pop);
+      const data = await generateVillageDetails("Cinderglade", pop, demo);
       setVillage(data);
       setEditableNotes(data.gmNotes || "");
     } catch (err) {
@@ -206,8 +223,9 @@ const App: React.FC = () => {
   const getStandingCategory = (npc: DetailedNPC) => {
     const total = npc.relationships.reduce((acc, r) => acc + r.score, 0);
     const avg = total / (npc.relationships.length || 1);
-    if (avg <= 4.5) return { label: 'Pariah', color: 'text-red-950 font-black', icon: <Frown size={12} className="text-red-900" /> };
-    if (avg >= 7.5) return { label: 'Pillar', color: 'text-amber-950 font-black', icon: <Crown size={12} className="text-amber-700" /> };
+    // 1-10 Scale Logic (Refined for varied results)
+    if (avg <= 4.0) return { label: 'Pariah', color: 'text-red-950 font-black', icon: <Frown size={12} className="text-red-900" /> };
+    if (avg >= 7.0) return { label: 'Pillar', color: 'text-amber-950 font-black', icon: <Crown size={12} className="text-amber-700" /> };
     return { label: 'Resident', color: 'text-stone-950 font-black', icon: <Users size={12} className="text-stone-800" /> };
   };
 
@@ -237,13 +255,13 @@ const App: React.FC = () => {
   };
 
   const chartData = useMemo(() => {
-    if (!village) return [];
+    if (!village || !village.demographics) return [];
     const base = [
       { name: 'Humans', value: village.demographics.humans, color: '#1a1a1a' },
       { name: 'Halflings', value: village.demographics.halflings, color: '#44403c' },
       { name: 'Dwarves', value: village.demographics.dwarves, color: '#78716c' },
       { name: 'Elves', value: village.demographics.elves, color: '#a8a29e' },
-      ...village.demographics.others.map((o, idx) => ({ name: o.race, value: o.count, color: idx % 2 === 0 ? '#7f1d1d' : '#450a0a' }))
+      ...(village.demographics.others || []).map((o, idx) => ({ name: o.race, value: o.count, color: idx % 2 === 0 ? '#7f1d1d' : '#450a0a' }))
     ];
     return base.filter(d => d.value > 0);
   }, [village]);
@@ -282,15 +300,15 @@ const App: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <div className="p-4 bg-white/30 border-2 border-stone-800 rounded">
                   <h3 className="text-xs font-black uppercase text-stone-600 mb-2 flex items-center gap-1"><CloudRain size={14} /> Current Climate</h3>
-                  <p className="text-lg font-bold text-black italic">"{village.weather}"</p>
+                  <p className="text-lg font-bold text-black italic font-black">"{village.weather}"</p>
                 </div>
                 <div className="p-4 bg-white/30 border-2 border-stone-800 rounded">
                   <h3 className="text-xs font-black uppercase text-stone-600 mb-2 flex items-center gap-1"><Wind size={14} /> Local Atmosphere</h3>
-                  <p className="text-lg font-bold text-black italic">"{village.atmosphere}"</p>
+                  <p className="text-lg font-bold text-black italic font-black">"{village.atmosphere}"</p>
                 </div>
                 <div className="p-4 bg-white/30 border-2 border-stone-800 rounded">
                   <h3 className="text-xs font-black uppercase text-stone-600 mb-2 flex items-center gap-1"><MapPin size={14} /> Geography</h3>
-                  <p className="text-lg font-bold text-black italic">"{village.geography}"</p>
+                  <p className="text-lg font-bold text-black italic font-black">"{village.geography}"</p>
                 </div>
               </div>
 
@@ -299,12 +317,19 @@ const App: React.FC = () => {
                   <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase text-black"><Scroll className="w-6 h-6" /> Narrative Manifest</div>
                   <p className="text-2xl italic font-serif leading-relaxed text-black bg-white/40 p-8 border-l-8 border-stone-800 rounded-r shadow-inner font-black">"{village.description}"</p>
                 </div>
-                <div className="w-full md:w-64 shrink-0">
+                <div className="w-full md:w-72 shrink-0 break-inside-avoid">
                   <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b border-stone-800 mb-4 pb-1 text-black"><Users size={20} /> Census</h3>
-                  <div className="h-64 w-full bg-white/20 p-2 rounded-lg border border-stone-200">
+                  <div className="h-72 w-full bg-white/20 p-2 rounded-lg border border-stone-200">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={chartData} innerRadius={40} outerRadius={60} paddingAngle={2} dataKey="value">
+                        <Pie 
+                          data={chartData} 
+                          innerRadius={45} 
+                          outerRadius={65} 
+                          paddingAngle={3} 
+                          dataKey="value"
+                          stroke="none"
+                        >
                           {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                         </Pie>
                         <Tooltip 
@@ -315,10 +340,11 @@ const App: React.FC = () => {
                           layout="vertical" 
                           align="right" 
                           verticalAlign="middle" 
+                          iconType="square"
                           formatter={(value, entry: any) => {
                             const item = entry.payload;
                             const percent = ((item.value / totalPop) * 100).toFixed(0);
-                            return <span className="text-[10px] font-black text-stone-900 uppercase">{value}: {item.value} ({percent}%)</span>;
+                            return <span className="text-[10px] font-black text-stone-950 uppercase leading-none">{value}: {item.value} ({percent}%)</span>;
                           }}
                         />
                       </PieChart>
@@ -339,8 +365,8 @@ const App: React.FC = () => {
                       {getSeasonIcon(fest.season)}
                     </div>
                     <span className="text-[10px] font-black uppercase text-stone-600">{fest.timing} of {fest.season}</span>
-                    <p className="text-xs italic font-black text-stone-900 mt-2">"{fest.lore}"</p>
-                    <p className="text-[10px] text-stone-700 mt-1 font-bold">Practice: {fest.modernPractice}</p>
+                    <p className="text-xs italic font-black text-stone-950 mt-2">"{fest.lore}"</p>
+                    <p className="text-[10px] text-stone-900 mt-1 font-bold">Practice: {fest.modernPractice}</p>
                   </div>
                 ))}
               </div>
@@ -367,7 +393,7 @@ const App: React.FC = () => {
                 ].map((category, cIdx) => (
                   <div key={cIdx} className="break-inside-avoid">
                     <h4 className="text-xl font-bold medieval-font text-black mb-4 uppercase">{category.title}</h4>
-                    <div className="bg-white/50 border-2 border-stone-800 rounded">
+                    <div className="bg-white/50 border-2 border-stone-800 rounded overflow-hidden">
                       <table className="w-full text-left text-sm font-serif">
                         <thead className="bg-stone-800 text-amber-500 text-[10px] font-black">
                           <tr>
@@ -379,7 +405,7 @@ const App: React.FC = () => {
                         <tbody className="divide-y divide-stone-300">
                           {category.table.slice(0, 20).map((enc, eIdx) => (
                             <tr key={eIdx} className="hover:bg-amber-100/30">
-                              <td className="py-2 px-3 text-center border-r border-stone-300 font-black text-black">{eIdx + 1}</td>
+                              <td className="py-2 px-3 text-center border-r border-stone-300 font-black text-black text-lg">{(eIdx + 1).toString().padStart(2, '0')}</td>
                               <td className="py-2 px-3 font-black text-black flex items-center gap-2">{enc.icon} {enc.who}</td>
                               <td className="py-2 px-3 italic text-stone-950 font-black">{enc.text}</td>
                             </tr>
@@ -408,30 +434,30 @@ const App: React.FC = () => {
                             <button onClick={() => playVoice(idx, npc)} className="absolute bottom-2 right-2 p-2 bg-amber-600 text-white rounded-full no-print shadow-lg"><Volume2 size={16} /></button>
                           </div>
                           <h4 className="text-3xl font-bold medieval-font text-black uppercase text-center leading-none mb-1">{npc.name}</h4>
-                          <p className="text-[10px] font-black text-stone-600 uppercase mb-4">{npc.sex} • {npc.race} • {npc.role}</p>
+                          <p className="text-[10px] font-black text-stone-700 uppercase mb-4">{npc.sex} • {npc.race} • {npc.role}</p>
                           <div className={`text-xs font-black px-4 py-2 border-2 border-stone-800 rounded bg-white w-full flex items-center justify-center gap-2 ${standing.color}`}>{standing.icon} {standing.label}</div>
                         </div>
                         <div className="flex-1 space-y-8">
                           <div>
-                            <h5 className="text-[10px] font-black uppercase text-stone-500 mb-2 tracking-widest">Psychological Profile</h5>
+                            <h5 className="text-[10px] font-black uppercase text-stone-600 mb-2 tracking-widest">Psychological Profile</h5>
                             <p className="italic text-xl text-black font-black leading-relaxed border-l-4 border-stone-800 pl-4">"{npc.personality}"</p>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-4 bg-stone-800 text-amber-500 rounded border-2 border-stone-900 shadow-sm font-bold"><span className="text-[10px] font-black block uppercase mb-1 opacity-50">Motivation</span>{npc.motivation}</div>
+                            <div className="p-4 bg-stone-800 text-amber-500 rounded border-2 border-stone-900 shadow-sm font-black"><span className="text-[10px] font-black block uppercase mb-1 opacity-50">Motivation</span>{npc.motivation}</div>
                             <div className="p-4 bg-white/60 text-stone-950 rounded border-2 border-stone-800 shadow-sm font-black"><span className="text-[10px] font-black block uppercase mb-1 opacity-50">AC / HP</span>{npc.stats.ac} / {npc.stats.hp}</div>
                           </div>
                           <div>
-                            <h5 className="text-[10px] font-black uppercase text-stone-500 mb-2 tracking-widest">Social Influence Matrix</h5>
+                            <h5 className="text-[10px] font-black uppercase text-stone-600 mb-2 tracking-widest">Social Influence Matrix</h5>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                               {npc.relationships.slice(0, 8).map((rel, ridx) => {
                                 const styles = getRelationshipStyles(rel.score);
                                 return (
                                   <div key={ridx} className={`p-2 border-2 rounded ${styles.bg} ${styles.border} flex flex-col gap-1 shadow-sm`}>
                                     <div className="flex justify-between items-center text-[10px] font-black">
-                                      <span className="flex items-center gap-1 text-black">{styles.icon} {rel.targetName}</span>
+                                      <span className="flex items-center gap-1 text-black truncate">{styles.icon} {rel.targetName}</span>
                                       <span className={styles.text}>{rel.score} • {rel.feeling}</span>
                                     </div>
-                                    <p className="text-[10px] italic font-black text-stone-800 truncate">"{rel.reason}"</p>
+                                    <p className="text-[10px] italic font-black text-stone-950 truncate">"{rel.reason}"</p>
                                   </div>
                                 );
                               })}
@@ -460,7 +486,7 @@ const App: React.FC = () => {
                         <div key={iidx} className="flex justify-between items-center text-sm border-b border-dashed border-stone-400 pb-1">
                           <div className="flex items-center gap-1">
                             <span className="font-black text-black">{item.name}</span>
-                            <span className="text-[9px] font-bold text-stone-600 bg-stone-200 px-1 rounded">{item.availability}</span>
+                            <span className="text-[9px] font-bold text-stone-700 bg-stone-200 px-1 rounded">{item.availability}</span>
                           </div>
                           <span className="font-black text-black medieval-font">{item.price}</span>
                         </div>
@@ -486,12 +512,12 @@ const App: React.FC = () => {
                   <div className="p-6 bg-stone-900 text-stone-200 border-4 border-stone-700 rounded shadow-2xl">
                     <h4 className="text-3xl font-bold medieval-font text-amber-500 mb-2 uppercase">{village.poi.title}</h4>
                     <div className="text-xs font-black text-stone-500 uppercase mb-4 tracking-widest">{village.poi.type} • {village.poi.location}</div>
-                    <p className="text-lg italic font-serif border-l-4 border-amber-600 pl-4 mb-8 text-stone-300">"{village.poi.background}"</p>
+                    <p className="text-lg italic font-serif border-l-4 border-amber-600 pl-4 mb-8 text-stone-300 font-black">"{village.poi.background}"</p>
                     <div className="grid grid-cols-1 gap-6">
                       {village.poi.rooms.map((room, ridx) => (
                         <div key={ridx} className="p-5 border-2 border-stone-700 bg-stone-800/50 rounded shadow-inner">
                           <h5 className="text-lg font-bold text-amber-400 mb-2 uppercase medieval-font">Room {room.number}: {room.name}</h5>
-                          <p className="text-sm italic mb-4 font-bold text-stone-300">"{room.description}"</p>
+                          <p className="text-sm italic mb-4 font-black text-stone-200">"{room.description}"</p>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="text-xs bg-red-900/40 p-3 rounded border border-red-900/50 text-red-100 font-bold"><span className="block uppercase opacity-70 text-[9px] mb-1 tracking-widest">Threats & Traps</span>{room.threats}</div>
                             <div className="text-xs bg-emerald-900/40 p-3 rounded border border-emerald-900/50 text-emerald-100 font-bold"><span className="block uppercase opacity-70 text-[9px] mb-1 tracking-widest">Treasure</span>{room.treasure}</div>
