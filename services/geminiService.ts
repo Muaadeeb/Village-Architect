@@ -22,14 +22,18 @@ export const generateVillageDetails = async (
     5. Weather: A single short thematic phrase.
     6. Exactly 4 Nearby Settlement Relations: 
        - Focus on resource scarcity, border skirmishes, stolen livestock, and espionage.
-       - Each entry must have: settlementName, relationType ('Good', 'Neutral', 'Harmful'), status (e.g., 'Bloody Rivalry', 'Salt Pact', 'Uneasy Truce'), and description (2-3 sentences).
-    7. Exactly 12 Businesses: Gritty names, rumors, encounterHooks, gmNotes, and exactly 5 marketItems each.
-    8. Two major landmarks.
-    9. Exactly 15 NPCs: 12 shop owners + 3 others. 
+       - Each entry must have: settlementName, relationType ('Good', 'Neutral', 'Harmful'), status, and description.
+    7. Exactly 6-8 Festivals:
+       - 1 or 2 per season (Spring, Summer, Fall, Winter).
+       - 2 "Major" festivals that occur twice a year (Equinoxes or Solstices).
+       - Each must have: name, season, timing (Beginning/Middle/End of season), lore (dark origins), and modernPractice (what it has evolved into today).
+    8. Exactly 12 Businesses: Gritty names, rumors, encounterHooks, gmNotes, and exactly 5 marketItems each.
+    9. Two major landmarks.
+    10. Exactly 15 NPCs: 12 shop owners + 3 others. 
        - Detailed attributes: sex, alignment, motivation, secret, combat stats, and a full relationship matrix for ALL other 14 NPCs.
-    10. Main Quests (4) and Side Treks (10).
-    11. Current Events (3).
-    12. GM Notes.
+    11. Main Quests (4) and Side Treks (10).
+    12. Current Events (3).
+    13. GM Notes.
 
     Output JSON schema:
     {
@@ -41,6 +45,9 @@ export const generateVillageDetails = async (
       "darkSecret": "string",
       "settlementRelations": [
         { "settlementName": "string", "type": "Good|Neutral|Harmful", "status": "string", "description": "string" }
+      ],
+      "festivals": [
+        { "name": "string", "season": "Spring|Summer|Fall|Winter|Major", "timing": "string", "lore": "string", "modernPractice": "string" }
       ],
       "landmarks": [ { "name": "string", "description": "string", "encounterHook": "string" } ],
       "gmNotes": "string",

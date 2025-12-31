@@ -85,6 +85,14 @@ export interface SettlementRelation {
   description: string;
 }
 
+export interface Festival {
+  name: string;
+  season: 'Spring' | 'Summer' | 'Fall' | 'Winter' | 'Major';
+  timing: string; // Beginning/Middle/End
+  lore: string;
+  modernPractice: string;
+}
+
 export interface VillageData {
   name: string;
   population: number;
@@ -105,6 +113,7 @@ export interface VillageData {
   landmarks: Landmark[];
   residents: DetailedNPC[];
   settlementRelations: SettlementRelation[];
+  festivals: Festival[];
   mainQuests: Quest[];
   sideTreks: Quest[];
   currentEvents: string[];

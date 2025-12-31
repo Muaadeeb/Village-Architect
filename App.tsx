@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { 
   generateVillageDetails, 
@@ -7,7 +8,7 @@ import {
   generateVillageGossip,
   generatePOI
 } from './services/geminiService';
-import { VillageData, DetailedNPC, Relationship, PointOfInterest, Business, SettlementRelation } from './types';
+import { VillageData, DetailedNPC, Relationship, PointOfInterest, Business, SettlementRelation, Festival } from './types';
 import { 
   Scroll, RefreshCw, Users, Flame, Waves, Store, Printer, Skull, ArrowRight, UserCircle,
   EyeOff, MessageSquareQuote, BookOpen, Pencil, MapPin, Heart, Swords, Minus, Package,
@@ -18,7 +19,8 @@ import {
   Briefcase, FileDigit, Dices, CloudRain, Sun, ThermometerSnowflake, HeartCrack, Goal,
   ZapOff, Calendar, MapPinned, Moon, SunMedium, UserSearch, Tent, Ghost as MonsterIcon,
   HandHelping, MessageCircle, Save, FolderOpen, Download, Settings2, Plus, Trash2,
-  Bug, Zap as Spark, Target, Footprints, Droplets, Bone, Wind as Gust, Globe
+  Bug, Zap as Spark, Target, Footprints, Droplets, Bone, Wind as Gust, Globe,
+  CalendarDays, Sprout, Leaf, Snowflake, Star
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
@@ -230,52 +232,52 @@ const VILLAGE_EVENTS = [
   "The village has been 'shifted' into another dimension."
 ];
 
-// --- 1d20/1d100 Encounter Tables ---
+// --- Encounter Tables: Day and Night ---
 
 const ENCOUNTERS_DAY_INSIDE = [
-  { icon: <Shield size={16} />, who: "Town Watch", attitude: "Wary", text: "Three guards are inspecting a merchant's cart, suspecting smuggled 'forbidden' oils." },
-  { icon: <Store size={16} />, who: "Desperate Peddler", attitude: "Friendly", text: "A starving man offers a 'genuine' magic ring for just 1 silver piece." },
-  { icon: <Users size={16} />, who: "Street Urchins", attitude: "Neutral", text: "A swarm of dirty children are playing a game involving a skull and a stick." },
-  { icon: <MessageSquareQuote size={16} />, who: "Village Gossip", attitude: "Friendly", text: "A local woman stops you to whisper that the priest's shadow was seen moving on its own." },
-  { icon: <Package size={16} />, who: "Stray Mule", attitude: "Neutral", text: "A lone mule with a broken lead wanders the street, its packs empty." },
-  { icon: <Skull size={16} />, who: "Grim Procession", attitude: "Neutral", text: "Four silent villagers carry a shrouded body toward the river for burial." },
-  { icon: <Activity size={16} />, who: "Market Brawl", attitude: "Hostile", text: "Two blacksmiths are brawling over a shared coal delivery; a crowd is cheering." },
-  { icon: <Flame size={16} />, who: "Street Performer", attitude: "Neutral", text: "A man eats fire while his monkey attempts to pick the pockets of observers." },
-  { icon: <Ghost size={16} />, who: "The Prophet", attitude: "Bizarre", text: "A wild-eyed elf screams that the Sun is a lie and the Great Gloom is coming." },
-  { icon: <ShoppingBag size={16} />, who: "Overturned Cart", attitude: "Neutral", text: "A cart of rotten vegetables has spilled, attracting a swarm of aggressive flies." },
-  { icon: <UserCircle size={16} />, who: "Drunken Noble", attitude: "Friendly", text: "A finely dressed human is stumbling and insists you join him for a midday toast." },
-  { icon: <Search size={16} />, who: "Lost Child", attitude: "Fearful", text: "A small halfling child is crying, clutching a map that seems to lead nowhere." },
-  { icon: <Crown size={16} />, who: "Town Crier", attitude: "Neutral", text: "A bell-ringer announces a new tax on 'breathing the village air' effective immediately." },
-  { icon: <Sparkles size={16} />, who: "Hedge Wizard", attitude: "Wary", text: "An old woman is selling 'luck charms' that smell strongly of sulfur and damp earth." },
-  { icon: <Axe size={16} />, who: "Woodcutters", attitude: "Neutral", text: "A group of weary men return from the woods, whispering about 'moving trees'." },
-  { icon: <Compass size={16} />, who: "Foreign Scout", attitude: "Hostile", text: "A hooded figure is sketching a map of the village defenses and hides it when seen." },
-  { icon: <Heart size={16} />, who: "Secret Lovers", attitude: "Friendly", text: "Two villagers from rival families are meeting behind the granary, looking terrified." },
-  { icon: <Coins size={16} />, who: "Gambling Ring", attitude: "Neutral", text: "A group of miners is rolling bones in an alleyway; the stakes are high." },
-  { icon: <Waves size={16} />, who: "River Fisher", attitude: "Wary", text: "A man pulls a mutated, three-eyed fish from the river and quickly hides it." },
-  { icon: <AlertCircle size={16} />, who: "The Tax Man", attitude: "Hostile", text: "A sour-faced human with two thugs is demanding immediate payment for 'village protection'." }
+  { icon: <UserSearch size={16} />, who: "Pickpocket", attitude: "Hostile", text: "A nimble-fingered youth attempts to lift a pouch from a PC's belt." },
+  { icon: <MessageSquareQuote size={16} />, who: "Street Preacher", attitude: "Bizarre", text: "A wild-eyed man screams about the 'Great Shadow' coming to consume the sun." },
+  { icon: <Activity size={16} />, who: "Stray Hound", attitude: "Friendly", text: "A scrawny, mangy dog follows the party, hoping for a scrap of dried meat." },
+  { icon: <ShoppingBag size={16} />, who: "Suspicious Merchant", attitude: "Neutral", text: "A hooded figure offers 'genuine' elven silk at a price too good to be true." },
+  { icon: <Shield size={16} />, who: "Guard Patrol", attitude: "Wary", text: "Two guards in rusted chainmail demand to know the party's business in this quarter." },
+  { icon: <Users size={16} />, who: "Orphan Beggar", attitude: "Fearful", text: "A grime-covered child asks for a single copper piece to buy a crust of bread." },
+  { icon: <Swords size={16} />, who: "Drunken Brawl", attitude: "Hostile", text: "Two laborers spill out of a tavern, swinging heavy clubs at anyone nearby." },
+  { icon: <Activity size={16} />, who: "Runaway Cart", attitude: "Neutral", text: "A panicked mule pulls a cart of cabbages through the street; make a DEX save!" },
+  { icon: <Wand2 size={16} />, who: "Hedge Witch", attitude: "Bizarre", text: "An old woman offers to read the party's fortune in a bowl of brackish water." },
+  { icon: <Package size={16} />, who: "Mysterious Package", attitude: "Neutral", text: "A small, ticking box is left on a doorstep just as the party passes." },
+  { icon: <CloudRain size={16} />, who: "Sudden Deluge", attitude: "Neutral", text: "The sky opens up, drenching the street and reducing visibility to a few paces." },
+  { icon: <Meh size={16} />, who: "Town Drunk", attitude: "Neutral", text: "A man smelling of sour ale stumbles into a PC, muttering apologies." },
+  { icon: <MessageCircle size={16} />, who: "Gossiping Elders", attitude: "Neutral", text: "Three old men on a bench stop talking and stare intently at the party." },
+  { icon: <Skull size={16} />, who: "Public Stocks", attitude: "Neutral", text: "A local criminal is being pelted with rotten fruit; they beg the PCs for water." },
+  { icon: <Tag size={16} />, who: "Snake Oil Vendor", attitude: "Friendly", text: "A charismatic woman sells 'Troll Blood' tonic that is just dyed vinegar." },
+  { icon: <Crown size={16} />, who: "Minor Noble", attitude: "Neutral", text: "A local official passes by in a sedan chair, escorted by four surly guards." },
+  { icon: <GhostIcon size={16} />, who: "Black Cat", attitude: "Bizarre", text: "A cat with one white paw crosses the path and hisses at the party's shadows." },
+  { icon: <Flame size={16} />, who: "Chimney Fire", attitude: "Neutral", text: "Smoke billows from a nearby roof; residents scramble with buckets of sand." },
+  { icon: <Activity size={16} />, who: "Rat Swarm", attitude: "Hostile", text: "A dozen rats surge from a sewer grate, biting at the party's boots." },
+  { icon: <Newspaper size={16} />, who: "Local Messenger", attitude: "Friendly", text: "A boy runs past, shouting about the latest 'Current Event' in the village." }
 ];
 
 const ENCOUNTERS_NIGHT_INSIDE = [
-  { icon: <GhostIcon size={16} />, who: "Shadow Stalker", attitude: "Hostile", text: "A dark shape slides across the roof above you, making no sound at all." },
-  { icon: <Flame size={16} />, who: "Clandestine Meeting", attitude: "Wary", text: "Three hooded figures are whispering in a language that makes your ears ring." },
-  { icon: <Moon size={16} />, who: "Drunkard", attitude: "Friendly", text: "A man is singing a bawdy song to a stray cat and offers you his half-empty bottle." },
-  { icon: <Shield size={16} />, who: "Nervous Patrol", attitude: "Hostile", text: "Watchmen with shaking torches demand to know why you are out past the gloom-bell." },
-  { icon: <Zap size={16} />, who: "Strange Glow", attitude: "Bizarre", text: "A pale blue light is leaking from a cellar door, accompanied by a low hum." },
-  { icon: <Skull size={16} />, who: "Graverobbers", attitude: "Hostile", text: "Two men with shovels try to look inconspicuous while carrying a heavy, lumpy sack." },
-  { icon: <Binoculars size={16} />, who: "The Watcher", attitude: "Neutral", text: "A woman is staring unblinkingly at the moon from an upper-floor window." },
-  { icon: <MessageCircle size={16} />, who: "Tavern Spill", attitude: "Neutral", text: "The tavern doors burst open as a bleeding man is thrown into the mud." },
-  { icon: <Wind size={16} />, who: "Howling Wind", attitude: "Bizarre", text: "The wind whistles through the alleys, sounding distinctly like someone screaming your name." },
-  { icon: <GhostIcon size={16} />, who: "Spirit of the Gate", attitude: "Neutral", text: "A translucent figure stands by the village gate, pointing toward the gloom." },
-  { icon: <Castle size={16} />, who: "Locked Secret", attitude: "Wary", text: "You find a business door ajar; inside, candles are burning in a circle on the floor." },
-  { icon: <ZapOff size={16} />, who: "Total Dark", attitude: "Hostile", text: "Every torch on the street suddenly flickers out at once. You are not alone." },
-  { icon: <Waves size={16} />, who: "River Ghost", attitude: "Neutral", text: "A small boat drifts by on the river, empty except for a single, burning lantern." },
-  { icon: <Sword size={16} />, who: "Duellists", attitude: "Hostile", text: "Two figures are engaged in a silent, deadly knife fight in a narrow alley." },
-  { icon: <Dices size={16} />, who: "The Dealer", attitude: "Wary", text: "A man in a doorway offers to sell you 'the true history of the village' for 5 gold." },
-  { icon: <Meh size={16} />, who: "Sleepwalker", attitude: "Neutral", text: "A child in a nightshirt is wandering toward the river, eyes wide and glazed." },
-  { icon: <Skull size={16} />, who: "The Plague Cart", attitude: "Fearful", text: "A creaking cart passes, piled with bodies; the driver wears a mask of leather." },
-  { icon: <Mountain size={16} />, who: "Beast from the Wall", attitude: "Hostile", text: "A massive, hairy limb reaches over the village wall and then quickly retracts." },
-  { icon: <Search size={16} />, who: "Midnight Inspector", attitude: "Wary", text: "A man is methodically sniffing every door handle on the street." },
-  { icon: <Activity size={16} />, who: "Chaos Cult", attitude: "Hostile", text: "A muffled chant rises from beneath your feet, vibrating the cobblestones." }
+  { icon: <UserSearch size={16} />, who: "Roof Stalker", attitude: "Hostile", text: "A silhouette is seen leaping between rooftops, watching the party." },
+  { icon: <Ghost size={16} />, who: "Muffled Scream", attitude: "Wary", text: "A cry for help echoes from a narrow, unlit alleyway." },
+  { icon: <Users size={16} />, who: "Hooded Cultists", attitude: "Hostile", text: "Six figures in gray robes carry a heavy, blood-stained sack." },
+  { icon: <ZapOff size={16} />, who: "Sleeping Sentry", attitude: "Neutral", text: "A guard is fast asleep against a crate, their torch long extinguished." },
+  { icon: <Activity size={16} />, who: "Giant Rat", attitude: "Hostile", text: "A massive rat with glowing red eyes gnaws on a discarded bone." },
+  { icon: <Wind size={16} />, who: "Slamming Shutter", attitude: "Bizarre", text: "A window shutter slams shut violently as the party passes beneath it." },
+  { icon: <MonsterIcon size={16} />, who: "Distant Howl", attitude: "Hostile", text: "A howl that sounds far too large for a dog echoes through the empty streets." },
+  { icon: <Spark size={16} />, who: "Green Light", attitude: "Bizarre", text: "A sickly green glow flickers through the cracks of a cellar door." },
+  { icon: <ThermometerSnowflake size={16} />, who: "Shivering Beggar", attitude: "Fearful", text: "A man huddles in a doorway, his breath visible in the freezing night air." },
+  { icon: <MessageCircle size={16} />, who: "Secret Meeting", attitude: "Wary", text: "Two figures whisper urgently behind a rain barrel; they bolt if seen." },
+  { icon: <CloudFog size={16} />, who: "Choking Fog", attitude: "Neutral", text: "A thick, yellow fog rolls in, smelling of sulfur and damp earth." },
+  { icon: <GhostIcon size={16} />, who: "Spectral Child", attitude: "Bizarre", text: "A translucent girl chases a ghostly ball across the road and vanishes." },
+  { icon: <Flame size={16} />, who: "Night Watch", attitude: "Wary", text: "A patrol of four guards with lanterns demands the party's 'night pass'." },
+  { icon: <Fingerprint size={16} />, who: "Lock-picker", attitude: "Hostile", text: "A thief is caught red-handed trying to jemmy open a shop door." },
+  { icon: <Activity size={16} />, who: "Scratching Wall", attitude: "Bizarre", text: "The sound of frantic scratching comes from inside a seemingly empty house." },
+  { icon: <Gust size={16} />, who: "Foul Wind", attitude: "Neutral", text: "A sudden blast of cold air carries the unmistakable stench of the grave." },
+  { icon: <EyeOff size={16} />, who: "Glowing Eyes", attitude: "Bizarre", text: "Multiple pairs of reflective eyes watch the party from a dark stable." },
+  { icon: <Meh size={16} />, who: "Lost Reveler", attitude: "Neutral", text: "A nobleman's son, far too drunk, is wandering the wrong part of town." },
+  { icon: <Castle size={16} />, who: "Phantom Door", attitude: "Bizarre", text: "A door painted blood-red appears on a wall that was bare yesterday." },
+  { icon: <Ghost size={16} />, who: "Moving Shadow", attitude: "Hostile", text: "A PC's shadow seems to lag behind their movements for a few seconds." }
 ];
 
 const ENCOUNTERS_MONSTERS = [
@@ -339,7 +341,7 @@ const ENCOUNTERS_MONSTERS = [
   { icon: <Flame size={16} />, who: "Fire Elemental", attitude: "Hostile", text: "A bonfire detaches and begins to sprint toward you." },
   { icon: <Activity size={16} />, who: "Earth Elemental", attitude: "Hostile", text: "The cobblestones buckle as rock and clay rises up." },
   { icon: <Spark size={16} />, who: "Vrock Demon", attitude: "Hostile", text: "A vulture-headed demon lets out a stun-inducing screech." },
-  { icon: <Skull size={16} />, who: "Hezrou Demon", attitude: "Hostile", text: "A toad-like demon fills the area with a foul stench." },
+  { icon: <Skull size={16} />, who: "Hezrou Demon", attitude: "Hostile", text: "A toad-like demon with poisonous skin fills the area with a foul stench." },
   { icon: <GhostIcon size={16} />, who: "Marilith Demon", attitude: "Hostile", text: "A six-armed serpent woman draws six blades." },
   { icon: <Swords size={16} />, who: "Glabrezu Demon", attitude: "Wary", text: "A pincer-armed demon offers you a dark wish." },
   { icon: <Skull size={16} />, who: "Balor Demon", attitude: "Hostile", text: "A winged terror of flame looms over the village." },
@@ -458,9 +460,6 @@ const App: React.FC = () => {
   // Encounter Rolls
   const [lastDayInsideRoll, setLastDayInsideRoll] = useState<number | null>(null);
   const [lastNightInsideRoll, setLastNightInsideRoll] = useState<number | null>(null);
-  const [lastDayOutsideRoll, setLastDayOutsideRoll] = useState<number | null>(null);
-  const [lastNightOutsideRoll, setLastNightOutsideRoll] = useState<number | null>(null);
-  const [lastSocialRoll, setLastSocialRoll] = useState<number | null>(null);
   const [lastMonsterRoll, setLastMonsterRoll] = useState<number | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -509,9 +508,6 @@ const App: React.FC = () => {
     setLastHookRoll(null);
     setLastDayInsideRoll(null);
     setLastNightInsideRoll(null);
-    setLastDayOutsideRoll(null);
-    setLastNightOutsideRoll(null);
-    setLastSocialRoll(null);
     setLastMonsterRoll(null);
     try {
       const pop = Math.floor(Math.random() * (300 - 200) + 200);
@@ -567,9 +563,6 @@ const App: React.FC = () => {
   const rollHook = () => setLastHookRoll(Math.floor(Math.random() * 100) + 1);
   const rollDayInside = () => setLastDayInsideRoll(Math.floor(Math.random() * 20) + 1);
   const rollNightInside = () => setLastNightInsideRoll(Math.floor(Math.random() * 20) + 1);
-  const rollDayOutside = () => setLastDayOutsideRoll(Math.floor(Math.random() * 20) + 1);
-  const rollNightOutside = () => setLastNightOutsideRoll(Math.floor(Math.random() * 20) + 1);
-  const rollSocial = () => setLastSocialRoll(Math.floor(Math.random() * 20) + 1);
   const rollMonster = () => setLastMonsterRoll(Math.floor(Math.random() * 100) + 1);
 
   const addOverrideRow = () => setDemoOverrides([...demoOverrides, { race: "New Race", percent: 0 }]);
@@ -668,6 +661,17 @@ const App: React.FC = () => {
       case 'Neutral': return { icon: <Scale size={18} />, color: 'text-stone-900', bg: 'bg-stone-100', border: 'border-stone-700' };
       case 'Harmful': return { icon: <Swords size={18} />, color: 'text-red-900', bg: 'bg-red-100', border: 'border-red-700' };
       default: return { icon: <Globe size={18} />, color: 'text-stone-900', bg: 'bg-stone-100', border: 'border-stone-700' };
+    }
+  };
+
+  const getSeasonIcon = (season: string) => {
+    switch(season) {
+      case 'Spring': return <Sprout className="text-emerald-600" size={18} />;
+      case 'Summer': return <Sun className="text-amber-600" size={18} />;
+      case 'Fall': return <Leaf className="text-orange-700" size={18} />;
+      case 'Winter': return <Snowflake className="text-blue-500" size={18} />;
+      case 'Major': return <Star className="text-purple-600 animate-pulse" size={20} />;
+      default: return <CalendarDays size={18} />;
     }
   };
 
@@ -789,6 +793,51 @@ const App: React.FC = () => {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* Local Festivals Section */}
+              <div className="mb-12 page-break-before break-inside-avoid">
+                <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase">
+                  <CalendarDays className="w-6 h-6" /> The Cycle of Tradition: Local Festivals
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {village.festivals.map((fest, idx) => (
+                    <div key={idx} className="p-5 bg-white/50 border-2 border-stone-400 rounded shadow-inner relative overflow-hidden group hover:border-amber-700 transition-colors">
+                      <div className="flex justify-between items-start mb-3 border-b border-stone-300 pb-2">
+                        <div>
+                          <h4 className="font-bold text-stone-950 medieval-font text-xl uppercase tracking-tight">{fest.name}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            {getSeasonIcon(fest.season)}
+                            <span className="text-[10px] font-black uppercase text-stone-600 tracking-widest">
+                              {fest.timing} of {fest.season}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="opacity-10 group-hover:opacity-30 transition-opacity">
+                          {getSeasonIcon(fest.season)}
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-[9px] font-black text-amber-900 uppercase mb-1 flex items-center gap-1">
+                            <BookOpen size={10} /> The Old Lore
+                          </p>
+                          <p className="text-xs italic text-stone-800 leading-tight font-serif bg-stone-200/40 p-2 rounded">
+                            "{fest.lore}"
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-stone-500 uppercase mb-1 flex items-center gap-1">
+                            <RefreshCw size={10} /> Modern Practice
+                          </p>
+                          <p className="text-xs text-stone-700 leading-snug">
+                            {fest.modernPractice}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
