@@ -21,19 +21,17 @@ export const generateVillageDetails = async (
     4. Morale: A single metric ('Hopeful', 'Fearful', 'Resentful', 'Apathetic', 'Defiant').
     5. Weather: A single short thematic phrase.
     6. Exactly 4 Nearby Settlement Relations: 
-       - Focus on resource scarcity, border skirmishes, stolen livestock, and espionage.
-       - Each entry must have: settlementName, relationType ('Good', 'Neutral', 'Harmful'), status, and description.
+       - Focus on resource scarcity, border skirmishes, and espionage.
+       - Each entry: settlementName, type ('Good', 'Neutral', 'Harmful'), status, description.
     7. Exactly 6-8 Festivals:
-       - 1 or 2 per season (Spring, Summer, Fall, Winter).
-       - 2 "Major" festivals that occur twice a year (Equinoxes or Solstices).
-       - Each must have: name, season, timing (Beginning/Middle/End of season), lore (dark origins), and modernPractice.
+       - name, season ('Spring', 'Summer', 'Fall', 'Winter', 'Major'), timing, lore (dark origins), and modernPractice.
     8. Exactly 12 Businesses: Gritty names, rumors, encounterHooks, gmNotes, and exactly 5 marketItems each.
     9. Two major landmarks.
-    10. Exactly 15 NPCs: 12 shop owners + 3 others. 
-       - Detailed attributes: sex, alignment, motivation, secret, combat stats.
-       - IMPORTANT: Provide a full relationship matrix for ALL other 14 NPCs.
-       - RELATIONSHIP SCORES: Must be an integer between 1 (Extreme Hate/Fear) and 10 (Total Trust/Love). 
-       - Provide a VAST MIX of scores (some high, some low, some neutral) so the village feels like a real community with friends and enemies.
+    10. Exactly 15 NPCs: 
+       - Attributes: name, race, sex, role, alignment ('Lawful', 'Neutral', 'Chaotic').
+       - Psychology: personality, motivation, trait (Characteristic), secret (Alignment Shadow Secret).
+       - Stats: hp, ac.
+       - IMPORTANT: Relationship matrix for ALL other 14 NPCs. Scores 1-10 (Varied mix).
     11. Main Quests (4) and Side Treks (10).
     12. Current Events (3).
     13. GM Notes.
@@ -58,7 +56,7 @@ export const generateVillageDetails = async (
       "businesses": [
         { 
           "name": "string", "type": "string", "description": "string", "rumor": "string", "encounterHook": "string", "gmNotes": "string",
-          "marketItems": [ { "name": "string", "price": "string", "availability": "string", "description": "string" } ],
+          "marketItems": [ { "name": "string", "price": "string", "availability": "Common|Rare|Scarce", "description": "string" } ],
           "owner": { "name": "string", "race": "string", "sex": "Male|Female", "role": "string", "trait": "string", "alignment": "Lawful|Neutral|Chaotic", "motivation": "string", "secret": "string" } 
         }
       ],
@@ -97,35 +95,18 @@ export const generatePOI = async (village: VillageData): Promise<PointOfInterest
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `
     Generate a Shadowdark RPG "Point of Interest" located 1d6 miles from the village "${village.name}".
-    Narrative context: The village description is "${village.description}" and secret is "${village.darkSecret}".
-    Main Quests involve: ${village.mainQuests.map(q => q.title).join(", ")}.
-
-    Structure: A 5-room crawl (dungeon, lair, or ruin).
     JSON Output Format:
     {
-      "title": "Name of the location",
-      "type": "Dungeon|Lair|Ruin",
-      "location": "Distance and direction from village, plus descriptive landmark",
-      "background": "Gritty history linked to the village's secret or a main quest",
-      "rooms": [
-        {
-          "number": 1,
-          "name": "Room Name",
-          "description": "Atmospheric sensory details",
-          "threats": "Monsters, traps, or environmental hazards (Shadowdark style)",
-          "treasure": "Specific loot or useful items"
-        }
-      ]
+      "title": "Name", "type": "Dungeon|Lair|Ruin", "location": "string", "background": "string",
+      "rooms": [ { "number": number, "name": "string", "description": "string", "threats": "string", "treasure": "string" } ]
     }
-    Generate exactly 5 rooms.
+    Exactly 5 rooms.
   `;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
-    config: {
-      responseMimeType: "application/json"
-    }
+    config: { responseMimeType: "application/json" }
   });
 
   return JSON.parse(response.text || "{}");
@@ -133,81 +114,47 @@ export const generatePOI = async (village: VillageData): Promise<PointOfInterest
 
 export const generateVillageGossip = async (village: VillageData): Promise<string[]> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Based on the village "${village.name}" with the dark secret "${village.darkSecret}", generate 3 short, gritty rumors that might be overheard in the local tavern. Each rumor should be 1-2 sentences. Respond with a JSON array of strings.`;
-
+  const prompt = `Generate 3 gritty Shadowdark rumors for the village "${village.name}". Array of strings.`;
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
-    config: {
-      responseMimeType: "application/json"
-    }
+    config: { responseMimeType: "application/json" }
   });
-
-  try {
-    return JSON.parse(response.text || "[]");
-  } catch {
-    return ["The shadows are growing long tonight.", "Keep your coins close and your daggers closer.", "Someone new is watching from the riverbank."];
-  }
+  return JSON.parse(response.text || "[]");
 };
 
 export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const femaleVoices = ['Kore', 'Zephyr'];
-  const maleVoices = ['Puck', 'Charon', 'Fenrir'];
-  const voices = npc.sex === 'Female' ? femaleVoices : maleVoices;
+  const voices = npc.sex === 'Female' ? ['Kore', 'Zephyr'] : ['Puck', 'Charon', 'Fenrir'];
   const voice = voices[Math.floor(Math.random() * voices.length)];
-  
-  const prompt = `You are ${npc.name}, a ${npc.sex} ${npc.race} ${npc.role} in a gritty Shadowdark village. 
-    Personality: ${npc.personality}. 
-    Greeting (5-10 words): Weary adventurers entered your shop.`;
-
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
-    contents: [{ parts: [{ text: prompt }] }],
-    config: {
-      responseModalities: [Modality.AUDIO],
-      speechConfig: {
-        voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: voice },
-        },
-      },
-    },
+    contents: [{ parts: [{ text: `Greeting from ${npc.name}, a ${npc.role}. Personality: ${npc.personality}` }] }],
+    config: { responseModalities: [Modality.AUDIO], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
   });
-
-  const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-  if (!base64Audio) throw new Error("No audio generated");
-  return base64Audio;
+  return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || "";
 };
 
 export const generateNPCPortrait = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
-
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
-    contents: { parts: [{ text: prompt }] },
-    config: { imageConfig: { aspectRatio: "1:1" } }
+    contents: { parts: [{ text: `Portrait of ${npc.name}, gritty fantasy ${npc.race} ${npc.role}, dark style.` }] },
   });
-
   for (const part of response.candidates[0].content.parts) {
     if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }
-  throw new Error("Portrait generation failed.");
+  return "";
 };
 
 export const generateVillageMap = async (village: VillageData): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const businessNames = village.businesses.map(b => b.name).join(", ");
-  const prompt = `A top-down, hand-drawn fantasy village map of "${village.name}". Parchment style, black ink. 12 buildings along a river. No colors.`;
-
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
-    contents: { parts: [{ text: prompt }] },
-    config: { imageConfig: { aspectRatio: "16:9" } }
+    contents: { parts: [{ text: `Top-down fantasy map of ${village.name}, parchment style.` }] },
   });
-
   for (const part of response.candidates[0].content.parts) {
     if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }
-  throw new Error("Map generation failed.");
+  return "";
 };
