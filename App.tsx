@@ -98,10 +98,11 @@ const ENCOUNTERS_MONSTERS = [
   { icon: <Target size={16} />, who: "Werewolf", attitude: "Hostile", text: "A half-man, half-wolf predator leaps from a thatched roof." },
   { icon: <Activity size={16} />, who: "Giant Snake", attitude: "Hostile", text: "A twenty-foot constrictor drops from a rafter." },
   { icon: <Target size={16} />, who: "Hill Giant", attitude: "Wary", text: "A hungry giant is searching for livestock (or small people)." },
-  { icon: <Skull size={16} />, who: "Wight Lord", attitude: "Hostile", text: "A skeletal commander leading 1d4 skeletons." },
-  { icon: <Droplets size={16} />, who: "Giant Squid", attitude: "Hostile", text: "A mass of tentacles reaches from the river." },
-  // ... and 72 more low-to-mid tier Shadowdark appropriate monsters for a 1d100 table
-].concat(Array(72).fill({ icon: <GhostIcon size={16} />, who: "Gloom Stalker", attitude: "Hostile", text: "A generic dark predator tracks the party from the periphery." }));
+  { icon: <Activity size={16} />, who: "Dire Wolf", attitude: "Hostile", text: "A massive, intelligence predator snarling in the dark." },
+  { icon: <Users size={16} />, who: "Bandit Patrol", attitude: "Hostile", text: "A group of 1d6 deserters looking for easy gold." },
+  { icon: <Bug size={16} />, who: "Giant Toad", attitude: "Neutral", text: "A massive amphibian watching for something to swallow whole." },
+  { icon: <Activity size={16} />, who: "Brown Bear", attitude: "Wary", text: "A powerful beast protecting its territory near a landmark." },
+].concat(Array(70).fill({ icon: <GhostIcon size={16} />, who: "Gloom Stalker", attitude: "Hostile", text: "A generic dark predator tracks the party from the periphery." }));
 
 // --- Decoding Helpers ---
 function decodeBase64(base64: string) {
@@ -129,32 +130,24 @@ const App: React.FC = () => {
   const [poiLoading, setPoiLoading] = useState(false);
   const [gossipLoading, setGossipLoading] = useState(false);
   const [village, setVillage] = useState<VillageData | null>(null);
-  const [gossip, setGossip] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [editableNotes, setEditableNotes] = useState("");
   const [npcFilter, setNpcFilter] = useState("");
   const [portraitLoading, setPortraitLoading] = useState<Record<number, boolean>>({});
   const [voiceLoading, setVoiceLoading] = useState<Record<number, boolean>>({});
   
-  const [isOverrideEnabled, setIsOverrideEnabled] = useState(false);
-  const [demoOverrides, setDemoOverrides] = useState([{ race: "Human", percent: 85 }, { race: "Halfling", percent: 8 }, { race: "Dwarf", percent: 4 }, { race: "Elf", percent: 3 }]);
-  const [showDemoSettings, setShowDemoSettings] = useState(false);
-
   const [lastDayInsideRoll, setLastDayInsideRoll] = useState<number | null>(null);
-  const [lastNightInsideRoll, setLastNightInsideRoll] = useState<number | null>(null);
   const [lastMonsterRoll, setLastMonsterRoll] = useState<number | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const totalPercent = useMemo(() => demoOverrides.reduce((sum, d) => sum + d.percent, 0), [demoOverrides]);
 
   const handleGenerate = async () => {
     setLoading(true);
     setError(null);
     try {
       const pop = Math.floor(Math.random() * 100 + 200);
-      const data = await generateVillageDetails("Shadowfall", pop, {});
+      const data = await generateVillageDetails("Cinderglade", pop, {});
       setVillage(data);
       setEditableNotes(data.gmNotes || "");
     } catch (err) {
@@ -213,7 +206,6 @@ const App: React.FC = () => {
   const getStandingCategory = (npc: DetailedNPC) => {
     const total = npc.relationships.reduce((acc, r) => acc + r.score, 0);
     const avg = total / (npc.relationships.length || 1);
-    // 1-10 Scale Logic
     if (avg <= 4.5) return { label: 'Pariah', color: 'text-red-950 font-black', icon: <Frown size={12} className="text-red-900" /> };
     if (avg >= 7.5) return { label: 'Pillar', color: 'text-amber-950 font-black', icon: <Crown size={12} className="text-amber-700" /> };
     return { label: 'Resident', color: 'text-stone-950 font-black', icon: <Users size={12} className="text-stone-800" /> };
@@ -243,6 +235,20 @@ const App: React.FC = () => {
       setVillage({ ...village, mapUrl: url });
     } catch (err) { console.error(err); } finally { setMapLoading(false); }
   };
+
+  const chartData = useMemo(() => {
+    if (!village) return [];
+    const base = [
+      { name: 'Humans', value: village.demographics.humans, color: '#1a1a1a' },
+      { name: 'Halflings', value: village.demographics.halflings, color: '#44403c' },
+      { name: 'Dwarves', value: village.demographics.dwarves, color: '#78716c' },
+      { name: 'Elves', value: village.demographics.elves, color: '#a8a29e' },
+      ...village.demographics.others.map((o, idx) => ({ name: o.race, value: o.count, color: idx % 2 === 0 ? '#7f1d1d' : '#450a0a' }))
+    ];
+    return base.filter(d => d.value > 0);
+  }, [village]);
+
+  const totalPop = village?.population || 1;
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
@@ -288,9 +294,37 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mb-12">
-                <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase text-black"><Scroll className="w-6 h-6" /> Narrative Manifest</div>
-                <p className="text-2xl italic font-serif leading-relaxed text-black bg-white/40 p-8 border-l-8 border-stone-800 rounded-r shadow-inner font-black">"{village.description}"</p>
+              <div className="mb-12 flex flex-col md:flex-row gap-8">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase text-black"><Scroll className="w-6 h-6" /> Narrative Manifest</div>
+                  <p className="text-2xl italic font-serif leading-relaxed text-black bg-white/40 p-8 border-l-8 border-stone-800 rounded-r shadow-inner font-black">"{village.description}"</p>
+                </div>
+                <div className="w-full md:w-64 shrink-0">
+                  <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b border-stone-800 mb-4 pb-1 text-black"><Users size={20} /> Census</h3>
+                  <div className="h-64 w-full bg-white/20 p-2 rounded-lg border border-stone-200">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={chartData} innerRadius={40} outerRadius={60} paddingAngle={2} dataKey="value">
+                          {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#fef3c7', border: '1px solid #1a1a1a', borderRadius: '4px' }}
+                          itemStyle={{ color: '#1a1a1a', fontWeight: 'bold', fontSize: '10px', textTransform: 'uppercase' }}
+                        />
+                        <Legend 
+                          layout="vertical" 
+                          align="right" 
+                          verticalAlign="middle" 
+                          formatter={(value, entry: any) => {
+                            const item = entry.payload;
+                            const percent = ((item.value / totalPop) * 100).toFixed(0);
+                            return <span className="text-[10px] font-black text-stone-900 uppercase">{value}: {item.value} ({percent}%)</span>;
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -306,6 +340,7 @@ const App: React.FC = () => {
                     </div>
                     <span className="text-[10px] font-black uppercase text-stone-600">{fest.timing} of {fest.season}</span>
                     <p className="text-xs italic font-black text-stone-900 mt-2">"{fest.lore}"</p>
+                    <p className="text-[10px] text-stone-700 mt-1 font-bold">Practice: {fest.modernPractice}</p>
                   </div>
                 ))}
               </div>
@@ -346,7 +381,7 @@ const App: React.FC = () => {
                             <tr key={eIdx} className="hover:bg-amber-100/30">
                               <td className="py-2 px-3 text-center border-r border-stone-300 font-black text-black">{eIdx + 1}</td>
                               <td className="py-2 px-3 font-black text-black flex items-center gap-2">{enc.icon} {enc.who}</td>
-                              <td className="py-2 px-3 italic text-stone-900 font-black">{enc.text}</td>
+                              <td className="py-2 px-3 italic text-stone-950 font-black">{enc.text}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -382,7 +417,7 @@ const App: React.FC = () => {
                             <p className="italic text-xl text-black font-black leading-relaxed border-l-4 border-stone-800 pl-4">"{npc.personality}"</p>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-4 bg-stone-800 text-amber-500 rounded border-2 border-stone-900 shadow-sm"><span className="text-[10px] font-black block uppercase mb-1 opacity-50">Motivation</span>{npc.motivation}</div>
+                            <div className="p-4 bg-stone-800 text-amber-500 rounded border-2 border-stone-900 shadow-sm font-bold"><span className="text-[10px] font-black block uppercase mb-1 opacity-50">Motivation</span>{npc.motivation}</div>
                             <div className="p-4 bg-white/60 text-stone-950 rounded border-2 border-stone-800 shadow-sm font-black"><span className="text-[10px] font-black block uppercase mb-1 opacity-50">AC / HP</span>{npc.stats.ac} / {npc.stats.hp}</div>
                           </div>
                           <div>
@@ -420,18 +455,18 @@ const App: React.FC = () => {
                       <h4 className="text-2xl font-bold medieval-font text-black">{biz.name}</h4>
                       <span className="text-[10px] font-black uppercase text-stone-600">Merchant: {biz.owner.name}</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-4">
                       {biz.marketItems.map((item, iidx) => (
                         <div key={iidx} className="flex justify-between items-center text-sm border-b border-dashed border-stone-400 pb-1">
-                          <div>
+                          <div className="flex items-center gap-1">
                             <span className="font-black text-black">{item.name}</span>
-                            <span className="ml-2 text-[10px] font-bold text-stone-500">({item.availability})</span>
+                            <span className="text-[9px] font-bold text-stone-600 bg-stone-200 px-1 rounded">{item.availability}</span>
                           </div>
                           <span className="font-black text-black medieval-font">{item.price}</span>
                         </div>
                       ))}
                     </div>
-                    <div className="mt-4 p-3 bg-amber-100/50 rounded border-l-4 border-amber-800 shadow-inner">
+                    <div className="p-3 bg-amber-100/50 rounded border-l-4 border-amber-800 shadow-inner">
                        <p className="text-[10px] font-black text-amber-900 uppercase mb-1">Local Rumor</p>
                        <p className="text-sm italic text-amber-950 font-black">"{biz.rumor}"</p>
                     </div>
@@ -444,22 +479,22 @@ const App: React.FC = () => {
             <section className="page-break-before">
               <div className="flex justify-between items-center border-b-4 border-stone-800 mb-8 pb-4">
                 <h3 className="text-3xl font-bold medieval-font text-black flex items-center gap-2 uppercase"><Boxes /> Nearby Crawl in a Box</h3>
-                {!village.poi && <button onClick={handleGeneratePOI} className="bg-stone-800 text-amber-500 px-4 py-2 rounded no-print font-bold hover:bg-stone-700">{poiLoading ? 'Digging...' : 'Draft Crawl'}</button>}
+                <button onClick={handleGeneratePOI} className="bg-stone-800 text-amber-500 px-4 py-2 rounded no-print font-bold hover:bg-stone-700 text-xs uppercase">{poiLoading ? 'Digging...' : village.poi ? 'Regenerate Crawl' : 'Draft Crawl'}</button>
               </div>
               {village.poi && (
                 <div className="space-y-8">
                   <div className="p-6 bg-stone-900 text-stone-200 border-4 border-stone-700 rounded shadow-2xl">
                     <h4 className="text-3xl font-bold medieval-font text-amber-500 mb-2 uppercase">{village.poi.title}</h4>
-                    <div className="text-xs font-black text-stone-500 uppercase mb-4">{village.poi.type} • {village.poi.location}</div>
-                    <p className="text-lg italic font-serif border-l-4 border-amber-600 pl-4 mb-8">"{village.poi.background}"</p>
+                    <div className="text-xs font-black text-stone-500 uppercase mb-4 tracking-widest">{village.poi.type} • {village.poi.location}</div>
+                    <p className="text-lg italic font-serif border-l-4 border-amber-600 pl-4 mb-8 text-stone-300">"{village.poi.background}"</p>
                     <div className="grid grid-cols-1 gap-6">
                       {village.poi.rooms.map((room, ridx) => (
                         <div key={ridx} className="p-5 border-2 border-stone-700 bg-stone-800/50 rounded shadow-inner">
-                          <h5 className="text-lg font-bold text-amber-400 mb-2 uppercase">Room {room.number}: {room.name}</h5>
-                          <p className="text-sm italic mb-4 font-black">"{room.description}"</p>
+                          <h5 className="text-lg font-bold text-amber-400 mb-2 uppercase medieval-font">Room {room.number}: {room.name}</h5>
+                          <p className="text-sm italic mb-4 font-bold text-stone-300">"{room.description}"</p>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="text-xs bg-red-900/20 p-2 rounded border border-red-900/50 text-red-200 font-black"><span className="block uppercase opacity-50 mb-1">Threats</span>{room.threats}</div>
-                            <div className="text-xs bg-emerald-900/20 p-2 rounded border border-emerald-900/50 text-emerald-200 font-black"><span className="block uppercase opacity-50 mb-1">Treasure</span>{room.treasure}</div>
+                            <div className="text-xs bg-red-900/40 p-3 rounded border border-red-900/50 text-red-100 font-bold"><span className="block uppercase opacity-70 text-[9px] mb-1 tracking-widest">Threats & Traps</span>{room.threats}</div>
+                            <div className="text-xs bg-emerald-900/40 p-3 rounded border border-emerald-900/50 text-emerald-100 font-bold"><span className="block uppercase opacity-70 text-[9px] mb-1 tracking-widest">Treasure</span>{room.treasure}</div>
                           </div>
                         </div>
                       ))}
