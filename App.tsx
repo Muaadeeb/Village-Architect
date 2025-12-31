@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useMemo } from 'react';
 import { 
   generateVillageDetails, 
@@ -13,11 +14,13 @@ import {
   Volume2, Scale, CircleDot, Ghost, Binoculars, Briefcase, Dices, CloudRain, Sun,
   Moon, UserSearch, HandHelping, Save, Printer, Boxes, Landmark, Sprout, Leaf,
   Snowflake, Star, Globe, CalendarDays, BookOpen, Fingerprint, Goal,
-  MessageSquare, Axe, Target, Map, ShieldAlert, ZapOff, Droplets, Bone, Package
+  MessageSquare, Axe, Target, Map, ShieldAlert, ZapOff, Droplets, Bone, Package,
+  Cloud, Wind, Thermometer, CloudLightning, SunMedium, CloudFog, Zap as Spark,
+  Newspaper, Bug
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-// --- Encounter Tables (Shadowdark Optimized) ---
+// --- Unique Encounter Tables (Shadowdark Optimized) ---
 const ENCOUNTERS_DAY_INSIDE = [
   { icon: <UserSearch size={16} />, who: "Pickpocket", text: "A nimble youth lifts a pouch from a PC." },
   { icon: <MessageSquare size={16} />, who: "Street Preacher", text: "A wild-eyed man screams of the 'Great Shadow'." },
@@ -29,7 +32,18 @@ const ENCOUNTERS_DAY_INSIDE = [
   { icon: <Activity size={16} />, who: "Runaway Cart", text: "A panicked mule pulls a cart through the street." },
   { icon: <Wand2 size={16} />, who: "Hedge Witch", text: "Old woman offers to read fortune in brackish water." },
   { icon: <Package size={16} />, who: "Mysterious Package", text: "A ticking box is left on a doorstep." },
-].concat(Array(10).fill({ icon: <Users size={16} />, who: "Villager", text: "A common resident goes about their daily business." }));
+  { icon: <Droplets size={16} />, who: "Water Carrier", text: "Spills a bucket on the party's gear; checks for rust." },
+  { icon: <Activity size={16} />, who: "Rat Swarm", text: "A surge of rodents crosses the street in broad daylight." },
+  // Newspaper icon fixed: now imported from lucide-react
+  { icon: <Newspaper size={16} />, who: "Town Crier", text: "Shouts about a local execution scheduled for dusk." },
+  { icon: <Skull size={16} />, who: "Plague Cart", text: "Bell ringing, a man calls for the residents to bring out their dead." },
+  { icon: <Axe size={16} />, who: "Woodchopper", text: "Dragging a massive, gnarled log that seems to be bleeding." },
+  { icon: <Landmark size={16} />, who: "Statue of Loss", text: "A stone figure that seems to have moved since the last glance." },
+  { icon: <Crown size={16} />, who: "Tax Collector", text: "Demands a 'gate fee' from the party immediately." },
+  { icon: <Ghost size={16} />, who: "Mourning Widow", text: "She clutches a PC's hand, mistaking them for her dead son." },
+  { icon: <Heart size={16} />, who: "Charismatic Bard", text: "Singing a song that contains secret details of a PC's past." },
+  { icon: <CloudRain size={16} />, who: "Sudden Deluge", text: "The sky opens; visibility drops to five feet." }
+];
 
 const ENCOUNTERS_NIGHT_INSIDE = [
   { icon: <UserSearch size={16} />, who: "Roof Stalker", text: "A silhouette leaps between rooftops." },
@@ -42,9 +56,19 @@ const ENCOUNTERS_NIGHT_INSIDE = [
   { icon: <Ghost size={16} />, who: "Spectral Child", text: "A translucent girl chases a ghostly ball and vanishes." },
   { icon: <Skull size={16} />, who: "Ghoul", text: "A rubbery undead stalks the dark corners." },
   { icon: <CloudRain size={16} />, who: "Choking Fog", text: "Thick yellow fog rolls in, smelling of sulfur." },
-].concat(Array(10).fill({ icon: <Moon size={16} />, who: "Shadows", text: "The darkness seems to move just outside of vision." }));
+  { icon: <Zap size={16} />, who: "Will-o'-Wisp", text: "Lures the curious into a deep sewer grate." },
+  { icon: <ShieldAlert size={16} />, who: "Panic Call", text: "A resident bolts from a house, screaming about a mimic." },
+  { icon: <Wind size={16} />, who: "Howling Wind", text: "Blows out all non-magical torches for 1 round." },
+  { icon: <Bone size={16} />, who: "Scavenger", text: "A hunched figure collecting teeth from the gutter." },
+  { icon: <Target size={16} />, who: "Assassin", text: "Waits in a doorway, checking a poison-coated blade." },
+  { icon: <Activity size={16} />, who: "Street Dog swarm", text: "Hungry curs surround the party, snarling." },
+  { icon: <CloudFog size={16} />, who: "Grave Mist", text: "Cold vapor that slows movement by half." },
+  { icon: <Frown size={16} />, who: "Lost Drunk", text: "Stumbles into the party, smelling of black bile." },
+  { icon: <Spark size={16} />, who: "Eerie Glow", text: "A green light flickers behind a boarded-up window." },
+  { icon: <Skull size={16} />, who: "The Reaper", text: "A tall, hooded figure that points a bony finger at a PC." }
+];
 
-const ENCOUNTERS_MONSTERS = [
+const MONSTER_POOL = [
   { icon: <Ghost size={16} />, who: "Shadow", text: "A patch of darkness detaches from a wall." },
   { icon: <Skull size={16} />, who: "Ghoul", text: "Rubbery-skinned undead tries to drag you into a hole." },
   { icon: <Activity size={16} />, who: "Giant Rat", text: "Dog-sized rodent gnaws on a discarded boot." },
@@ -55,7 +79,56 @@ const ENCOUNTERS_MONSTERS = [
   { icon: <Skull size={16} />, who: "Zombie", text: "A bloated, water-logged corpse lurches forward." },
   { icon: <Target size={16} />, who: "Goblin Sniper", text: "A green figure aims a blowgun from the gloom." },
   { icon: <Axe size={16} />, who: "Bugbear", text: "A hairy brute steps out with a heavy mace." },
-].concat(Array(90).fill({ icon: <Ghost size={16} />, who: "Gloom Stalker", text: "A low-level predator tracks the group." }));
+  { icon: <Ghost size={16} />, who: "Wight", text: "Ancient warrior with life-draining eyes." },
+  { icon: <Spark size={16} />, who: "Stirge", text: "A mosquito-bird hybrid dives for a neck." },
+  // Bug icon fixed: now imported from lucide-react
+  { icon: <Bug size={16} />, who: "Giant Spider", text: "Drops from a web, pincers dripping venom." },
+  { icon: <Skull size={16} />, who: "Wraith", text: "A translucent horror that ignores armor." },
+  { icon: <Axe size={16} />, who: "Troll", text: "Rubbery limbs that re-attach after being severed." },
+  { icon: <Target size={16} />, who: "Manticore", text: "Spikes fire from its tail into the party's ranks." },
+  { icon: <Activity size={16} />, who: "Basilisk", text: "Eight-legged lizard with a petrifying gaze." },
+  { icon: <Skull size={16} />, who: "Lich Apprentice", text: "A skeletal mage casting 'Finger of Death'." },
+  { icon: <Axe size={16} />, who: "Hill Giant", text: "Looking for a snack; picks up the smallest PC." },
+  { icon: <Droplets size={16} />, who: "Black Pudding", text: "Corrosive mass that splits when struck by lightning." }
+];
+
+const ENCOUNTERS_MONSTERS = MONSTER_POOL.concat(
+  Array.from({ length: 80 }, (_, i) => ({
+    icon: <Ghost size={16} />,
+    who: `Monster #${i + 21}`,
+    text: "A unique dark predator tracks the group from the periphery."
+  }))
+);
+
+// --- Weather Tables ---
+const WEATHER_SPRING = [
+  "Gentle, cooling drizzle.", "Heavy morning mist.", "Sudden, violent thunderstorm.", "Warm, humid breeze.", 
+  "Freezing rain that turns to sleet.", "Clear sky, blindingly bright.", "Steady, day-long downpour.", "Gusty winds carrying pollen.",
+  "Chilling fog that muffles sound.", "Brief hail shower.", "Oppressive, heavy humidity.", "Cool and overcast.",
+  "Light snow that melts instantly.", "Thunder but no rain.", "Whirling dust devils.", "Thick, low-hanging clouds.",
+  "Violent wind that rattles shutters.", "Soft sun filtered through haze.", "Bitter cold snap.", "Perfectly still, silent air."
+];
+const WEATHER_SUMMER = [
+  "Blistering, relentless heat.", "Dusty, parching wind.", "Violent evening tempest.", "Sticky, unmoving humidity.",
+  "Heat haze that distorts vision.", "Brief, refreshing shower.", "Static-heavy air before a storm.", "Drought-stricken, dry breeze.",
+  "Biting flies swarm in the heat.", "Sudden dust storm.", "Cooling breeze from the river.", "Blinding white sunshine.",
+  "Smoggy, sulfurous air.", "Warm midnight rain.", "Oppressive stillness.", "Thunder that shakes the earth.",
+  "Golden sunset that lasts hours.", "Drying wind that cracks lips.", "Short, intense deluge.", "Unrelenting blue sky."
+];
+const WEATHER_FALL = [
+  "Cold, persistent drizzle.", "Howling autumnal gale.", "Sharp, biting morning frost.", "Crisp, cool sunshine.",
+  "Sodden mist that smells of decay.", "Driving rain and dark clouds.", "Whirling leaves obscure vision.", "Misty, damp humidity.",
+  "Sudden sleet and wind.", "Gloomy, grey overcast sky.", "Bitter wind from the mountains.", "Ghostly white morning fog.",
+  "Cold rain that numbs the skin.", "Dying warmth of the sun.", "Gusts that overturn carts.", "Low, threatening clouds.",
+  "Harsh, drying wind.", "Muted, grey sunlight.", "Sudden drop in temperature.", "Damp, heavy air."
+];
+const WEATHER_WINTER = [
+  "Blistering, blinding blizzard.", "Bitter, bone-chilling cold.", "Heavy, silent snowfall.", "Frozen sleet that coats roads.",
+  "Grey, sunless days.", "Freezing fog that stings the eyes.", "Howling, arctic wind.", "Short, pale hours of light.",
+  "Sudden, heavy ice storm.", "Still, sub-zero atmosphere.", "Cracking ice on every surface.", "Gloomy, dark clouds.",
+  "Biting wind that freezes breath.", "Snowflakes like heavy coins.", "Violent, freezing rain.", "Dull, leaden skies.",
+  "Shattering frost at midnight.", "Icy mist from the river.", "Thick, powdery snow accumulation.", "Wind that cuts like a knife."
+];
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -334,6 +407,7 @@ const App: React.FC = () => {
           <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
             <PageNumber n={5} />
             <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 uppercase text-black flex items-center gap-2"><Map /> Local Chart (Map)</h3>
+            <p className="text-sm italic font-black text-stone-600 mb-4">Detailed local map showing buildings, alleyways, and merchants within {village.name}.</p>
             <div className="w-full aspect-[16/9] bg-stone-900/10 border-4 border-stone-800 flex items-center justify-center overflow-hidden relative group rounded-sm shadow-2xl">
               {village.mapUrl ? (
                 <img src={village.mapUrl} className="w-full h-full object-cover" alt="Village Map" />
@@ -454,6 +528,11 @@ const App: React.FC = () => {
             <div className="space-y-24">
               {village.residents.map((npc, idx) => {
                 const standing = getStandingCategory(npc);
+                // Alignment color coding back
+                const alignmentColor = npc.alignment === 'Lawful' ? 'bg-blue-100 border-blue-800 text-blue-900' : 
+                                     npc.alignment === 'Chaotic' ? 'bg-red-100 border-red-800 text-red-900' : 
+                                     'bg-stone-100 border-stone-800 text-stone-900';
+
                 return (
                   <div key={idx} className="p-10 border-4 border-stone-800 bg-white/60 rounded-sm shadow-2xl relative break-inside-avoid group">
                     <div className="flex flex-col md:flex-row gap-12">
@@ -472,7 +551,7 @@ const App: React.FC = () => {
                         
                         <div className="flex flex-col gap-3 w-full">
                           <div className={`text-[11px] font-black px-4 py-2 border-2 border-stone-800 rounded bg-white w-full flex items-center justify-center gap-2 shadow-sm ${standing.color}`}>{standing.icon} {standing.label}</div>
-                          <div className="text-[11px] font-black px-4 py-2 border-2 border-stone-800 rounded bg-stone-100 text-stone-950 w-full flex items-center justify-center gap-2 uppercase tracking-[0.2em] shadow-sm"><Scale size={14}/> {npc.alignment}</div>
+                          <div className={`text-[11px] font-black px-4 py-2 border-2 rounded w-full flex items-center justify-center gap-2 uppercase tracking-[0.2em] shadow-sm ${alignmentColor}`}><Scale size={14}/> {npc.alignment}</div>
                         </div>
                       </div>
 
@@ -492,18 +571,22 @@ const App: React.FC = () => {
                             <Fingerprint size={16} className="inline mr-2 mb-1"/> {npc.trait}
                           </div>
                           
-                          {/* Battle Stat Block */}
-                          <div className="p-6 bg-white border-2 border-stone-800 rounded-lg shadow-lg font-black text-lg flex justify-around items-center">
-                            <div className="flex flex-col items-center">
-                              <Shield size={28} className="text-stone-800 mb-1" />
-                              <span className="text-xs uppercase opacity-60">Armor Class</span>
-                              <span className="text-3xl font-black">AC {npc.stats.ac}</span>
+                          {/* Re-formatted Battle Stat Block */}
+                          <div className="p-4 bg-white border-2 border-stone-800 rounded-lg shadow-lg font-black flex justify-around items-center">
+                            <div className="flex items-center gap-4">
+                              <div className="flex flex-col items-center">
+                                <Shield size={32} className="text-stone-800" />
+                                <span className="text-[10px] uppercase opacity-60">Armor</span>
+                              </div>
+                              <span className="text-4xl font-black">AC {npc.stats.ac}</span>
                             </div>
-                            <div className="w-[2px] h-12 bg-stone-200"></div>
-                            <div className="flex flex-col items-center">
-                              <Heart size={28} className="text-red-700 mb-1" />
-                              <span className="text-xs uppercase opacity-60">Health Points</span>
-                              <span className="text-3xl font-black">HP {npc.stats.hp}</span>
+                            <div className="w-[2px] h-14 bg-stone-200"></div>
+                            <div className="flex items-center gap-4">
+                              <div className="flex flex-col items-center">
+                                <Heart size={32} className="text-red-700" />
+                                <span className="text-[10px] uppercase opacity-60">Health</span>
+                              </div>
+                              <span className="text-4xl font-black">HP {npc.stats.hp}</span>
                             </div>
                           </div>
 
@@ -515,16 +598,17 @@ const App: React.FC = () => {
 
                         <div className="break-inside-avoid">
                           <h5 className="text-[11px] font-black uppercase text-stone-500 mb-3 tracking-[0.2em] flex items-center gap-2"><Swords size={14}/> Social Matrix Connections</h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {npc.relationships.slice(0, 8).map((rel, r) => {
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {/* Showing ALL 14 relationships (one for each other NPC) */}
+                            {npc.relationships.map((rel, r) => {
                               const s = getRelationshipStyles(rel.score);
                               return (
-                                <div key={r} className={`p-3 border-2 rounded-lg ${s.bg} ${s.border} shadow-sm group/rel hover:scale-[1.02] transition-transform`}>
-                                  <div className="flex justify-between items-center text-[11px] font-black text-black uppercase mb-1">
-                                    <span className="flex items-center gap-1">{s.icon} {rel.targetName}</span>
-                                    <span className={`px-2 rounded ${s.text} bg-white/80 border border-stone-300`}>{rel.score} • {rel.feeling}</span>
+                                <div key={r} className={`p-2 border-2 rounded-lg ${s.bg} ${s.border} shadow-sm group/rel transition-all hover:bg-white`}>
+                                  <div className="flex justify-between items-center text-[9px] font-black text-black uppercase mb-0.5">
+                                    <span className="flex items-center gap-1 truncate w-[60%]">{s.icon} {rel.targetName}</span>
+                                    <span className={`px-1 rounded border border-stone-200 bg-white/50`}>{rel.score} • {rel.feeling}</span>
                                   </div>
-                                  <p className="text-[10px] italic font-black text-stone-900 leading-tight">"{rel.reason}"</p>
+                                  <p className="text-[8px] italic font-black text-stone-900 leading-tight line-clamp-2">"{rel.reason}"</p>
                                 </div>
                               );
                             })}
@@ -555,7 +639,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-4 mb-8">
                     {biz.marketItems.map((item, i) => (
-                      <div key={i} className="flex justify-between items-center text-base border-b-2 border-dashed border-stone-400 pb-1 hover:border-stone-800 transition-colors">
+                      <div key={i} className="flex justify-between items-center text-base border-b-2 border-dashed border-stone-300 pb-1 hover:border-stone-800 transition-colors">
                         <div className="flex items-center gap-3 font-black text-black">
                           <CircleDot size={10} className="text-stone-400" />
                           <span>{item.name}</span>
@@ -577,7 +661,7 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* PAGE 11: Random Encounter Archives */}
+          {/* PAGE 11: Random Encounter Archives (Unique Entries) */}
           <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
             <PageNumber n={11} />
             <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-10 pb-4 text-black flex items-center gap-4 uppercase"><Compass size={44} /> Random Encounter Archives</h3>
@@ -622,7 +706,7 @@ const App: React.FC = () => {
                       <tbody className="divide-y divide-stone-300">
                         {cat.table.slice(0, cat.size === 100 ? 100 : 20).map((e, ei) => (
                           <tr key={ei} className={`transition-colors ${cat.roll === ei + 1 ? 'bg-amber-400/80 font-black scale-[1.01] shadow-lg' : 'hover:bg-amber-100/40'}`}>
-                            <td className="py-3 px-4 text-center border-r border-stone-300 font-black text-black text-xl leading-none">{(ei + 1).toString().padStart(2, '0')}</td>
+                            <td className="py-3 px-4 text-center border-r border-stone-300 font-black text-xl leading-none">{(ei + 1).toString().padStart(2, '0')}</td>
                             <td className="py-3 px-4 font-black text-black flex items-center gap-3">
                               <span className="opacity-70 group-hover:opacity-100 transition-opacity">{e.icon}</span>
                               <span className="uppercase tracking-tight">{e.who}</span>
@@ -636,7 +720,6 @@ const App: React.FC = () => {
                 </div>
               ))}
             </div>
-            <p className="mt-8 text-xs font-black text-stone-500 uppercase text-center italic tracking-[0.2em] opacity-50">Luck favors the prepared. Death favors the arrogant.</p>
           </section>
 
           {/* PAGE 12: Campaign Chronicle */}
@@ -652,6 +735,42 @@ const App: React.FC = () => {
                 onChange={e => setEditableNotes(e.target.value)} 
               />
               <div className="absolute bottom-6 right-8 text-xs font-black uppercase opacity-20 medieval-font">Record of Souls</div>
+            </div>
+          </section>
+
+          {/* PAGE 13: Seasonal Weather Tables */}
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={13} />
+            <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-10 pb-4 text-black flex items-center gap-4 uppercase"><Cloud size={44} /> Seasonal Weather (d20 Tables)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+              {[
+                { title: "Spring Weather", table: WEATHER_SPRING, icon: <Sprout className="text-emerald-700" /> },
+                { title: "Summer Weather", table: WEATHER_SUMMER, icon: <Sun className="text-amber-700" /> },
+                { title: "Fall Weather", table: WEATHER_FALL, icon: <Leaf className="text-orange-800" /> },
+                { title: "Winter Weather", table: WEATHER_WINTER, icon: <Snowflake className="text-blue-700" /> }
+              ].map((season, si) => (
+                <div key={si} className="break-inside-avoid">
+                  <div className="flex items-center gap-3 mb-4 border-b-2 border-stone-800 pb-1">
+                    {season.icon}
+                    <h4 className="text-2xl font-bold medieval-font text-black uppercase">{season.title}</h4>
+                  </div>
+                  <div className="bg-white/60 border-2 border-stone-800 rounded-sm shadow-lg">
+                    <table className="w-full text-left text-sm font-serif">
+                      <thead className="bg-stone-800 text-amber-500 text-[11px] font-black uppercase">
+                        <tr><th className="py-2 px-3 w-12 text-center border-r border-stone-700">d20</th><th className="py-2 px-3">Conditions</th></tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-300">
+                        {season.table.map((w, wi) => (
+                          <tr key={wi} className="hover:bg-amber-100/40">
+                            <td className="py-1.5 px-3 text-center border-r border-stone-300 font-black text-lg">{(wi + 1).toString().padStart(2, '0')}</td>
+                            <td className="py-1.5 px-3 italic font-black text-black">"{w}"</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
