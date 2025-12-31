@@ -78,6 +78,13 @@ export interface PointOfInterest {
   rooms: Room[];
 }
 
+export interface SettlementRelation {
+  settlementName: string;
+  type: 'Good' | 'Neutral' | 'Harmful';
+  status: string;
+  description: string;
+}
+
 export interface VillageData {
   name: string;
   population: number;
@@ -97,6 +104,7 @@ export interface VillageData {
   businesses: Business[];
   landmarks: Landmark[];
   residents: DetailedNPC[];
+  settlementRelations: SettlementRelation[];
   mainQuests: Quest[];
   sideTreks: Quest[];
   currentEvents: string[];

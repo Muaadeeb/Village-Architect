@@ -7,7 +7,7 @@ import {
   generateVillageGossip,
   generatePOI
 } from './services/geminiService';
-import { VillageData, DetailedNPC, Relationship, PointOfInterest, Business } from './types';
+import { VillageData, DetailedNPC, Relationship, PointOfInterest, Business, SettlementRelation } from './types';
 import { 
   Scroll, RefreshCw, Users, Flame, Waves, Store, Printer, Skull, ArrowRight, UserCircle,
   EyeOff, MessageSquareQuote, BookOpen, Pencil, MapPin, Heart, Swords, Minus, Package,
@@ -17,9 +17,10 @@ import {
   User as UserIcon, Mountain, Ghost as GhostIcon, Binoculars, AlertCircle,
   Briefcase, FileDigit, Dices, CloudRain, Sun, ThermometerSnowflake, HeartCrack, Goal,
   ZapOff, Calendar, MapPinned, Moon, SunMedium, UserSearch, Tent, Ghost as MonsterIcon,
-  HandHelping, MessageCircle, Save, FolderOpen, Download
+  HandHelping, MessageCircle, Save, FolderOpen, Download, Settings2, Plus, Trash2,
+  Bug, Zap as Spark, Target, Footprints, Droplets, Bone, Wind as Gust, Globe
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 // --- Constants: 1d100 Tables ---
 
@@ -229,7 +230,7 @@ const VILLAGE_EVENTS = [
   "The village has been 'shifted' into another dimension."
 ];
 
-// --- 1d20 Encounter Tables ---
+// --- 1d20/1d100 Encounter Tables ---
 
 const ENCOUNTERS_DAY_INSIDE = [
   { icon: <Shield size={16} />, who: "Town Watch", attitude: "Wary", text: "Three guards are inspecting a merchant's cart, suspecting smuggled 'forbidden' oils." },
@@ -277,99 +278,110 @@ const ENCOUNTERS_NIGHT_INSIDE = [
   { icon: <Activity size={16} />, who: "Chaos Cult", attitude: "Hostile", text: "A muffled chant rises from beneath your feet, vibrating the cobblestones." }
 ];
 
-const ENCOUNTERS_DAY_OUTSIDE = [
-  { icon: <Mountain size={16} />, who: "Lone Hunter", attitude: "Wary", text: "A man skinning a two-headed rabbit eyes you, his hand resting on a heavy axe." },
-  { icon: <Tent size={16} />, who: "Gypsy Camp", attitude: "Neutral", text: "A colorful wagon is parked by the road; the occupants are selling 'charred' meat." },
-  { icon: <Compass size={16} />, who: "Old Pilgrim", attitude: "Friendly", text: "An old woman on a mule asks if you've seen the 'Sunken Spire' nearby." },
-  { icon: <Shield size={16} />, who: "Bandit Scouts", attitude: "Hostile", text: "Two archers in leaf-covered cloaks are watching you from a ridge." },
-  { icon: <Waves size={16} />, who: "River Ferryman", attitude: "Neutral", text: "A giant of a man waits by a raft, demanding 1 gold per person to cross." },
-  { icon: <Skull size={16} />, who: "Fresh Grave", attitude: "Neutral", text: "A shallow grave sits by the path, marked only with a broken wooden sword." },
-  { icon: <Axe size={16} />, who: "Logger", attitude: "Neutral", text: "A man is frantically chopping at a tree that seems to be 'bleeding' sap." },
-  { icon: <Activity size={16} />, who: "Wild Dogs", attitude: "Hostile", text: "A pack of mangy hounds circles you, their eyes glowing with a faint hunger." },
-  { icon: <CloudFog size={16} />, who: "Sudden Fog", attitude: "Neutral", text: "A thick bank of mist rolls in, smelling of sulfur and wet dog." },
-  { icon: <UserSearch size={16} />, who: "Escaped Serf", attitude: "Fearful", text: "A ragged man begs for food, claiming he fled a 'farm of flesh' nearby." },
-  { icon: <GhostIcon size={16} />, who: "Standing Stone", attitude: "Bizarre", text: "An ancient monolith vibrates as you pass, whispering in a dead tongue." },
-  { icon: <SunMedium size={16} />, who: "Sunstroke Hermit", attitude: "Bizarre", text: "A naked man is staring directly at the sun, his eyes completely white." },
-  { icon: <Package size={16} />, who: "Lost Supplies", attitude: "Neutral", text: "A crate of iron rations is half-buried in the mud, covered in strange bite marks." },
-  { icon: <Shield size={16} />, who: "Knight Errant", attitude: "Friendly", text: "A knight in rusted armor asks for directions to the nearest place of 'evil'." },
-  { icon: <Zap size={16} />, who: "Lightning Strike", attitude: "Hostile", text: "A sudden bolt of blue lightning hits a nearby tree, igniting it instantly." },
-  { icon: <ArrowRight size={16} />, who: "Fleeing Merchant", attitude: "Fearful", text: "A merchant runs past you, screaming about 'the thing in the well'." },
-  { icon: <Coins size={16} />, who: "The Toll-Bridge", attitude: "Hostile", text: "A bridge troll (actually a very large man with a club) demands a 'luck tax'." },
-  { icon: <Sparkles size={16} />, who: "Fairy Ring", attitude: "Bizarre", text: "A circle of bright purple mushrooms pulse with a soft, rhythmic light." },
-  { icon: <Axe size={16} />, who: "Beast Trap", attitude: "Neutral", text: "You nearly step into a massive iron trap designed for something much bigger than a man." },
-  { icon: <AlertCircle size={16} />, who: "The Harbinger", attitude: "Neutral", text: "A raven with a human tongue perches nearby and croaks: 'Turn back, traveler'." }
-];
-
-const ENCOUNTERS_NIGHT_OUTSIDE = [
-  { icon: <MonsterIcon size={16} />, who: "Gloom-Crawler", attitude: "Hostile", text: "A pale, multi-legged horror scurries across the path and into the brush." },
-  { icon: <Moon size={16} />, who: "Will-o'-Wisp", attitude: "Bizarre", text: "A bobbing blue light leads toward the marsh; you feel a strange urge to follow." },
-  { icon: <Tent size={16} />, who: "The Hidden Camp", attitude: "Wary", text: "A small fire burns in a hollow; a group of mercenaries is sharpening blades." },
-  { icon: <Wind size={16} />, who: "Ghostly Howl", attitude: "Neutral", text: "A howl rises that sounds half-wolf, half-human, and dangerously close." },
-  { icon: <Zap size={16} />, who: "Star-Fall", attitude: "Bizarre", text: "A streak of green fire hits the ground nearby; the impact is silent." },
-  { icon: <Skull size={16} />, who: "The Ossuary", attitude: "Hostile", text: "A pile of bones starts to knit itself together as you draw near." },
-  { icon: <GhostIcon size={16} />, who: "Wandering Shadow", attitude: "Hostile", text: "Your own shadow suddenly detaches and tries to strangle you." },
-  { icon: <Sun size={16} />, who: "Midnight Sun", attitude: "Bizarre", text: "For ten seconds, the sky turns as bright as noon, then plunges back into black." },
-  { icon: <Sword size={16} />, who: "Undead Sentry", attitude: "Hostile", text: "A skeletal warrior in ancient bronze armor blocks the path ahead." },
-  { icon: <Waves size={16} />, who: "The River Hag", attitude: "Wary", text: "A crone is washing bloody clothes in the river, cackling to herself." },
-  { icon: <Compass size={16} />, who: "Lost Explorer", attitude: "Fearful", text: "A man with no eyes asks you for a light, claiming he's been in the dark for years." },
-  { icon: <HeartCrack size={16} />, who: "Weeping Willow", attitude: "Neutral", text: "A tree is literally sobbing; the ground around it is soaked in salty tears." },
-  { icon: <Skull size={16} />, who: "The Feast", attitude: "Hostile", text: "Three ghouls are fighting over the carcass of a giant elk." },
-  { icon: <Sparkles size={16} />, who: "Moonflowers", attitude: "Bizarre", text: "Flowers bloom in the dark, emitting a pollen that makes you feel lightheaded." },
-  { icon: <Activity size={16} />, who: "Earthquake", attitude: "Neutral", text: "The ground heaves and a small fissure opens, venting cold, black air." },
-  { icon: <Dices size={16} />, who: "The Gambler", attitude: "Friendly", text: "A ghost offers to play a game of cards; the prize is 'your soul' or 'gold'." },
-  { icon: <Shield size={16} />, who: "Black Knight", attitude: "Hostile", text: "A rider on a horse of smoke gallops past, leaving a trail of frost." },
-  { icon: <EyeOff size={16} />, who: "The Void", attitude: "Neutral", text: "You step into a patch of absolute silence where no sound can be made." },
-  { icon: <MessageSquareQuote size={16} />, who: "The Whisperer", attitude: "Bizarre", text: "A bush whispers your deepest secret as you pass by." },
-  { icon: <Flame size={16} />, who: "Pyre", attitude: "Neutral", text: "A massive bonfire burns in the distance, surrounded by dancing, horned shapes." }
-];
-
-const ENCOUNTERS_SOCIAL = [
-  { icon: <MessageCircle size={16} />, who: "Grumbling Elder", attitude: "Wary", text: "An old man insists the village was better 'before the light arrived'." },
-  { icon: <Users size={16} />, who: "The Matchmaker", attitude: "Friendly", text: "A local woman tries to set you up with her 'very strong' son or daughter." },
-  { icon: <HandHelping size={16} />, who: "Beggar Priest", attitude: "Neutral", text: "A man in rags asks for a copper to 'save the river from the rot'." },
-  { icon: <Sparkles size={16} />, who: "Travelling Bard", attitude: "Friendly", text: "A singer offers to write a ballad about your deeds for a gold piece." },
-  { icon: <Sword size={16} />, who: "Drunken Soldier", attitude: "Hostile", text: "A veteran challenges you to a duel for 'looking at his scar wrong'." },
-  { icon: <Scale size={16} />, who: "The Magistrate", attitude: "Wary", text: "A stiff man in robes asks for your 'papers' and 'reason for existence'." },
-  { icon: <Search size={16} />, who: "The Inquisitive", attitude: "Friendly", text: "A halfling scholar wants to interview you about your combat experience." },
-  { icon: <Activity size={16} />, who: "Town Crier", attitude: "Neutral", text: "A man shouts that a nearby point of interest is 'now open for looting'." },
-  { icon: <Heart size={16} />, who: "Broken-Hearted", attitude: "Fearful", text: "A villager asks if you've seen their lover who 'went to the river to wash'." },
-  { icon: <Coins size={16} />, who: "The Scoundrel", attitude: "Friendly", text: "A rogue offers to show you a 'secret entrance' to the village warehouse." },
-  { icon: <Wind size={16} />, who: "The Oracle", attitude: "Bizarre", text: "An old man says your future is 'as bright as a guttering candle'." },
-  { icon: <Skull size={16} />, who: "Widow", attitude: "Neutral", text: "A woman in black asks you to carry a message to her dead husband's grave." },
-  { icon: <Crown size={16} />, who: "The Pretender", attitude: "Bizarre", text: "A man in a paper crown demands you kneel to the 'King of the Shadows'." },
-  { icon: <Tag size={16} />, who: "Merchant Rival", attitude: "Wary", text: "A local shopkeeper asks you to 'sabotage' the goods of a competitor." },
-  { icon: <Info size={16} />, who: "The Guide", attitude: "Friendly", text: "A young boy offers to show you the village landmarks for a few silvers." },
-  { icon: <Frown size={16} />, who: "The Pessimist", attitude: "Neutral", text: "A man follows you, listing all the ways you are likely to die today." },
-  { icon: <Meh size={16} />, who: "The Apathetic", attitude: "Neutral", text: "A person stares blankly at you, refusing to acknowledge any question." },
-  { icon: <Shield size={16} />, who: "The Guardian", attitude: "Hostile", text: "A massive dwarf blocks your path, refusing to let you enter 'his' street." },
-  { icon: <Sparkles size={16} />, who: "The Dreamer", attitude: "Bizarre", text: "A girl claims she saw you in a dream, and you were 'covered in spiders'." },
-  { icon: <AlertCircle size={16} />, who: "The Alarmist", attitude: "Fearful", text: "A woman runs through the street screaming that the sky is falling." }
-];
-
 const ENCOUNTERS_MONSTERS = [
   { icon: <MonsterIcon size={16} />, who: "Giant Centipede", attitude: "Hostile", text: "A segmented horror with venomous pincers lunges from a sewer grate." },
   { icon: <GhostIcon size={16} />, who: "Shadow", attitude: "Hostile", text: "A patch of darkness detaches from a wall and reaches for your throat." },
   { icon: <Skull size={16} />, who: "Ghoul", attitude: "Hostile", text: "A rubbery-skinned undead with long claws tries to drag you into an alley." },
   { icon: <Activity size={16} />, who: "Giant Rat", attitude: "Neutral", text: "A rat the size of a dog is chewing on a discarded boot and eyes you warily." },
-  { icon: <MonsterIcon size={16} />, who: "Swarm of Beetles", attitude: "Hostile", text: "Thousands of clicking insects boil out of the ground beneath you." },
-  { icon: <Zap size={16} />, who: "Static Wisp", attitude: "Bizarre", text: "A ball of electricity crackles near your head, singeing your hair." },
-  { icon: <MonsterIcon size={16} />, who: "Gray Ooze", attitude: "Hostile", text: "A puddle of acidic slime moves toward your metal armor with hunger." },
-  { icon: <Skull size={16} />, who: "Skeleton", attitude: "Hostile", text: "A rattling pile of bones rises and draws a rusted bronze shortsword." },
+  { icon: <Bug size={16} />, who: "Swarm of Beetles", attitude: "Hostile", text: "Thousands of clicking insects boil out of the ground beneath you." },
+  { icon: <Spark size={16} />, who: "Static Wisp", attitude: "Bizarre", text: "A ball of electricity crackles near your head, singeing your hair." },
+  { icon: <Droplets size={16} />, who: "Gray Ooze", attitude: "Hostile", text: "A puddle of acidic slime moves toward your metal armor with hunger." },
+  { icon: <Bone size={16} />, who: "Skeleton", attitude: "Hostile", text: "A rattling pile of bones rises and draws a rusted bronze shortsword." },
   { icon: <GhostIcon size={16} />, who: "Poltergeist", attitude: "Hostile", text: "Barrels and crates start flying toward you as an unseen spirit rages." },
-  { icon: <MonsterIcon size={16} />, who: "Giant Spider", attitude: "Hostile", text: "A web drops from above, followed by a bloated, hairy predator." },
+  { icon: <Bug size={16} />, who: "Giant Spider", attitude: "Hostile", text: "A web drops from above, followed by a bloated, hairy predator." },
   { icon: <Skull size={16} />, who: "Zombie", attitude: "Hostile", text: "A bloated, water-logged corpse lurches toward you from the shadows." },
   { icon: <Axe size={16} />, who: "Owlbear Cub", attitude: "Wary", text: "A feathered, beaked beast-ling growls at you; the mother must be near." },
   { icon: <MonsterIcon size={16} />, who: "Harpy", attitude: "Hostile", text: "A screeching humanoid with bird-wings dives from a high landmark." },
   { icon: <GhostIcon size={16} />, who: "Banshee", attitude: "Hostile", text: "A translucent woman begins a mournful wail that chills your blood." },
   { icon: <MonsterIcon size={16} />, who: "Cockatrice", attitude: "Hostile", text: "A small, lizard-like bird attempts to peck at your exposed skin." },
-  { icon: <Skull size={16} />, who: "Lich-Hand", attitude: "Bizarre", text: "A severed skeletal hand scuttles like a crab, trying to trip you." },
-  { icon: <MonsterIcon size={16} />, who: "Rust Monster", attitude: "Neutral", text: "A strange creature with feathery antennae sniffs at your shield." },
-  { icon: <GhostIcon size={16} />, who: "Mimic", attitude: "Hostile", text: "A nearby chest (or door) suddenly grows teeth and attempts to bite." },
+  { icon: <Bone size={16} />, who: "Lich-Hand", attitude: "Bizarre", text: "A severed skeletal hand scuttles like a crab, trying to trip you." },
+  { icon: <Bug size={16} />, who: "Rust Monster", attitude: "Neutral", text: "A strange creature with feathery antennae sniffs at your shield." },
+  { icon: <Castle size={16} />, who: "Mimic", attitude: "Hostile", text: "A nearby chest (or door) suddenly grows teeth and attempts to bite." },
   { icon: <MonsterIcon size={16} />, who: "Gargoyle", attitude: "Hostile", text: "A stone statue on a roof suddenly detaches and swoops down." },
-  { icon: <Skull size={16} />, who: "Deep-One", attitude: "Hostile", text: "A fish-man with a hooked spear climbs out of the river, croaking." }
+  { icon: <Waves size={16} />, who: "Deep-One", attitude: "Hostile", text: "A fish-man with a hooked spear climbs out of the river, croaking." },
+  { icon: <Skull size={16} />, who: "Wight", attitude: "Hostile", text: "A gaunt undead in rotted mail raises a life-draining blade." },
+  { icon: <GhostIcon size={16} />, who: "Wraith", attitude: "Hostile", text: "A flickering spirit passes through a wall, reaching for your soul." },
+  { icon: <Axe size={16} />, who: "Bugbear", attitude: "Hostile", text: "A hairy brute steps from the gloom, mace at the ready." },
+  { icon: <Target size={16} />, who: "Goblin Sniper", attitude: "Hostile", text: "A green figure aims a blowgun from the shadows of a rafter." },
+  { icon: <Users size={16} />, who: "Hobgoblin Phalanx", attitude: "Wary", text: "Disciplined goblinoids in iron plate block the street." },
+  { icon: <Activity size={16} />, who: "Stirges", attitude: "Hostile", text: "1d6 mosquito-like birds dive to drain your blood." },
+  { icon: <MonsterIcon size={16} />, who: "Manticore", attitude: "Hostile", text: "A lion with a human face and bat wings perches on a nearby wall." },
+  { icon: <Axe size={16} />, who: "Minotaur", attitude: "Hostile", text: "A bull-headed giant huffs steam in the alleyway." },
+  { icon: <Bug size={16} />, who: "Carrion Crawler", attitude: "Hostile", text: "A multi-legged worm with paralyzing tentacles crawls across the ceiling." },
+  { icon: <Droplets size={16} />, who: "Black Pudding", attitude: "Hostile", text: "A massive, acidic black blob seeps from a crack in the masonry." },
+  { icon: <GhostIcon size={16} />, who: "Specter", attitude: "Hostile", text: "A howling ghost of a murdered villager swoops toward you." },
+  { icon: <Skull size={16} />, who: "Skeleton Archer", attitude: "Hostile", text: "A pile of bones assembles itself and notches a yellowed arrow." },
+  { icon: <Swords size={16} />, who: "Bandit Chief", attitude: "Hostile", text: "A scarred human with bodyguards demands all your gold." },
+  { icon: <Flame size={16} />, who: "Hellhound", attitude: "Hostile", text: "An obsidian dog with burning eyes exhales black smoke." },
+  { icon: <Spark size={16} />, who: "Will-o'-Wisp", attitude: "Bizarre", text: "A bobbing light leads you toward a dangerous trap." },
+  { icon: <Droplets size={16} />, who: "Gelatinous Cube", attitude: "Hostile", text: "The hallway ahead looks strangely clean; a transparent block awaits." },
+  { icon: <Skull size={16} />, who: "Mummy", attitude: "Hostile", text: "A bandaged figure lurches from a sarcophagus." },
+  { icon: <MonsterIcon size={16} />, who: "Chimera", attitude: "Hostile", text: "A goat, lion, and dragon headed horror roars from the town square." },
+  { icon: <Activity size={16} />, who: "Basilisk", attitude: "Hostile", text: "An eight-legged lizard with a stony gaze crawls into the light." },
+  { icon: <GhostIcon size={16} />, who: "Shadow Demon", attitude: "Hostile", text: "A demon composed of pure darkness detaches from your shadow." },
+  { icon: <Skull size={16} />, who: "Vampire Spawn", attitude: "Friendly", text: "A pale youth asks to be invited into your current location." },
+  { icon: <Axe size={16} />, who: "Ogre", attitude: "Hostile", text: "A lumering brute is chewing on a raw horse leg." },
+  { icon: <MonsterIcon size={16} />, who: "Medusa", attitude: "Wary", text: "A veiled woman stands among lifelike stone statues." },
+  { icon: <Gust size={16} />, who: "Invisible Stalker", attitude: "Hostile", text: "The air chills and footsteps are heard in the dust." },
+  { icon: <Bone size={16} />, who: "Naga", attitude: "Bizarre", text: "A human-headed serpent is sorting a pile of coins." },
+  { icon: <Target size={16} />, who: "Kobold Trapper", attitude: "Fearful", text: "A lizard-like humanoid is resetting a spiked-pit trap." },
+  { icon: <Bug size={16} />, who: "Giant Wasp", attitude: "Hostile", text: "A buzzing drone fills the air as a massive insect dives." },
+  { icon: <Skull size={16} />, who: "Wraith-Knight", attitude: "Hostile", text: "A spectral warrior on a skeletal horse charges through the street." },
+  { icon: <MonsterIcon size={16} />, who: "Ettin", attitude: "Wary", text: "A two-headed giant is arguing with itself over who to eat." },
+  { icon: <Swords size={16} />, who: "Orc Warband", attitude: "Hostile", text: "1d6 gray-skinned warriors surround your group." },
+  { icon: <Skull size={16} />, who: "Death Knight", attitude: "Hostile", text: "A skeletal lord commands a legion of 1d10 zombies." },
+  { icon: <Bug size={16} />, who: "Giant Scorpion", attitude: "Hostile", text: "A chittering horror with a glowing stinger erupts." },
+  { icon: <GhostIcon size={16} />, who: "Blink Dog", attitude: "Neutral", text: "A hound flickers in and out, barking at an unseen threat." },
+  { icon: <Spark size={16} />, who: "Efreeti", attitude: "Hostile", text: "A fire giant emerges from a burning building." },
+  { icon: <MonsterIcon size={16} />, who: "Gorgon", attitude: "Hostile", text: "A metal-plated bull snorts petrifying gas." },
+  { icon: <Droplets size={16} />, who: "Water Weird", attitude: "Hostile", text: "The village fountain forms a serpentine liquid lash." },
+  { icon: <Gust size={16} />, who: "Air Elemental", attitude: "Neutral", text: "A whirlwind tosses carts into the air." },
+  { icon: <Flame size={16} />, who: "Fire Elemental", attitude: "Hostile", text: "A bonfire detaches and begins to sprint toward you." },
+  { icon: <Activity size={16} />, who: "Earth Elemental", attitude: "Hostile", text: "The cobblestones buckle as rock and clay rises up." },
+  { icon: <Spark size={16} />, who: "Vrock Demon", attitude: "Hostile", text: "A vulture-headed demon lets out a stun-inducing screech." },
+  { icon: <Skull size={16} />, who: "Hezrou Demon", attitude: "Hostile", text: "A toad-like demon fills the area with a foul stench." },
+  { icon: <GhostIcon size={16} />, who: "Marilith Demon", attitude: "Hostile", text: "A six-armed serpent woman draws six blades." },
+  { icon: <Swords size={16} />, who: "Glabrezu Demon", attitude: "Wary", text: "A pincer-armed demon offers you a dark wish." },
+  { icon: <Skull size={16} />, who: "Balor Demon", attitude: "Hostile", text: "A winged terror of flame looms over the village." },
+  { icon: <MonsterIcon size={16} />, who: "Beholder-Kin", attitude: "Hostile", text: "A floating eye with stalks peers from a window." },
+  { icon: <Axe size={16} />, who: "Hill Giant", attitude: "Neutral", text: "A massive human is sleeping against a landmark." },
+  { icon: <Target size={16} />, who: "Stone Giant", attitude: "Wary", text: "A giant is stacking large boulders in the square." },
+  { icon: <Gust size={16} />, who: "Cloud Giant", attitude: "Hostile", text: "A giant in silken robes steps from a storm cloud." },
+  { icon: <Spark size={16} />, who: "Storm Giant", attitude: "Bizarre", text: "A titan is playing a harp made of lightning." },
+  { icon: <Droplets size={16} />, who: "Aboleth-Shadow", attitude: "Hostile", text: "A psychic resonance fills your mind as a fish-ghost appears." },
+  { icon: <MonsterIcon size={16} />, who: "Bulette", attitude: "Hostile", text: "The ground explodes as a 'land shark' lunges." },
+  { icon: <Bug size={16} />, who: "Hook Horror", attitude: "Hostile", text: "Clicking sounds precede a beak-headed beast with hooks." },
+  { icon: <Gust size={16} />, who: "Wyvern", attitude: "Hostile", text: "A dragon-kin with a scorpion tail dives from the sky." },
+  { icon: <Bone size={16} />, who: "Hydra", attitude: "Hostile", text: "Five heads snake out from the river, hungry." },
+  { icon: <Flame size={16} />, who: "Red Dragon (Young)", attitude: "Wary", text: "A scarlet beast is sunning itself on the roof." },
+  { icon: <Spark size={16} />, who: "Blue Dragon (Young)", attitude: "Hostile", text: "Electrical arcs leap between the horns of a predator." },
+  { icon: <Activity size={16} />, who: "Green Dragon (Young)", attitude: "Hostile", text: "A dragon exhales chlorine gas over the well." },
+  { icon: <Skull size={16} />, who: "Black Dragon (Young)", attitude: "Hostile", text: "A skull-faced dragon emerges from the dark river." },
+  { icon: <Droplets size={16} />, who: "White Dragon (Young)", attitude: "Hostile", text: "The temperature drops forty degrees as a frost beast lands." },
+  { icon: <Bug size={16} />, who: "Phase Spider", attitude: "Hostile", text: "A spider shifts into the ethereal plane." },
+  { icon: <Spark size={16} />, who: "Chuul", attitude: "Hostile", text: "A lobster-headed horror grabs a PC with pincers." },
+  { icon: <GhostIcon size={16} />, who: "Invisible Beast", attitude: "Hostile", text: "A heavy weight slams into you, but nothing is visible." },
+  { icon: <Skull size={16} />, who: "Bodak", attitude: "Hostile", text: "A gray featureless undead peers at you with a death gaze." },
+  { icon: <Target size={16} />, who: "Displacer Beast", attitude: "Hostile", text: "A six-legged panther appears elsewhere." },
+  { icon: <MonsterIcon size={16} />, who: "Remorhaz", attitude: "Hostile", text: "A centipede of ice and fire melts the cobblestones." },
+  { icon: <Droplets size={16} />, who: "Gibbering Mouther", attitude: "Bizarre", text: "A mass of eyes begins to scream incoherently." },
+  { icon: <Footprints size={16} />, who: "Shambling Mound", attitude: "Hostile", text: "A pile of rot attempts to engulf a resident." },
+  { icon: <Bug size={16} />, who: "Umber Hulk", attitude: "Hostile", text: "A massive insectoid brute bursts through a wall." },
+  { icon: <Skull size={16} />, who: "Shadow Stalker", attitude: "Hostile", text: "A hunter made of darkness tracks your torch." },
+  { icon: <GhostIcon size={16} />, who: "Nightwalker", attitude: "Hostile", text: "A twenty-foot-tall shadow looms over the walls." },
+  { icon: <Bug size={16} />, who: "Ankheg", attitude: "Hostile", text: "A burrowing insect erupts from below." },
+  { icon: <Gust size={16} />, who: "Peryton", attitude: "Hostile", text: "A stag-headed bird dives to rip out a heart." },
+  { icon: <MonsterIcon size={16} />, who: "Grell", attitude: "Hostile", text: "A floating brain attempts to paralyze you." },
+  { icon: <Gust size={16} />, who: "Cloaker", attitude: "Hostile", text: "A leather cloak on a wall suddenly unfurls wings." },
+  { icon: <Droplets size={16} />, who: "Roper", attitude: "Hostile", text: "A fence post suddenly shoots out sticky tentacles." },
+  { icon: <Skull size={16} />, who: "Lich", attitude: "Wary", text: "A skeletal figure is reading a book by a landmark." },
+  { icon: <Gust size={16} />, who: "Behir", attitude: "Hostile", text: "A blue reptile exhales lightning down the street." },
+  { icon: <Droplets size={16} />, who: "Kraken-Limb", attitude: "Hostile", text: "A massive tentacle reaches from the river." },
+  { icon: <Activity size={16} />, who: "Purple Worm", attitude: "Hostile", text: "The village shakes as a fifty-foot worm surfaces." },
+  { icon: <Target size={16} />, who: "The Tarasque-Lite", attitude: "Hostile", text: "A mountain-sized beast is seen walking toward you." }
 ];
 
-// --- Decoding Helpers for raw PCM from Gemini TTS ---
+// --- Decoding Helpers ---
 function decodeBase64(base64: string) {
   const binaryString = atob(base64);
   const bytes = new Uint8Array(binaryString.length);
@@ -412,6 +424,11 @@ const WEATHER_TABLE = [
   "Dramatic shift: roll twice and combine"
 ];
 
+interface DemoOverride {
+  race: string;
+  percent: number;
+}
+
 const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [mapLoading, setMapLoading] = useState(false);
@@ -428,6 +445,16 @@ const App: React.FC = () => {
   const [lastEventRoll, setLastEventRoll] = useState<number | null>(null);
   const [lastHookRoll, setLastHookRoll] = useState<number | null>(null);
   
+  // Demographics Override State
+  const [isOverrideEnabled, setIsOverrideEnabled] = useState(false);
+  const [demoOverrides, setDemoOverrides] = useState<DemoOverride[]>([
+    { race: "Human", percent: 85 },
+    { race: "Halfling", percent: 8 },
+    { race: "Dwarf", percent: 4 },
+    { race: "Elf", percent: 3 }
+  ]);
+  const [showDemoSettings, setShowDemoSettings] = useState(false);
+
   // Encounter Rolls
   const [lastDayInsideRoll, setLastDayInsideRoll] = useState<number | null>(null);
   const [lastNightInsideRoll, setLastNightInsideRoll] = useState<number | null>(null);
@@ -439,7 +466,26 @@ const App: React.FC = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const totalPercent = useMemo(() => demoOverrides.reduce((sum, d) => sum + d.percent, 0), [demoOverrides]);
+
   const calculateDemographics = (total: number) => {
+    if (isOverrideEnabled && totalPercent === 100) {
+      const results: any = { humans: 0, halflings: 0, dwarves: 0, elves: 0, others: [] };
+      demoOverrides.forEach(d => {
+        const count = Math.floor(total * (d.percent / 100));
+        if (d.race.toLowerCase() === 'human') results.humans = count;
+        else if (d.race.toLowerCase() === 'halfling') results.halflings = count;
+        else if (d.race.toLowerCase() === 'dwarf') results.dwarves = count;
+        else if (d.race.toLowerCase() === 'elf') results.elves = count;
+        else results.others.push({ race: d.race, count });
+      });
+      const currentSum = results.humans + results.halflings + results.dwarves + results.elves + results.others.reduce((s: number, o: any) => s + o.count, 0);
+      if (currentSum < total) {
+        if (results.humans > 0) results.humans += (total - currentSum);
+        else results.halflings += (total - currentSum);
+      }
+      return results;
+    }
     const humans = Math.floor(total * 0.85);
     const halflings = Math.floor(total * 0.08);
     const dwarves = Math.floor(total * 0.03);
@@ -449,6 +495,10 @@ const App: React.FC = () => {
   };
 
   const handleGenerate = async () => {
+    if (isOverrideEnabled && totalPercent !== 100) {
+      alert("Demographics must sum to exactly 100% before manifesting.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setPortraitLoading({});
@@ -469,7 +519,7 @@ const App: React.FC = () => {
       setVillage(data);
       setEditableNotes(data.gmNotes || "");
     } catch (err) {
-      setError("The shadows have obscured the path. Try again.");
+      setError("Generation failed.");
     } finally {
       setLoading(false);
     }
@@ -477,7 +527,7 @@ const App: React.FC = () => {
 
   const handleSave = () => {
     if (!village) return;
-    const dataToSave = { ...village, gmNotes: editableNotes };
+    const dataToSave = { ...village, gmNotes: editableNotes, _meta: { isOverrideEnabled, demoOverrides } };
     const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -489,50 +539,46 @@ const App: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleLoadClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleLoadClick = () => fileInputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const loadedData = JSON.parse(event.target?.result as string);
         setVillage(loadedData);
         setEditableNotes(loadedData.gmNotes || "");
-        // Reset rolls on load
-        setLastWeatherRoll(null);
-        setLastEventRoll(null);
-        setLastHookRoll(null);
-        setLastDayInsideRoll(null);
-        setLastNightInsideRoll(null);
-        setLastDayOutsideRoll(null);
-        setLastNightOutsideRoll(null);
-        setLastSocialRoll(null);
-        setLastMonsterRoll(null);
+        if (loadedData._meta) {
+          setIsOverrideEnabled(loadedData._meta.isOverrideEnabled || false);
+          setDemoOverrides(loadedData._meta.demoOverrides || []);
+        }
       } catch (err) {
-        alert("Failed to read the ancient scroll. Is it valid JSON?");
+        alert("Failed to read scroll.");
       }
     };
     reader.readAsText(file);
-    // Reset input so the same file can be loaded twice if needed
     e.target.value = '';
   };
 
   const rollWeather = () => setLastWeatherRoll(Math.floor(Math.random() * 20) + 1);
   const rollEvent = () => setLastEventRoll(Math.floor(Math.random() * 100) + 1);
   const rollHook = () => setLastHookRoll(Math.floor(Math.random() * 100) + 1);
-
-  // Encounter Rolling Functions
   const rollDayInside = () => setLastDayInsideRoll(Math.floor(Math.random() * 20) + 1);
   const rollNightInside = () => setLastNightInsideRoll(Math.floor(Math.random() * 20) + 1);
   const rollDayOutside = () => setLastDayOutsideRoll(Math.floor(Math.random() * 20) + 1);
   const rollNightOutside = () => setLastNightOutsideRoll(Math.floor(Math.random() * 20) + 1);
   const rollSocial = () => setLastSocialRoll(Math.floor(Math.random() * 20) + 1);
-  const rollMonster = () => setLastMonsterRoll(Math.floor(Math.random() * 20) + 1);
+  const rollMonster = () => setLastMonsterRoll(Math.floor(Math.random() * 100) + 1);
+
+  const addOverrideRow = () => setDemoOverrides([...demoOverrides, { race: "New Race", percent: 0 }]);
+  const removeOverrideRow = (idx: number) => setDemoOverrides(demoOverrides.filter((_, i) => i !== idx));
+  const updateOverride = (idx: number, field: keyof DemoOverride, value: string | number) => {
+    const next = [...demoOverrides];
+    next[idx] = { ...next[idx], [field]: value };
+    setDemoOverrides(next);
+  };
 
   const handleGeneratePOI = async () => {
     if (!village || poiLoading) return;
@@ -540,11 +586,7 @@ const App: React.FC = () => {
     try {
       const poiData = await generatePOI(village);
       setVillage({ ...village, poi: poiData });
-    } catch (err) {
-      console.error("POI generation failed", err);
-    } finally {
-      setPoiLoading(false);
-    }
+    } catch (err) { console.error(err); } finally { setPoiLoading(false); }
   };
 
   const handleGeneratePortrait = async (idx: number, npc: DetailedNPC) => {
@@ -555,11 +597,7 @@ const App: React.FC = () => {
       const updatedResidents = [...village.residents];
       updatedResidents[idx] = { ...updatedResidents[idx], portraitUrl: url };
       setVillage({ ...village, residents: updatedResidents });
-    } catch (err) {
-      console.error("Portrait generation failed:", err);
-    } finally {
-      setPortraitLoading(prev => ({ ...prev, [idx]: false }));
-    }
+    } catch (err) { console.error(err); } finally { setPortraitLoading(prev => ({ ...prev, [idx]: false })); }
   };
 
   const handleRollGossip = async () => {
@@ -568,11 +606,7 @@ const App: React.FC = () => {
     try {
       const gossipData = await generateVillageGossip(village);
       setGossip(prev => [...gossipData, ...prev].slice(0, 9));
-    } catch (err) {
-      console.error("Gossip failed", err);
-    } finally {
-      setGossipLoading(false);
-    }
+    } catch (err) { console.error(err); } finally { setGossipLoading(false); }
   };
 
   const handleGenerateMap = async () => {
@@ -581,11 +615,7 @@ const App: React.FC = () => {
     try {
       const url = await generateVillageMap(village);
       setVillage({ ...village, mapUrl: url });
-    } catch (err) {
-      console.error("Map generation failed:", err);
-    } finally {
-      setMapLoading(false);
-    }
+    } catch (err) { console.error(err); } finally { setMapLoading(false); }
   };
 
   const updateBusinessGMNotes = (bIdx: number, newNotes: string) => {
@@ -610,11 +640,7 @@ const App: React.FC = () => {
       source.buffer = buffer;
       source.connect(ctx.destination);
       source.start();
-    } catch (err) {
-      console.error("Voice playback failed", err);
-    } finally {
-      setVoiceLoading(prev => ({ ...prev, [idx]: false }));
-    }
+    } catch (err) { console.error(err); } finally { setVoiceLoading(prev => ({ ...prev, [idx]: false })); }
   };
 
   const getAlignmentDetails = (alignment: string) => {
@@ -633,6 +659,15 @@ const App: React.FC = () => {
       case 'Apathetic': return { icon: <Meh size={24} />, color: 'text-stone-700', bg: 'bg-stone-200', border: 'border-stone-500' };
       case 'Defiant': return { icon: <Shield size={24} />, color: 'text-indigo-900', bg: 'bg-indigo-100', border: 'border-indigo-800' };
       default: return { icon: <Activity size={24} />, color: 'text-stone-900', bg: 'bg-stone-100', border: 'border-stone-800' };
+    }
+  };
+
+  const getRelationTypeDetails = (type: string) => {
+    switch(type) {
+      case 'Good': return { icon: <HandHelping size={18} />, color: 'text-emerald-900', bg: 'bg-emerald-100', border: 'border-emerald-700' };
+      case 'Neutral': return { icon: <Scale size={18} />, color: 'text-stone-900', bg: 'bg-stone-100', border: 'border-stone-700' };
+      case 'Harmful': return { icon: <Swords size={18} />, color: 'text-red-900', bg: 'bg-red-100', border: 'border-red-700' };
+      default: return { icon: <Globe size={18} />, color: 'text-stone-900', bg: 'bg-stone-100', border: 'border-stone-700' };
     }
   };
 
@@ -670,7 +705,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
-      {/* HUD - Not Printed */}
       <div className="max-w-6xl w-full flex flex-col md:flex-row justify-between items-center gap-6 mb-12 no-print">
         <div className="text-center md:text-left">
           <h1 className="text-4xl md:text-5xl font-bold medieval-font text-amber-500 mb-2 flex items-center gap-3">
@@ -680,208 +714,118 @@ const App: React.FC = () => {
           <p className="text-slate-400 italic">"Full Dossier: Lives, Deaths, and Grudges in the Gloom."</p>
         </div>
         <div className="flex flex-wrap gap-4 justify-center">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            className="hidden" 
-            accept=".json"
-          />
-          <button 
-            onClick={handleLoadClick}
-            className="bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"
-          >
-            <FolderOpen size={18} /> Load
-          </button>
-          <button 
-            onClick={handleSave}
-            disabled={!village}
-            className="bg-stone-800 hover:bg-stone-700 disabled:opacity-50 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"
-          >
-            <Save size={18} /> Save
-          </button>
-          <button 
-            onClick={() => window.print()} 
-            className="bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"
-          >
-            <Printer size={18} /> Print
-          </button>
-          <button onClick={handleGenerate} disabled={loading} className="bg-amber-600 hover:bg-amber-700 disabled:bg-slate-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font">
-            {loading ? <RefreshCw className="animate-spin" /> : <Scroll />} Manifest Village
-          </button>
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".json" />
+          <button onClick={() => setShowDemoSettings(!showDemoSettings)} className={`font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50 ${showDemoSettings ? 'bg-amber-600 text-white' : 'bg-stone-800 text-amber-500'}`}><Settings2 size={18} /> Census</button>
+          <button onClick={handleLoadClick} className="bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"><FolderOpen size={18} /> Load</button>
+          <button onClick={handleSave} disabled={!village} className="bg-stone-800 hover:bg-stone-700 disabled:opacity-50 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"><Save size={18} /> Save</button>
+          <button onClick={() => window.print()} className="bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold py-3 px-5 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font border border-amber-900/50"><Printer size={18} /> Print</button>
+          <button onClick={handleGenerate} disabled={loading} className="bg-amber-600 hover:bg-amber-700 disabled:bg-slate-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 text-base medieval-font">{loading ? <RefreshCw className="animate-spin" /> : <Scroll />} Manifest Village</button>
         </div>
       </div>
+
+      {showDemoSettings && (
+        <div className="max-w-xl w-full parchment mb-12 p-6 rounded-sm shadow-2xl border-4 border-dashed border-stone-400 no-print">
+          <div className="flex justify-between items-center mb-6">
+             <h3 className="text-2xl font-bold medieval-font flex items-center gap-2 uppercase tracking-tight text-stone-900"><Users className="w-6 h-6" /> Census Architect</h3>
+             <div className="flex items-center gap-3">
+               <span className="text-xs font-bold uppercase text-stone-600">Manual Override</span>
+               <button onClick={() => setIsOverrideEnabled(!isOverrideEnabled)} className={`w-12 h-6 rounded-full transition-colors relative ${isOverrideEnabled ? 'bg-amber-600' : 'bg-stone-400'}`}><div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isOverrideEnabled ? 'left-7' : 'left-1'}`} /></button>
+             </div>
+          </div>
+          <div className={`space-y-3 transition-opacity ${!isOverrideEnabled ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+            {demoOverrides.map((row, idx) => (
+              <div key={idx} className="flex gap-3 items-center">
+                <input type="text" value={row.race} onChange={(e) => updateOverride(idx, 'race', e.target.value)} className="flex-1 bg-white/50 border-2 border-stone-300 rounded px-3 py-1 text-sm font-bold text-stone-800" placeholder="Race Name" />
+                <div className="flex items-center gap-2 w-24"><input type="number" value={row.percent} onChange={(e) => updateOverride(idx, 'percent', parseInt(e.target.value) || 0)} className="w-full bg-white/50 border-2 border-stone-300 rounded px-2 py-1 text-sm font-bold text-stone-800" /><span className="text-xs font-black text-stone-600">%</span></div>
+                <button onClick={() => removeOverrideRow(idx)} className="text-stone-400 hover:text-red-600 transition-colors"><Trash2 size={16} /></button>
+              </div>
+            ))}
+            <div className="flex justify-between items-center pt-4 mt-4 border-t border-stone-300">
+               <button onClick={addOverrideRow} className="text-xs font-black bg-stone-800 text-amber-500 px-4 py-2 rounded hover:bg-stone-700 flex items-center gap-1 uppercase"><Plus size={14} /> Add Race</button>
+               <div className={`text-lg font-black medieval-font ${totalPercent === 100 ? 'text-emerald-700' : 'text-red-700'}`}>Total: {totalPercent}%</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {village && (
         <div className="w-full max-w-4xl flex flex-col gap-6 relative">
           <div className="parchment p-8 md:p-12 rounded-sm shadow-2xl border-2 border-stone-400/30 relative overflow-visible h-auto">
-            
-            {/* Page 1: Title & Atmospheric Records */}
             <section className="print:print-page-border">
-              <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none no-print">
-                <Skull className="w-96 h-96" />
-              </div>
-
+              <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none no-print"><Skull className="w-96 h-96" /></div>
               <div className="border-b-4 border-double border-stone-800 pb-6 mb-12 text-center">
                 <h2 className="text-7xl font-bold medieval-font mb-2 uppercase tracking-tighter">{village.name}</h2>
-                <div className="flex items-center justify-center gap-4 text-xs font-bold uppercase tracking-[0.2em] opacity-80">
-                  <span>Village Dossier</span>
-                  <div className="w-2 h-2 rounded-full bg-stone-800"></div>
-                  <span>Shadowdark RPG</span>
-                </div>
+                <div className="flex items-center justify-center gap-4 text-xs font-bold uppercase tracking-[0.2em] opacity-80"><span>Village Dossier</span><div className="w-2 h-2 rounded-full bg-stone-800"></div><span>Shadowdark RPG</span></div>
               </div>
-
               <div className="mb-12 flex flex-col md:flex-row gap-8">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase">
-                    <Scroll className="w-6 h-6" /> Narrative Manifest
-                  </div>
-                  <p className="text-2xl italic font-serif leading-relaxed text-stone-900 bg-white/30 p-8 border-l-8 border-stone-800 rounded-r shadow-inner">
-                    "{village.description}"
-                  </p>
-                </div>
-                
-                {/* Morale Widget */}
+                <div className="flex-1"><div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase"><Scroll className="w-6 h-6" /> Narrative Manifest</div><p className="text-2xl italic font-serif leading-relaxed text-stone-900 bg-white/30 p-8 border-l-8 border-stone-800 rounded-r shadow-inner">"{village.description}"</p></div>
                 <div className="w-full md:w-64 break-inside-avoid">
-                  <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase">
-                    <Activity className="w-6 h-6" /> Town Morale
-                  </div>
+                  <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase"><Activity className="w-6 h-6" /> Town Morale</div>
                   {(() => {
                     const details = getMoraleDetails(village.morale);
-                    return (
-                      <div className={`p-6 rounded border-4 flex flex-col items-center justify-center text-center shadow-md ${details.bg} ${details.border} ${details.color}`}>
-                        <div className="mb-2">{details.icon}</div>
-                        <div className="text-2xl font-black medieval-font uppercase tracking-tighter">{village.morale}</div>
-                        <p className="text-[10px] mt-2 font-bold opacity-70 italic">Collective spirit in the wake of gloom.</p>
-                      </div>
-                    );
+                    return (<div className={`p-6 rounded border-4 flex flex-col items-center justify-center text-center shadow-md ${details.bg} ${details.border} ${details.color}`}><div className="mb-2">{details.icon}</div><div className="text-2xl font-black medieval-font uppercase tracking-tighter">{village.morale}</div><p className="text-[10px] mt-2 font-bold opacity-70 italic">Collective spirit in the wake of gloom.</p></div>);
                   })()}
                 </div>
               </div>
 
-              {/* Current Events Section */}
+              {/* Nearby Settlement Relations Section */}
               <div className="mb-12 break-inside-avoid">
                 <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase">
-                  <Calendar className="w-6 h-6" /> Current Events
+                  <Globe className="w-6 h-6" /> Nearby Settlement Relations
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {village.currentEvents.map((event, idx) => (
-                    <div key={idx} className="bg-amber-800/5 p-4 border-l-4 border-amber-900 shadow-sm relative overflow-hidden group">
-                      <div className="text-[10px] font-black text-amber-900/40 mb-1 uppercase">SITUATION {idx + 1}</div>
-                      <p className="text-base italic text-stone-900 font-bold leading-tight">"{event}"</p>
-                      <ZapOff className="absolute -bottom-2 -right-2 w-8 h-8 text-amber-900/10" />
-                    </div>
-                  ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {village.settlementRelations.map((rel, idx) => {
+                    const details = getRelationTypeDetails(rel.type);
+                    return (
+                      <div key={idx} className={`p-4 rounded border-2 shadow-sm ${details.bg} ${details.border} relative overflow-hidden`}>
+                        <div className="flex justify-between items-center mb-2">
+                           <h4 className="font-bold text-stone-950 medieval-font text-lg">{rel.settlementName}</h4>
+                           <div className={`flex items-center gap-1 text-[10px] font-black uppercase ${details.color}`}>
+                             {details.icon} {rel.type}
+                           </div>
+                        </div>
+                        <div className="text-[10px] font-black bg-white/40 px-2 py-0.5 rounded inline-block mb-2 text-stone-800 uppercase tracking-widest">{rel.status}</div>
+                        <p className="text-sm italic leading-tight text-stone-900 font-serif">"{rel.description}"</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
+              <div className="mb-12 break-inside-avoid">
+                <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase"><Calendar className="w-6 h-6" /> Current Events</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {village.currentEvents.map((event, idx) => (<div key={idx} className="bg-amber-800/5 p-4 border-l-4 border-amber-900 shadow-sm relative overflow-hidden group"><div className="text-[10px] font-black text-amber-900/40 mb-1 uppercase">SITUATION {idx + 1}</div><p className="text-base italic text-stone-900 font-bold leading-tight">"{event}"</p><ZapOff className="absolute -bottom-2 -right-2 w-8 h-8 text-amber-900/10" /></div>))}
+                </div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 break-inside-avoid">
                 <div>
-                  <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b border-stone-800 mb-6 pb-1">
-                    <Users className="w-6 h-6" /> Census Data
-                  </h3>
-                  <div className="h-64 w-full bg-white/20 p-4 rounded-lg border border-stone-200">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={chartData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                          {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                        </Pie>
-                        <Legend layout="vertical" align="right" verticalAlign="middle" />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
+                  <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b border-stone-800 mb-6 pb-1"><Users className="w-6 h-6" /> Census Data</h3>
+                  <div className="h-64 w-full bg-white/20 p-4 rounded-lg border border-stone-200"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={chartData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>{chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}</Pie><Tooltip /><Legend layout="vertical" align="right" verticalAlign="middle" /></PieChart></ResponsiveContainer></div>
                 </div>
-
-                <div>
-                  <div className="flex justify-between items-center border-b border-stone-800 mb-4 pb-1">
-                    <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font">
-                      <MapIcon className="w-6 h-6" /> Local Chart
-                    </h3>
-                    <button onClick={handleGenerateMap} className="text-[10px] font-bold bg-stone-800 text-amber-500 px-2 py-1 rounded no-print hover:bg-stone-700">
-                      {mapLoading ? 'Drafting...' : 'Update Map'}
-                    </button>
-                  </div>
-                  <div className="w-full aspect-[16/9] bg-stone-900/10 border-2 border-stone-800 flex items-center justify-center overflow-hidden shadow-md">
-                     {village.mapUrl ? <img src={village.mapUrl} className="w-full h-full object-cover" /> : <div className="text-stone-400 italic">No visual chart drafted.</div>}
-                  </div>
-                </div>
+                <div><div className="flex justify-between items-center border-b border-stone-800 mb-4 pb-1"><h3 className="flex items-center gap-2 text-2xl font-bold medieval-font"><MapIcon className="w-6 h-6" /> Local Chart</h3><button onClick={handleGenerateMap} className="text-[10px] font-bold bg-stone-800 text-amber-500 px-2 py-1 rounded no-print hover:bg-stone-700">{mapLoading ? 'Drafting...' : 'Update Map'}</button></div><div className="w-full aspect-[16/9] bg-stone-900/10 border-2 border-stone-800 flex items-center justify-center overflow-hidden shadow-md">{village.mapUrl ? <img src={village.mapUrl} className="w-full h-full object-cover" /> : <div className="text-stone-400 italic">No visual chart drafted.</div>}</div></div>
               </div>
             </section>
 
-            {/* Page 2: Gossip & Local Records */}
-            <section className="print:print-page-border">
-              <div className="grid grid-cols-1 gap-12 mb-16 break-inside-avoid">
-                 <div className="w-full">
-                   <div className="flex justify-between items-center border-b-2 border-stone-800 mb-4 pb-1">
-                      <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font uppercase">
-                        <Newspaper className="w-6 h-6" /> Tavern Intelligence
-                      </h3>
-                      <button onClick={handleRollGossip} disabled={gossipLoading} className="no-print flex items-center gap-1 text-[10px] bg-amber-900 text-white px-2 py-1 rounded hover:bg-amber-800 uppercase font-black">
-                        <RefreshCw size={10} className={gossipLoading ? 'animate-spin' : ''} /> Refresh Gossip
-                      </button>
-                   </div>
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                     {gossip.length === 0 ? (
-                       <div className="italic text-stone-500 text-sm col-span-3">No tavern talk logged.</div>
-                     ) : gossip.map((item, idx) => (
-                       <div key={idx} className="bg-white/40 p-4 border-l-4 border-amber-800 shadow-sm relative overflow-hidden group">
-                          <p className="text-base italic text-stone-900 leading-tight">"{item}"</p>
-                       </div>
-                     ))}
-                   </div>
-                 </div>
-                 
-                 <div>
-                    <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase">
-                      <CloudFog className="w-6 h-6" /> Regional Status
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="p-6 bg-white/40 border-2 border-stone-800 font-bold italic text-stone-900 text-xl text-center flex items-center justify-center text-stone-950">
-                         {village.weather}
-                      </div>
-                      <div className="text-lg leading-relaxed text-stone-700">
-                         <span className="font-black uppercase text-[10px] block mb-1 opacity-50">Local Geography:</span>
-                         {village.geography}
-                      </div>
-                    </div>
-                 </div>
-              </div>
-            </section>
-
-            {/* NEW: ENCOUNTER HUB SECTION */}
             <section className="page-break-before print:print-page-border">
-              <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-4 flex items-center gap-4 uppercase tracking-wider">
-                <Compass size={36} /> Random Encounter Archives
-              </h3>
-
+              <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-4 flex items-center gap-4 uppercase tracking-wider"><Compass size={36} /> Random Encounter Archives</h3>
               <div className="grid grid-cols-1 gap-12">
-                {/* 1d20 Tables Grid */}
                 {[
-                  { title: "Day: Inside Walls", icon: <Sun size={24} />, roll: lastDayInsideRoll, handler: rollDayInside, table: ENCOUNTERS_DAY_INSIDE },
-                  { title: "Night: Inside Walls", icon: <Moon size={24} />, roll: lastNightInsideRoll, handler: rollNightInside, table: ENCOUNTERS_NIGHT_INSIDE },
-                  { title: "Day: Outside Village", icon: <SunMedium size={24} />, roll: lastDayOutsideRoll, handler: rollDayOutside, table: ENCOUNTERS_DAY_OUTSIDE },
-                  { title: "Night: Outside Village", icon: <CloudRain size={24} />, roll: lastNightOutsideRoll, handler: rollNightOutside, table: ENCOUNTERS_NIGHT_OUTSIDE },
-                  { title: "Social Encounters", icon: <Users size={24} />, roll: lastSocialRoll, handler: rollSocial, table: ENCOUNTERS_SOCIAL },
-                  { title: "Wandering Monsters", icon: <MonsterIcon size={24} />, roll: lastMonsterRoll, handler: rollMonster, table: ENCOUNTERS_MONSTERS }
+                  { title: "Day: Inside Walls", icon: <Sun size={24} />, roll: lastDayInsideRoll, handler: rollDayInside, table: ENCOUNTERS_DAY_INSIDE, size: 20 },
+                  { title: "Night: Inside Walls", icon: <Moon size={24} />, roll: lastNightInsideRoll, handler: rollNightInside, table: ENCOUNTERS_NIGHT_INSIDE, size: 20 },
+                  { title: "Wandering Monsters", icon: <MonsterIcon size={24} />, roll: lastMonsterRoll, handler: rollMonster, table: ENCOUNTERS_MONSTERS, size: 100 }
                 ].map((category, cIdx) => (
                   <div key={cIdx} className="break-inside-avoid">
                     <div className="flex justify-between items-center mb-4 border-b-2 border-stone-800 pb-1">
-                       <h4 className="text-xl font-bold medieval-font uppercase flex items-center gap-2">
-                          {category.icon} {category.title}
-                       </h4>
-                       <button 
-                         onClick={category.handler}
-                         className="no-print bg-stone-800 text-amber-500 hover:bg-stone-700 px-3 py-1 rounded text-[10px] font-black uppercase flex items-center gap-1"
-                       >
-                         <Dices size={12} /> Roll 1d20
-                       </button>
+                       <h4 className="text-xl font-bold medieval-font uppercase flex items-center gap-2">{category.icon} {category.title}</h4>
+                       <button onClick={category.handler} className="no-print bg-stone-800 text-amber-500 hover:bg-stone-700 px-3 py-1 rounded text-[10px] font-black uppercase flex items-center gap-1"><Dices size={12} /> Roll 1d{category.size}</button>
                     </div>
                     <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm">
                        <div className="max-h-[400px] overflow-y-auto custom-scrollbar print:max-h-none print:overflow-visible">
                          <table className="w-full text-left text-sm font-serif">
                             <thead className="bg-stone-800 text-amber-500 text-[10px] font-black sticky top-0 z-10">
                               <tr>
-                                <th className="py-2 px-3 w-12 text-center">d20</th>
+                                <th className="py-2 px-3 w-12 text-center">d{category.size}</th>
                                 <th className="py-2 px-3 w-1/4">Encounter</th>
                                 <th className="py-2 px-3 w-20 text-center">Attitude</th>
                                 <th className="py-2 px-3">Situation Details</th>
@@ -889,19 +833,13 @@ const App: React.FC = () => {
                             </thead>
                             <tbody className="divide-y divide-stone-300">
                               {category.table.map((enc, eIdx) => {
-                                const d20 = eIdx + 1;
-                                const isRolled = category.roll === d20;
+                                const rollVal = eIdx + 1;
+                                const isRolled = category.roll === rollVal;
                                 return (
                                   <tr key={eIdx} className={`transition-colors duration-500 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}>
-                                    <td className="py-2 px-3 text-center border-r border-stone-300 font-black">{d20}</td>
-                                    <td className="py-2 px-3 font-bold flex items-center gap-2">
-                                       <span className="text-stone-500">{enc.icon}</span> {enc.who}
-                                    </td>
-                                    <td className="py-2 px-3 text-center">
-                                       <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${getAttitudeColor(enc.attitude)}`}>
-                                          {enc.attitude}
-                                       </span>
-                                    </td>
+                                    <td className="py-2 px-3 text-center border-r border-stone-300 font-black">{rollVal}</td>
+                                    <td className="py-2 px-3 font-bold flex items-center gap-2"><span className="text-stone-500">{enc.icon}</span> {enc.who}</td>
+                                    <td className="py-2 px-3 text-center"><span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${getAttitudeColor(enc.attitude)}`}>{enc.attitude}</span></td>
                                     <td className="py-2 px-3 italic text-stone-900 leading-snug">{enc.text}</td>
                                   </tr>
                                 );
@@ -915,487 +853,45 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* 1d100 ADDITIONAL VILLAGE EVENTS TABLE */}
             <section className="page-break-before print:print-page-border">
-              <div className="flex flex-col md:flex-row justify-between items-center border-b-4 border-stone-800 mb-8 pb-4 gap-4">
-                <h3 className="text-4xl font-bold medieval-font flex items-center gap-4 uppercase tracking-wider border-none p-0">
-                  <Activity size={36} /> 1d100 Additional Village Events
-                </h3>
-                <button 
-                  onClick={rollEvent}
-                  className="no-print bg-amber-600 hover:bg-amber-700 text-white font-black py-2 px-6 rounded flex items-center gap-2 uppercase tracking-tighter shadow-lg transition-transform active:scale-95"
-                >
-                  <Dices size={20} /> Roll d100
-                </button>
-              </div>
-
-              <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm overflow-hidden h-auto">
-                <div className="max-h-[600px] overflow-y-auto custom-scrollbar print:max-h-none print:overflow-visible">
-                  <table className="w-full text-left text-sm font-serif">
-                    <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black sticky top-0 z-10">
-                      <tr>
-                        <th className="py-3 px-4 w-16 text-amber-500">d100</th>
-                        <th className="py-3 px-4 text-amber-500">The Gritty Occurrence</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-stone-300">
-                      {VILLAGE_EVENTS.map((event, idx) => {
-                        const d100 = idx + 1;
-                        const isRolled = lastEventRoll === d100;
-                        return (
-                          <tr 
-                            key={idx} 
-                            className={`transition-colors duration-500 text-stone-950 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}
-                          >
-                            <td className="py-2 px-4 font-black border-r border-stone-300">{d100}</td>
-                            <td className="py-2 px-4 italic font-bold leading-snug">{event}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <p className="mt-4 text-[10px] italic text-stone-600 font-bold text-right no-print">
-                "Roll d100 whenever the narrative slows or a day passes."
-              </p>
-            </section>
-
-            {/* 1d100 PC HOOKS TABLE */}
-            <section className="page-break-before print:print-page-border">
-              <div className="flex flex-col md:flex-row justify-between items-center border-b-4 border-stone-800 mb-8 pb-4 gap-4">
-                <h3 className="text-4xl font-bold medieval-font flex items-center gap-4 uppercase tracking-wider border-none p-0">
-                  <MapPinned size={36} /> 1d100 PC Ties & Hooks
-                </h3>
-                <button 
-                  onClick={rollHook}
-                  className="no-print bg-amber-600 hover:bg-amber-700 text-white font-black py-2 px-6 rounded flex items-center gap-2 uppercase tracking-tighter shadow-lg transition-transform active:scale-95"
-                >
-                  <Dices size={20} /> Roll d100
-                </button>
-              </div>
-
-              <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm overflow-hidden h-auto">
-                <div className="max-h-[600px] overflow-y-auto custom-scrollbar print:max-h-none print:overflow-visible">
-                  <table className="w-full text-left text-sm font-serif">
-                    <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black sticky top-0 z-10">
-                      <tr>
-                        <th className="py-3 px-4 w-16 text-amber-500">d100</th>
-                        <th className="py-3 px-4 text-amber-500">The Reason You Are Here</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-stone-300">
-                      {PC_HOOKS.map((hook, idx) => {
-                        const d100 = idx + 1;
-                        const isRolled = lastHookRoll === d100;
-                        return (
-                          <tr 
-                            key={idx} 
-                            className={`transition-colors duration-500 text-stone-950 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}
-                          >
-                            <td className="py-2 px-4 font-black border-r border-stone-300">{d100}</td>
-                            <td className="py-2 px-4 italic font-bold leading-snug">{hook}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <p className="mt-4 text-[10px] italic text-stone-600 font-bold text-right no-print">
-                "Roll d100 for each player character to establish their connection to the village."
-              </p>
-            </section>
-
-            {/* Page 3: Establishments & Commerce */}
-            <section className="page-break-before print:print-page-border">
-              <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 flex items-center gap-2 uppercase tracking-wider">
-                <Briefcase size={28} /> Establishment Records
-              </h3>
+              <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 flex items-center gap-2 uppercase tracking-wider"><Briefcase size={28} /> Establishment Records</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
                 {village.businesses.map((business, bIdx) => (
                   <div key={bIdx} className="p-6 bg-white/50 border-2 border-stone-300 rounded shadow-md break-inside-avoid relative overflow-visible">
-                    <div className="flex justify-between items-start mb-4">
-                      <h4 className="font-bold text-stone-900 medieval-font text-2xl uppercase tracking-tighter">{business.name}</h4>
-                      <span className="text-[10px] font-black bg-stone-800 text-white px-3 py-1 rounded uppercase">{business.type}</span>
-                    </div>
+                    <div className="flex justify-between items-start mb-4"><h4 className="font-bold text-stone-900 medieval-font text-2xl uppercase tracking-tighter">{business.name}</h4><span className="text-[10px] font-black bg-stone-800 text-white px-3 py-1 rounded uppercase">{business.type}</span></div>
                     <p className="text-xs italic text-stone-600 mb-3 border-b border-stone-200 pb-2">Proprietor: <span className="font-bold text-stone-900">{business.owner.name}</span></p>
                     <p className="text-base text-stone-700 mb-4 leading-relaxed font-serif">{business.description}</p>
-                    
                     <div className="space-y-4">
-                      <div className="bg-amber-100/60 p-3 rounded border-l-4 border-amber-800 shadow-inner">
-                        <p className="text-[10px] font-black text-amber-900 uppercase mb-1">Local Rumor</p>
-                        <p className="text-sm italic text-amber-900 leading-tight">"{business.rumor}"</p>
-                      </div>
-                      
-                      <div className="p-4 border-2 border-dashed border-stone-400 rounded bg-white/40">
-                        <label className="text-[9px] font-black text-stone-500 uppercase block mb-2 flex items-center gap-1">
-                          <Edit2 size={10} /> GM Establishment Notes
-                        </label>
-                        <textarea 
-                          className="w-full text-base bg-transparent border-none focus:ring-0 italic text-stone-800 min-h-[80px] resize-none leading-relaxed"
-                          placeholder="Record shop secrets here..."
-                          value={business.gmNotes}
-                          onChange={(e) => updateBusinessGMNotes(bIdx, e.target.value)}
-                        />
-                      </div>
+                      <div className="bg-amber-100/60 p-3 rounded border-l-4 border-amber-800 shadow-inner"><p className="text-[10px] font-black text-amber-900 uppercase mb-1">Local Rumor</p><p className="text-sm italic text-amber-900 leading-tight">"{business.rumor}"</p></div>
+                      <div className="p-4 border-2 border-dashed border-stone-400 rounded bg-white/40"><label className="text-[9px] font-black text-stone-500 uppercase block mb-2 flex items-center gap-1"><Edit2 size={10} /> GM Establishment Notes</label><textarea className="w-full text-base bg-transparent border-none focus:ring-0 italic text-stone-800 min-h-[80px] resize-none leading-relaxed" placeholder="Record shop secrets here..." value={business.gmNotes} onChange={(e) => updateBusinessGMNotes(bIdx, e.target.value)} /></div>
                     </div>
                   </div>
                 ))}
               </div>
             </section>
 
-            {/* Page 4: Hooks & Nearby Hazards */}
             <section className="page-break-before print:print-page-border">
-              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-1 uppercase tracking-wider flex items-center gap-2">
-                <Swords size={28} /> Campaign Hooks & Points of Interest
-              </h3>
-              
+              <h3 className="text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-1 uppercase tracking-wider flex items-center gap-2"><Swords size={28} /> Campaign Hooks & Points of Interest</h3>
               <div className="grid grid-cols-1 gap-12 mb-12">
                 <div className="break-inside-avoid">
                   <h4 className="text-xl font-bold medieval-font mb-4 flex items-center gap-2"><Castle /> Landmarks</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {village.landmarks.map((l, i) => (
-                      <div key={i} className="p-5 bg-white/40 border-2 border-stone-300 rounded shadow-sm break-inside-avoid">
-                        <h5 className="font-bold text-stone-900 medieval-font text-xl mb-1">{l.name}</h5>
-                        <p className="text-sm italic text-stone-600 mb-4 leading-snug">{l.description}</p>
-                        <div className="bg-amber-800/10 p-3 rounded text-sm font-bold text-amber-900 border-l-4 border-amber-900 italic">
-                          "{l.encounterHook}"
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">{village.landmarks.map((l, i) => (<div key={i} className="p-5 bg-white/40 border-2 border-stone-300 rounded shadow-sm break-inside-avoid"><h5 className="font-bold text-stone-900 medieval-font text-xl mb-1">{l.name}</h5><p className="text-sm italic text-stone-600 mb-4 leading-snug">{l.description}</p><div className="bg-amber-800/10 p-3 rounded text-sm font-bold text-amber-900 border-l-4 border-amber-900 italic">"{l.encounterHook}"</div></div>))}</div>
                 </div>
-
                 <div className="break-inside-avoid">
                   <h4 className="text-xl font-bold medieval-font mb-4 flex items-center gap-2"><Scroll /> Local Quests</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     {village.mainQuests.map((q, i) => (
-                       <div key={i} className="p-4 bg-stone-800/5 border-l-8 border-stone-800 rounded-r shadow-sm">
-                          <h5 className="font-bold text-base text-stone-900 uppercase tracking-tighter mb-1">{q.title}</h5>
-                          <p className="text-sm italic text-stone-600 mb-2 leading-tight">{q.description}</p>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black bg-stone-800 text-amber-400 px-3 py-1 rounded-full uppercase">Reward: {q.reward}</span>
-                          </div>
-                       </div>
-                     ))}
-                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{village.mainQuests.map((q, i) => (<div key={i} className="p-4 bg-stone-800/5 border-l-8 border-stone-800 rounded-r shadow-sm"><h5 className="font-bold text-base text-stone-900 uppercase tracking-tighter mb-1">{q.title}</h5><p className="text-sm italic text-stone-600 mb-2 leading-tight">{q.description}</p><div className="flex items-center gap-2"><span className="text-[10px] font-black bg-stone-800 text-amber-400 px-3 py-1 rounded-full uppercase">Reward: {q.reward}</span></div></div>))}</div>
                 </div>
               </div>
-
-              {/* Session In A Box Sub-section */}
-              <div className="page-break-before">
-                <div className="flex justify-between items-center border-b-2 border-stone-800 mb-6 pb-2">
-                  <h4 className="text-2xl font-bold medieval-font uppercase tracking-wider flex items-center gap-2">
-                    <Binoculars size={24} /> Nearby Crawl: Session in a Box
-                  </h4>
-                  {!village.poi && (
-                    <button 
-                      onClick={handleGeneratePOI} 
-                      disabled={poiLoading}
-                      className="no-print flex items-center gap-1 text-[10px] bg-amber-900 text-white px-4 py-2 rounded hover:bg-amber-800 uppercase font-black"
-                    >
-                      {poiLoading ? <RefreshCw className="animate-spin" /> : <Mountain size={14} />} Scout Terrain
-                    </button>
-                  )}
-                </div>
-
-                {poiLoading && (
-                  <div className="p-16 text-center animate-pulse">
-                    <GhostIcon className="w-16 h-16 mx-auto text-stone-400 mb-4" />
-                    <p className="text-xl stone-500 italic font-serif">Surveying hidden hazards...</p>
-                  </div>
-                )}
-
-                {village.poi && (
-                  <div className="space-y-8">
-                    <div className="bg-stone-800/10 p-8 border-l-8 border-stone-800 break-inside-avoid shadow-inner">
-                      <div className="flex justify-between items-start mb-4">
-                        <h5 className="text-4xl font-bold medieval-font leading-none">{village.poi.title}</h5>
-                        <span className="text-xs font-black bg-stone-800 text-white px-4 py-1 rounded uppercase">{village.poi.type}</span>
-                      </div>
-                      <p className="text-sm font-bold text-stone-600 mb-4 flex items-center gap-1"><MapPin size={14} /> {village.poi.location}</p>
-                      <p className="text-lg italic text-stone-800 leading-relaxed font-serif bg-white/30 p-4 rounded">"{village.poi.background}"</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                      {village.poi.rooms.map((room, idx) => (
-                        <div key={idx} className="bg-white/60 border-2 border-stone-400 p-4 rounded-sm shadow-md break-inside-avoid flex flex-col">
-                          <div className="text-[10px] font-black text-stone-400 mb-1">CHAMBER {room.number}</div>
-                          <h6 className="font-bold text-stone-900 text-sm uppercase mb-3 border-b-2 border-stone-800 pb-1">{room.name}</h6>
-                          <div className="space-y-4 flex-1">
-                             <div>
-                               <p className="text-[10px] font-black text-stone-500 uppercase flex items-center gap-1"><EyeOff size={10} /> Sense</p>
-                               <p className="text-xs italic leading-tight text-stone-700">{room.description}</p>
-                             </div>
-                             <div>
-                               <p className="text-[10px] font-black text-red-900 uppercase flex items-center gap-1"><Skull size={10} /> Threat</p>
-                               <p className="text-xs leading-tight text-red-800 font-bold">{room.threats}</p>
-                             </div>
-                             <div className="mt-auto pt-4">
-                               <p className="text-[10px] font-black text-amber-900 uppercase flex items-center gap-1"><Coins size={10} /> Loot</p>
-                               <p className="text-xs leading-tight text-amber-900 font-black bg-amber-100 p-2 rounded">{room.treasure}</p>
-                             </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
             </section>
 
-            {/* Page 5: Ledger Table */}
-            <section className="page-break-before print:print-page-border">
-              <h3 className="text-3xl font-bold medieval-font border-b-4 border-double border-stone-800 mb-8 pb-4 flex items-center gap-2 uppercase tracking-wider">
-                <Coins size={32} /> Marketplace Ledger
-              </h3>
-              <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm">
-                <table className="w-full text-left text-sm font-serif">
-                  <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black">
-                    <tr>
-                      <th className="py-3 px-4 text-amber-500">Commodity Manifest</th>
-                      <th className="py-3 px-4 text-amber-500">Appraised Price</th>
-                      <th className="py-3 px-4 text-amber-500">Availability</th>
-                      <th className="py-3 px-4 text-amber-500">Vendor</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y-2 divide-stone-300">
-                    {village.businesses.flatMap(b => b.marketItems.map((item, idx) => (
-                      <tr key={`${b.name}-${idx}`} className="break-inside-avoid group text-stone-950 font-bold">
-                        <td className="py-4 px-4 align-top">
-                          <div className="font-bold text-stone-900 text-base mb-1">{item.name}</div>
-                          <div className="text-[10px] font-normal text-stone-700 italic leading-tight">{item.description}</div>
-                        </td>
-                        <td className="py-4 px-4 align-top italic font-bold text-lg text-amber-900 whitespace-nowrap">{item.price}</td>
-                        <td className="py-4 px-4 align-top">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${item.availability === 'Common' ? 'bg-emerald-200 text-emerald-900' : 'bg-rose-200 text-rose-900'}`}>
-                            {item.availability}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 align-top text-stone-700 text-xs font-black uppercase">{b.name}</td>
-                      </tr>
-                    )))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+            <section className="page-break-before bg-stone-900 text-stone-100 p-12 border-8 border-double border-red-900 shadow-2xl relative overflow-visible break-inside-avoid"><h3 className="text-4xl font-bold medieval-font mb-6 text-red-500 flex items-center gap-3 border-none pb-0 uppercase tracking-tighter"><Skull className="w-12 h-12" /> The Black Secret</h3><p className="text-3xl italic font-serif leading-relaxed text-red-200">{village.darkSecret}</p><div className="absolute top-2 right-4 text-[10px] font-black uppercase tracking-[0.5em] opacity-30">Eyes Only</div></section>
 
-            {/* DM Secrets */}
-            <section className="page-break-before bg-stone-900 text-stone-100 p-12 border-8 border-double border-red-900 shadow-2xl relative overflow-visible break-inside-avoid">
-              <h3 className="text-4xl font-bold medieval-font mb-6 text-red-500 flex items-center gap-3 border-none pb-0 uppercase tracking-tighter">
-                <Skull className="w-12 h-12" /> The Black Secret
-              </h3>
-              <p className="text-3xl italic font-serif leading-relaxed text-red-200">{village.darkSecret}</p>
-              <div className="absolute top-2 right-4 text-[10px] font-black uppercase tracking-[0.5em] opacity-30">Eyes Only</div>
-            </section>
-
-            {/* WEATHER TABLE SECTION */}
-            <section className="page-break-before print:print-page-border">
-              <div className="flex flex-col md:flex-row justify-between items-center border-b-4 border-stone-800 mb-8 pb-4 gap-4">
-                <h3 className="text-4xl font-bold medieval-font flex items-center gap-4 uppercase tracking-wider border-none p-0">
-                  <CloudRain size={36} /> Weather Patterns
-                </h3>
-                <button 
-                  onClick={rollWeather}
-                  className="no-print bg-amber-600 hover:bg-amber-700 text-white font-black py-2 px-6 rounded flex items-center gap-2 uppercase tracking-tighter shadow-lg transition-transform active:scale-95"
-                >
-                  <Dices size={20} /> Roll d20
-                </button>
-              </div>
-
-              <div className="bg-white/40 p-1 border-2 border-stone-800 rounded-sm">
-                <table className="w-full text-left text-sm font-serif">
-                  <thead className="bg-stone-800 text-amber-500 uppercase text-[10px] font-black">
-                    <tr>
-                      <th className="py-3 px-4 w-16 text-amber-500">d20</th>
-                      <th className="py-3 px-4 text-amber-500">Weather Manifestation</th>
-                      <th className="py-3 px-4 no-print text-amber-500">Effect Category</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-300">
-                    {WEATHER_TABLE.map((weather, idx) => {
-                      const d20 = idx + 1;
-                      const isRolled = lastWeatherRoll === d20;
-                      return (
-                        <tr 
-                          key={idx} 
-                          className={`transition-colors duration-500 text-stone-950 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}
-                        >
-                          <td className="py-2 px-4 font-black border-r border-stone-300">{d20}</td>
-                          <td className="py-2 px-4 italic font-bold">{weather}</td>
-                          <td className="py-2 px-4 no-print">
-                            {d20 <= 4 && <span className="text-[10px] font-black text-emerald-800 uppercase flex items-center gap-1"><Sun size={12}/> Clear</span>}
-                            {d20 >= 5 && d20 <= 10 && <span className="text-[10px] font-black text-blue-800 uppercase flex items-center gap-1"><CloudRain size={12}/> Precipitation</span>}
-                            {d20 >= 11 && d20 <= 12 && <span className="text-[10px] font-black text-stone-800 uppercase flex items-center gap-1"><Wind size={12}/> Wind</span>}
-                            {d20 >= 13 && d20 <= 18 && <span className="text-[10px] font-black text-indigo-900 uppercase flex items-center gap-1"><ThermometerSnowflake size={12}/> Extremes</span>}
-                            {d20 >= 19 && <span className="text-[10px] font-black text-red-900 uppercase flex items-center gap-1"><Zap size={12}/> Anomalous</span>}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <p className="mt-4 text-[10px] italic text-stone-600 font-bold text-right no-print">
-                "Roll d20 once per game day or whenever travel resumes."
-              </p>
-            </section>
-
-            {/* RESIDENTS SECTION */}
-            <section className="page-break-before print:print-page-border">
-              <div className="flex flex-col md:flex-row justify-between items-end border-b-4 border-stone-800 mb-12 pb-4 gap-4">
-                <h3 className="text-4xl font-bold medieval-font flex items-center gap-2 uppercase tracking-wider border-none p-0">
-                  <UserCircle size={36} /> Master Resident Dossiers
-                </h3>
-                
-                <div className="no-print relative mb-1">
-                  <Search className="absolute left-2 top-2 w-4 h-4 text-stone-400" />
-                  <input 
-                    type="text" placeholder="Filter residents..." 
-                    className="pl-8 py-2 text-sm bg-white border-2 border-stone-300 rounded focus:ring-2 focus:ring-amber-500 outline-none"
-                    onChange={(e) => setNpcFilter(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-16">
-                {village.residents.filter(r => r.name.toLowerCase().includes(npcFilter.toLowerCase())).map((npc, idx) => {
-                  const standing = getStandingCategory(npc);
-                  const alignDetails = getAlignmentDetails(npc.alignment);
-                  return (
-                    <div key={idx} className="p-10 border-4 border-stone-800 bg-white/40 rounded-sm shadow-2xl relative group break-inside-avoid overflow-visible npc-card-print">
-                      <div className="flex flex-col md:flex-row gap-10">
-                        <div className="w-full md:w-1/3 flex flex-col items-center text-center">
-                          <div className="relative w-full aspect-square bg-stone-800/10 mb-8 rounded-sm shadow-lg border-2 border-stone-800 overflow-hidden group/portrait">
-                            {npc.portraitUrl ? (
-                              <img src={npc.portraitUrl} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                {portraitLoading[idx] ? (
-                                  <RefreshCw className="w-16 h-16 animate-spin text-amber-600" />
-                                ) : (
-                                  <UserCircle className="w-full h-full opacity-10 p-4" />
-                                )}
-                              </div>
-                            )}
-
-                            {!portraitLoading[idx] && (
-                              <button 
-                                onClick={() => handleGeneratePortrait(idx, npc)}
-                                className={`absolute inset-0 bg-stone-900/80 transition-opacity flex flex-col items-center justify-center gap-3 text-amber-400 font-bold medieval-font no-print ${npc.portraitUrl ? 'opacity-0 group-hover/portrait:opacity-100' : 'opacity-100'}`}
-                              >
-                                <Wand2 className="w-10 h-10" />
-                                <span className="text-lg">Manifest Portrait</span>
-                              </button>
-                            )}
-
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); playVoice(idx, npc); }}
-                              className="absolute bottom-4 right-4 p-4 bg-amber-600 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all no-print disabled:opacity-50 z-10"
-                              disabled={voiceLoading[idx]}
-                            >
-                              {voiceLoading[idx] ? <RefreshCw className="animate-spin" size={24} /> : <Volume2 size={24} />}
-                            </button>
-                          </div>
-                          
-                          <h4 className="text-4xl font-bold medieval-font leading-none uppercase tracking-tighter mb-2">{npc.name}</h4>
-                          <p className="text-xs font-black text-stone-500 uppercase tracking-widest mb-4">
-                             {npc.sex} • {npc.race} • {npc.role}
-                          </p>
-                          
-                          <div className="flex flex-col gap-3 w-full px-4">
-                            <div className={`text-xs font-black px-4 py-2 bg-white rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${standing.color}`}>
-                               {standing.icon} {standing.label}
-                            </div>
-                            <div className={`text-xs font-black px-4 py-2 ${alignDetails.bg} rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${alignDetails.color}`}>
-                               {alignDetails.icon} {npc.alignment}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex-1">
-                           <div className="grid grid-cols-1 gap-10">
-                              <div>
-                                 <h5 className="text-xs font-black uppercase text-stone-400 mb-3 tracking-[0.2em]">Psychological Profile</h5>
-                                 <p className="italic text-xl text-stone-800 border-l-8 border-stone-800 pl-6 mb-6 leading-relaxed font-serif">"{npc.personality}"</p>
-                                 
-                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                                    <div className="px-4 py-2 bg-indigo-800 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase">
-                                       <Goal size={12} /> {npc.motivation}
-                                    </div>
-                                    <div className="px-4 py-2 bg-stone-800 text-amber-400 text-xs font-bold rounded flex items-center justify-center gap-2 uppercase">
-                                       <Fingerprint size={12} /> {npc.trait}
-                                    </div>
-                                    <div className="px-4 py-2 bg-rose-900 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase">
-                                       <Shield size={12} /> AC {npc.stats.ac} | HP {npc.stats.hp}
-                                    </div>
-                                 </div>
-                                 
-                                 <div className="bg-red-50/80 p-4 border-2 border-red-200 rounded-sm">
-                                    <h6 className="text-[10px] font-black text-red-900 uppercase mb-2 tracking-widest">Alignment Shadow Secret</h6>
-                                    <p className="text-sm italic text-red-800 font-serif leading-snug">{npc.secret}</p>
-                                 </div>
-                              </div>
-
-                              <div>
-                                 <h5 className="text-xs font-black uppercase text-stone-400 mb-4 tracking-[0.2em]">Social Influence Matrix</h5>
-                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] md:max-h-none overflow-y-auto pr-2 custom-scrollbar print:max-h-none print:overflow-visible h-auto">
-                                    {npc.relationships.map((rel, ridx) => {
-                                       const styles = getRelationshipStyles(rel.score);
-                                       return (
-                                          <div key={ridx} className={`p-3 rounded border-2 transition-all duration-500 ${styles.bg} ${styles.border} ${styles.effects} break-inside-avoid flex flex-col justify-between shadow-sm`}>
-                                             <div className="flex justify-between font-black text-[10px] uppercase mb-1 items-center gap-1">
-                                                <span className="flex items-center gap-1.5 truncate">
-                                                   <span className="flex-shrink-0">{styles.icon}</span> 
-                                                   <span className="truncate">{rel.targetName}</span>
-                                                </span>
-                                                <span className={`${styles.text} whitespace-nowrap bg-white/50 px-1 rounded`}>{rel.score} • {rel.feeling}</span>
-                                             </div>
-                                             <p className="italic text-xs opacity-80 leading-tight font-serif text-stone-950 font-bold">"{rel.reason}"</p>
-                                          </div>
-                                       );
-                                    })}
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* FINAL PAGE: GM ARCHIVE */}
-            <section className="page-break-before print:print-page-border no-print:hidden break-inside-avoid h-auto overflow-visible">
-              <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-4 uppercase tracking-wider">
-                <BookOpen size={36} /> Campaign Chronicle
-              </h3>
-              <div className="p-10 bg-white/40 border-4 border-dashed border-stone-400 rounded-sm h-auto min-h-[400px]">
-                 <textarea 
-                  className="w-full h-full min-h-[400px] bg-transparent focus:ring-0 border-none italic text-2xl font-serif text-stone-800 leading-relaxed outline-none resize-none"
-                  placeholder="The chronicle of your deeds begins here..."
-                  value={editableNotes}
-                  onChange={(e) => setEditableNotes(e.target.value)}
-                 />
-              </div>
-            </section>
+            <section className="page-break-before print:print-page-border no-print:hidden break-inside-avoid h-auto overflow-visible"><h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-4 uppercase tracking-wider"><BookOpen size={36} /> Campaign Chronicle</h3><div className="p-10 bg-white/40 border-4 border-dashed border-stone-400 rounded-sm h-auto min-h-[400px]"><textarea className="w-full h-full min-h-[400px] bg-transparent focus:ring-0 border-none italic text-2xl font-serif text-stone-800 leading-relaxed outline-none resize-none" placeholder="The chronicle of your deeds begins here..." value={editableNotes} onChange={(e) => setEditableNotes(e.target.value)} /></div></section>
           </div>
         </div>
       )}
 
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="fixed inset-0 bg-stone-900/95 z-50 flex items-center justify-center flex-col gap-6 p-12">
-          <div className="relative">
-            <Flame className="w-32 h-32 text-amber-500 animate-pulse" />
-            <RefreshCw className="w-32 h-32 text-amber-600 animate-spin absolute top-0 left-0 opacity-20" />
-          </div>
-          <h2 className="text-4xl medieval-font text-amber-500 text-center uppercase tracking-widest">Drafting the Dossier...</h2>
-          <p className="text-stone-400 italic text-center max-w-md text-lg">Weaving alliances, stocking the market, and unearthing deep-seated grudges across the Shadowdark.</p>
-        </div>
-      )}
+      {loading && (<div className="fixed inset-0 bg-stone-900/95 z-50 flex items-center justify-center flex-col gap-6 p-12"><div className="relative"><Flame className="w-32 h-32 text-amber-500 animate-pulse" /><RefreshCw className="w-32 h-32 text-amber-600 animate-spin absolute top-0 left-0 opacity-20" /></div><h2 className="text-4xl medieval-font text-amber-500 text-center uppercase tracking-widest">Drafting the Dossier...</h2><p className="text-stone-400 italic text-center max-w-md text-lg">Weaving alliances, stocking the market, and unearthing deep-seated grudges across the Shadowdark.</p></div>)}
     </div>
   );
 };

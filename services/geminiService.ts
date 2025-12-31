@@ -16,37 +16,20 @@ export const generateVillageDetails = async (
     
     REQUIRED DATA:
     1. Geography: Moody description of the site by a river.
-    2. Description: Elaborate on the general mood and prevalent dangers of the village (Shadowdark style). This should be a 2-3 sentence overview that sets the scene for the GM.
+    2. Description: Elaborate on the general mood and prevalent dangers of the village (Shadowdark style).
     3. Dark Secret: The village's core rot or hidden horror.
-    4. Morale: A single metric representing the collective spirit. Must be exactly one of: 'Hopeful', 'Fearful', 'Resentful', 'Apathetic', 'Defiant'. This should be heavily influenced by the dark secret and current dangers.
+    4. Morale: A single metric ('Hopeful', 'Fearful', 'Resentful', 'Apathetic', 'Defiant').
     5. Weather: A single short thematic phrase.
-    6. Exactly 12 Businesses: 
-       - Gritty names, rumors.
-       - encounterHook: 1-2 sentences.
-       - gmNotes: 1-2 sentences of DM-only secrets or plot hooks specific to this location.
-       - marketItems: Exactly 5 specific items for sale. Each must have:
-         - name, 
-         - price (Shadowdark style: "5 gp", "10 sp", "5 cp"),
-         - availability ("Common", "Rare", "Scarce"),
-         - description.
-    7. Two major landmarks: name, description, encounterHook.
-    8. Exactly 15 NPCs: 12 shop owners + 3 others. 
-       - FOR EACH NPC: name, race, sex, role, personality, trait, alignment, motivation, dark secret.
-       - MOTIVATION: A brief (2-5 words) primary drive or goal (e.g., 'Protect family', 'Seek revenge', 'Accumulate wealth', 'Survive', 'Uncover ancient truth'). This MUST be reflected in their relationships and secret.
-       - SEX: Must be 'Male' or 'Female'.
-       - ALIGNMENT: Must be 'Lawful', 'Neutral', or 'Chaotic'.
-       - THEMATIC CONSISTENCY: The NPC's personality, secret, and motivation MUST reflect their alignment. 
-         - Lawful secrets involve rigid codes, cults of order, or oppressive law.
-         - Chaotic secrets involve madness, entropy, or rebellion.
-         - Neutral secrets involve survival, greed, or apathy.
-       - SHADOWDARK COMBAT STATS: hp, ac, atk, dmg.
-       - FULL RELATIONSHIP MATRIX: Every NPC must have a relationship entry for the other 14 NPCs. 
-       - BELL CURVE SCORING: Strict Gaussian distribution (1 to 10 scale). 
-       - RELATIONSHIP REASON: MUST be a short, descriptive phrase (3-6 words) explaining *why* they feel this way (e.g., "Always pays on time", "Suspects them of theft", "Secretly in love with them", "Repaired their favorite boots"). DO NOT use single words.
-    9. Main Quests: Exactly 4 high-stakes narrative arcs.
-    10. Side Treks: 10 small, gritty errands or mysteries.
-    11. Current Events: Exactly 3 high-impact events happening NOW in the village.
-    12. GM Notes: DM-specific campaign hooks for the village overall.
+    6. Exactly 4 Nearby Settlement Relations: 
+       - Focus on resource scarcity, border skirmishes, stolen livestock, and espionage.
+       - Each entry must have: settlementName, relationType ('Good', 'Neutral', 'Harmful'), status (e.g., 'Bloody Rivalry', 'Salt Pact', 'Uneasy Truce'), and description (2-3 sentences).
+    7. Exactly 12 Businesses: Gritty names, rumors, encounterHooks, gmNotes, and exactly 5 marketItems each.
+    8. Two major landmarks.
+    9. Exactly 15 NPCs: 12 shop owners + 3 others. 
+       - Detailed attributes: sex, alignment, motivation, secret, combat stats, and a full relationship matrix for ALL other 14 NPCs.
+    10. Main Quests (4) and Side Treks (10).
+    11. Current Events (3).
+    12. GM Notes.
 
     Output JSON schema:
     {
@@ -56,6 +39,9 @@ export const generateVillageDetails = async (
       "morale": "Hopeful|Fearful|Resentful|Apathetic|Defiant",
       "weather": "string",
       "darkSecret": "string",
+      "settlementRelations": [
+        { "settlementName": "string", "type": "Good|Neutral|Harmful", "status": "string", "description": "string" }
+      ],
       "landmarks": [ { "name": "string", "description": "string", "encounterHook": "string" } ],
       "gmNotes": "string",
       "currentEvents": ["string", "string", "string"],
@@ -156,21 +142,14 @@ export const generateVillageGossip = async (village: VillageData): Promise<strin
 
 export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
-  // Voice categorization based on Gemini TTS profiles
   const femaleVoices = ['Kore', 'Zephyr'];
   const maleVoices = ['Puck', 'Charon', 'Fenrir'];
-  
   const voices = npc.sex === 'Female' ? femaleVoices : maleVoices;
   const voice = voices[Math.floor(Math.random() * voices.length)];
   
   const prompt = `You are ${npc.name}, a ${npc.sex} ${npc.race} ${npc.role} in a gritty Shadowdark village. 
     Personality: ${npc.personality}. 
-    Alignment: ${npc.alignment}.
-    Trait: ${npc.trait}.
-    Motivation: ${npc.motivation}.
-    Say a short (5-10 word) greeting to a group of weary adventurers entering your establishment. 
-    Make it sound appropriate for your personality, sex, alignment, and motivation.`;
+    Greeting (5-10 words): Weary adventurers entered your shop.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
@@ -192,7 +171,7 @@ export const generateMerchantVoice = async (npc: DetailedNPC): Promise<string> =
 
 export const generateNPCPortrait = async (npc: DetailedNPC): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Sex: ${npc.sex}. Race: ${npc.race}. Role: ${npc.role}. Alignment: ${npc.alignment}. Personality: ${npc.personality}. Traits: ${npc.trait}. Motivation: ${npc.motivation}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
+  const prompt = `A high-quality, gritty fantasy portrait for a Shadowdark RPG character. Name: ${npc.name}. Style: Dark, moody, oil painting, old-school fantasy art. No text.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
@@ -209,7 +188,7 @@ export const generateNPCPortrait = async (npc: DetailedNPC): Promise<string> => 
 export const generateVillageMap = async (village: VillageData): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const businessNames = village.businesses.map(b => b.name).join(", ");
-  const prompt = `A top-down, hand-drawn fantasy village map of "${village.name}". Parchment style, black ink. 12 buildings along a river. RPG cartography. Locations: ${businessNames}. No colors.`;
+  const prompt = `A top-down, hand-drawn fantasy village map of "${village.name}". Parchment style, black ink. 12 buildings along a river. No colors.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
