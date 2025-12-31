@@ -16,7 +16,7 @@ import {
   Snowflake, Star, Globe, CalendarDays, BookOpen, Fingerprint, Goal,
   MessageSquare, Axe, Target, Map, ShieldAlert, ZapOff, Droplets, Bone, Package,
   Cloud, Wind, Thermometer, CloudLightning, SunMedium, CloudFog, Zap as Spark,
-  Newspaper, Bug
+  Newspaper, Bug, Eye, Waves, Trees, Mountain
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
@@ -34,7 +34,6 @@ const ENCOUNTERS_DAY_INSIDE = [
   { icon: <Package size={16} />, who: "Mysterious Package", text: "A ticking box is left on a doorstep." },
   { icon: <Droplets size={16} />, who: "Water Carrier", text: "Spills a bucket on the party's gear; checks for rust." },
   { icon: <Activity size={16} />, who: "Rat Swarm", text: "A surge of rodents crosses the street in broad daylight." },
-  // Newspaper icon fixed: now imported from lucide-react
   { icon: <Newspaper size={16} />, who: "Town Crier", text: "Shouts about a local execution scheduled for dusk." },
   { icon: <Skull size={16} />, who: "Plague Cart", text: "Bell ringing, a man calls for the residents to bring out their dead." },
   { icon: <Axe size={16} />, who: "Woodchopper", text: "Dragging a massive, gnarled log that seems to be bleeding." },
@@ -68,37 +67,115 @@ const ENCOUNTERS_NIGHT_INSIDE = [
   { icon: <Skull size={16} />, who: "The Reaper", text: "A tall, hooded figure that points a bony finger at a PC." }
 ];
 
-const MONSTER_POOL = [
-  { icon: <Ghost size={16} />, who: "Shadow", text: "A patch of darkness detaches from a wall." },
-  { icon: <Skull size={16} />, who: "Ghoul", text: "Rubbery-skinned undead tries to drag you into a hole." },
-  { icon: <Activity size={16} />, who: "Giant Rat", text: "Dog-sized rodent gnaws on a discarded boot." },
-  { icon: <Axe size={16} />, who: "Ogre", text: "Lumbering brute chewing on a raw horse leg." },
-  { icon: <Target size={16} />, who: "Werewolf", text: "A half-man, half-wolf predator leaps from a roof." },
-  { icon: <Droplets size={16} />, who: "Gray Ooze", text: "A puddle of acidic slime moves toward metal." },
-  { icon: <Bone size={16} />, who: "Skeleton", text: "Rattling pile of bones rises and draws a rusted sword." },
-  { icon: <Skull size={16} />, who: "Zombie", text: "A bloated, water-logged corpse lurches forward." },
-  { icon: <Target size={16} />, who: "Goblin Sniper", text: "A green figure aims a blowgun from the gloom." },
-  { icon: <Axe size={16} />, who: "Bugbear", text: "A hairy brute steps out with a heavy mace." },
-  { icon: <Ghost size={16} />, who: "Wight", text: "Ancient warrior with life-draining eyes." },
-  { icon: <Spark size={16} />, who: "Stirge", text: "A mosquito-bird hybrid dives for a neck." },
-  // Bug icon fixed: now imported from lucide-react
-  { icon: <Bug size={16} />, who: "Giant Spider", text: "Drops from a web, pincers dripping venom." },
-  { icon: <Skull size={16} />, who: "Wraith", text: "A translucent horror that ignores armor." },
-  { icon: <Axe size={16} />, who: "Troll", text: "Rubbery limbs that re-attach after being severed." },
-  { icon: <Target size={16} />, who: "Manticore", text: "Spikes fire from its tail into the party's ranks." },
-  { icon: <Activity size={16} />, who: "Basilisk", text: "Eight-legged lizard with a petrifying gaze." },
-  { icon: <Skull size={16} />, who: "Lich Apprentice", text: "A skeletal mage casting 'Finger of Death'." },
-  { icon: <Axe size={16} />, who: "Hill Giant", text: "Looking for a snack; picks up the smallest PC." },
-  { icon: <Droplets size={16} />, who: "Black Pudding", text: "Corrosive mass that splits when struck by lightning." }
+// --- Unique 100 Monsters (No Duplicates) ---
+const UNIQUE_MONSTERS = [
+  "A patch of darkness detaches from a wall (Shadow).",
+  "Rubbery-skinned undead dragging a limb (Ghoul).",
+  "A massive rat with mangy fur and red eyes (Giant Rat).",
+  "Lumbering brute chewing on a raw horse leg (Ogre).",
+  "A half-man, half-wolf predator leaping from a roof (Werewolf).",
+  "A puddle of acidic slime moving toward metal (Gray Ooze).",
+  "Rattling bones rising from a pile of refuse (Skeleton).",
+  "A bloated, water-logged corpse lurching forward (Zombie).",
+  "A green figure aiming a blowgun from the gloom (Goblin).",
+  "A hairy brute wielding a heavy, spiked mace (Bugbear).",
+  "Ancient warrior with glowing blue life-draining eyes (Wight).",
+  "A mosquito-bird hybrid diving for a neck (Stirge).",
+  "A massive arachnid dropping from a sticky web (Giant Spider).",
+  "A translucent horror that bypasses physical armor (Wraith).",
+  "A rubbery-skinned giant with regenerative wounds (Troll).",
+  "A beast firing iron-hard spikes from its tail (Manticore).",
+  "An eight-legged lizard with a petrifying stare (Basilisk).",
+  "A skeletal mage chanting words of necrotic rot (Lich Apprentice).",
+  "A towering brute looking for a human snack (Hill Giant).",
+  "A corrosive black mass that splits when struck (Black Pudding).",
+  "A multi-headed serpent with acidic breath (Hydra).",
+  "A winged lion with a human face and scorpion tail (Chimera).",
+  "A floating eye with many smaller eyestalks (Beholder Kin).",
+  "A massive, armored centipede with toxic venom (Giant Centipede).",
+  "A creature disguised as a treasure chest (Mimic).",
+  "A winged serpent that hums with static (Couatl).",
+  "A heap of rotting vegetation that starts to move (Shambling Mound).",
+  "A creature made of living flame (Fire Elemental).",
+  "A spirit bound to a rusted suit of plate (Animated Armor).",
+  "A massive bear with the head of an owl (Owlbear).",
+  "A tiny, mischievous demon offering a dark bargain (Imp).",
+  "A half-man, half-bull wielding a great axe (Minotaur).",
+  "A floating skull wreathed in green fire (Flameskull).",
+  "A beautiful woman with snakes for hair (Medusa).",
+  "A giant scorpion with a stinger that glows purple.",
+  "A swarm of tiny, blood-drinking bats.",
+  "A creature made of wet clay and graveyard dirt (Golem).",
+  "A headless rider on a phantom steed (Dullahan).",
+  "A massive, burrowing worm with serrated teeth (Ankheg).",
+  "A group of tiny, aggressive lizardfolk (Kobolds).",
+  "A woman with the lower body of a spider (Drider).",
+  "A massive eagle with a 30-foot wingspan (Giant Eagle).",
+  "A creature that looks like a man but has no face (Doppelganger).",
+  "A floating, brain-like entity with tentacles (Mind Flayer).",
+  "A massive toad that can swallow a PC whole.",
+  "A spirit that screams with the voices of a thousand dying men (Banshee).",
+  "A group of small, stone-eating creatures (Xorn).",
+  "A massive, multi-colored lizard with wings (Wyvern).",
+  "A creature of pure shadow that drains strength.",
+  "A giant constrictor snake hiding in the rafters.",
+  "A rusted clockwork soldier clicking rhythmically.",
+  "A group of cannibalistic primitives with bone spears.",
+  "A massive crab with barnacles that look like eyes.",
+  "A floating jellyfish that drifts through the air (Gas Spore).",
+  "A creature made of hundreds of crawling insects.",
+  "A man-sized moth with hypnotic wing patterns.",
+  "A giant owl that watches silently from a dead tree.",
+  "A group of feral, blue-skinned dwarfs (Dark Creepers).",
+  "A massive elk with antlers made of obsidian.",
+  "A creature that mimics the sound of a crying baby.",
+  "A swarm of glowing beetles that burn to the touch.",
+  "A massive, one-eyed giant throwing boulders (Cyclops).",
+  "A spirit that possesses the party's own shadows.",
+  "A creature made of animated, bloody chains.",
+  "A giant, intelligent raven that speaks in riddles.",
+  "A group of cultists wearing masks of human skin.",
+  "A massive, burrowing mole with iron claws.",
+  "A floating, translucent brain (Intellect Devourer).",
+  "A creature that looks like a heap of golden coins.",
+  "A giant bat with a sonar cry that deafens.",
+  "A group of undead sailors dripping with seawater.",
+  "A massive, white-furred ape (Yeti).",
+  "A creature made of sharp, jagged glass shards.",
+  "A giant wasp with a stinger the size of a dagger.",
+  "A group of small, blue imps that steal light (Darkmantle).",
+  "A massive, three-eyed toad with poisonous skin.",
+  "A spirit bound to a mirror that shows a PC's death.",
+  "A giant, multi-colored centipede that hums.",
+  "A group of ghouls wearing rusted wedding finery.",
+  "A massive, stone-skinned boar with iron tusks.",
+  "A creature made of living, pulsing shadows.",
+  "A giant dragonfly that can hover silently.",
+  "A group of small, mechanical spiders.",
+  "A massive, white worm that breathes frost.",
+  "A spirit that looks like a PC's lost loved one.",
+  "A giant, black-furred wolf with glowing yellow eyes.",
+  "A group of skeletons playing rusted trumpets.",
+  "A massive, armored beetle that spits acid.",
+  "A creature made of hundreds of interlocking bones.",
+  "A giant, blue-skinned humanoid with four arms.",
+  "A spirit that drains the heat from the room.",
+  "A giant, translucent slug that leaves a trail of salt.",
+  "A group of tiny, flying demons with jagged teeth.",
+  "A massive, winged gargoyle that looks like a statue.",
+  "A creature that has no body, only a floating head.",
+  "A giant, red-eyed salamander that drips lava.",
+  "A spirit that makes a PC forget their own name.",
+  "A giant, multi-legged lizard that climbs walls.",
+  "A group of zombies carrying a heavy iron coffin.",
+  "A massive, ancient shadow that swallows all light."
 ];
 
-const ENCOUNTERS_MONSTERS = MONSTER_POOL.concat(
-  Array.from({ length: 80 }, (_, i) => ({
-    icon: <Ghost size={16} />,
-    who: `Monster #${i + 21}`,
-    text: "A unique dark predator tracks the group from the periphery."
-  }))
-);
+const ENCOUNTERS_MONSTERS = UNIQUE_MONSTERS.map((m, i) => ({
+  icon: i % 3 === 0 ? <Skull size={16} /> : i % 3 === 1 ? <Ghost size={16} /> : <Activity size={16} />,
+  who: m.split('(')[1]?.replace(')', '') || "Unknown Horror",
+  text: m
+}));
 
 // --- Weather Tables ---
 const WEATHER_SPRING = [
@@ -528,13 +605,12 @@ const App: React.FC = () => {
             <div className="space-y-24">
               {village.residents.map((npc, idx) => {
                 const standing = getStandingCategory(npc);
-                // Alignment color coding back
                 const alignmentColor = npc.alignment === 'Lawful' ? 'bg-blue-100 border-blue-800 text-blue-900' : 
                                      npc.alignment === 'Chaotic' ? 'bg-red-100 border-red-800 text-red-900' : 
                                      'bg-stone-100 border-stone-800 text-stone-900';
 
                 return (
-                  <div key={idx} className="p-10 border-4 border-stone-800 bg-white/60 rounded-sm shadow-2xl relative break-inside-avoid group">
+                  <div key={idx} className="p-8 md:p-12 border-4 border-stone-800 bg-white/60 rounded-sm shadow-2xl relative break-inside-avoid group overflow-hidden">
                     <div className="flex flex-col md:flex-row gap-12">
                       <div className="w-full md:w-1/3 flex flex-col items-center shrink-0">
                         <div className="relative w-full aspect-square bg-stone-900/10 mb-6 border-4 border-stone-800 overflow-hidden shadow-lg group-hover:border-amber-900 transition-colors">
@@ -555,9 +631,9 @@ const App: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex-1 space-y-8">
+                      <div className="flex-1 space-y-10">
                         <div>
-                          <h5 className="text-[11px] font-black uppercase text-stone-500 mb-2 tracking-[0.2em] flex items-center gap-2"><BookOpen size={14}/> Psychological Profile</h5>
+                          <h5 className="text-[11px] font-black uppercase text-stone-500 mb-3 tracking-[0.2em] flex items-center gap-2"><BookOpen size={14}/> Psychological Profile</h5>
                           <p className="italic text-2xl text-black font-black leading-relaxed border-l-8 border-stone-800 pl-6 bg-white/30 p-4 rounded-r shadow-inner">"{npc.personality}"</p>
                         </div>
 
@@ -571,22 +647,22 @@ const App: React.FC = () => {
                             <Fingerprint size={16} className="inline mr-2 mb-1"/> {npc.trait}
                           </div>
                           
-                          {/* Re-formatted Battle Stat Block */}
-                          <div className="p-4 bg-white border-2 border-stone-800 rounded-lg shadow-lg font-black flex justify-around items-center">
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-center">
-                                <Shield size={32} className="text-stone-800" />
-                                <span className="text-[10px] uppercase opacity-60">Armor</span>
+                          {/* Re-formatted Battle Stat Block - Fixed Overflow */}
+                          <div className="p-4 bg-white border-2 border-stone-800 rounded-lg shadow-lg font-black flex justify-between items-center min-w-0">
+                            <div className="flex items-center gap-3 min-w-0 flex-1 justify-center">
+                              <div className="flex flex-col items-center shrink-0">
+                                <Shield size={28} className="text-stone-800" />
+                                <span className="text-[8px] uppercase opacity-60">Armor</span>
                               </div>
-                              <span className="text-4xl font-black">AC {npc.stats.ac}</span>
+                              <span className="text-3xl font-black whitespace-nowrap">AC {npc.stats.ac}</span>
                             </div>
-                            <div className="w-[2px] h-14 bg-stone-200"></div>
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-center">
-                                <Heart size={32} className="text-red-700" />
-                                <span className="text-[10px] uppercase opacity-60">Health</span>
+                            <div className="w-[1.5px] h-10 bg-stone-200 mx-2 shrink-0"></div>
+                            <div className="flex items-center gap-3 min-w-0 flex-1 justify-center">
+                              <div className="flex flex-col items-center shrink-0">
+                                <Heart size={28} className="text-red-700" />
+                                <span className="text-[8px] uppercase opacity-60">Health</span>
                               </div>
-                              <span className="text-4xl font-black">HP {npc.stats.hp}</span>
+                              <span className="text-3xl font-black whitespace-nowrap">HP {npc.stats.hp}</span>
                             </div>
                           </div>
 
@@ -597,18 +673,20 @@ const App: React.FC = () => {
                         </div>
 
                         <div className="break-inside-avoid">
-                          <h5 className="text-[11px] font-black uppercase text-stone-500 mb-3 tracking-[0.2em] flex items-center gap-2"><Swords size={14}/> Social Matrix Connections</h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {/* Showing ALL 14 relationships (one for each other NPC) */}
+                          <h5 className="text-[11px] font-black uppercase text-stone-500 mb-4 tracking-[0.2em] flex items-center gap-2 border-b border-stone-200 pb-2"><Swords size={14}/> Social Matrix Connections</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 w-full">
                             {npc.relationships.map((rel, r) => {
                               const s = getRelationshipStyles(rel.score);
                               return (
-                                <div key={r} className={`p-2 border-2 rounded-lg ${s.bg} ${s.border} shadow-sm group/rel transition-all hover:bg-white`}>
-                                  <div className="flex justify-between items-center text-[9px] font-black text-black uppercase mb-0.5">
-                                    <span className="flex items-center gap-1 truncate w-[60%]">{s.icon} {rel.targetName}</span>
-                                    <span className={`px-1 rounded border border-stone-200 bg-white/50`}>{rel.score} • {rel.feeling}</span>
+                                <div key={r} className={`p-3 border-2 rounded-lg ${s.bg} ${s.border} shadow-sm group/rel transition-all hover:bg-white flex flex-col min-h-[70px]`}>
+                                  <div className="flex justify-between items-start text-[10px] font-black text-black uppercase mb-1">
+                                    <span className="flex items-center gap-1 leading-tight w-[70%] line-clamp-2">{s.icon} {rel.targetName}</span>
+                                    <div className="flex flex-col items-end">
+                                      <span className="px-1.5 rounded border border-stone-200 bg-white/70">{rel.score}</span>
+                                      <span className={`text-[7px] mt-0.5 px-1 rounded-sm border bg-white/50 ${s.text}`}>{rel.feeling}</span>
+                                    </div>
                                   </div>
-                                  <p className="text-[8px] italic font-black text-stone-900 leading-tight line-clamp-2">"{rel.reason}"</p>
+                                  <p className="text-[8.5px] italic font-black text-stone-900 leading-tight line-clamp-2 mt-auto">"{rel.reason}"</p>
                                 </div>
                               );
                             })}
