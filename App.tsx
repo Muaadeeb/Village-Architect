@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useMemo } from 'react';
 import { 
   generateVillageDetails, 
@@ -176,6 +175,13 @@ const App: React.FC = () => {
 
   const totalPop = village?.population || 1;
 
+  // Page numbering helper
+  const PageNumber = ({ n }: { n: number }) => (
+    <div className="absolute top-4 right-8 text-xs font-black uppercase tracking-[0.2em] opacity-30 medieval-font pointer-events-none">
+      Page {n}
+    </div>
+  );
+
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
       {/* Utility Bar */}
@@ -195,6 +201,7 @@ const App: React.FC = () => {
           
           {/* PAGE 1: Narrative Manifest, Town Morale and Census */}
           <section className="parchment p-12 shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={1} />
             <div className="border-b-4 border-double border-stone-800 pb-6 mb-8 text-center">
               <h2 className="text-7xl font-bold medieval-font uppercase text-black leading-none">{village.name}</h2>
               <div className="flex items-center justify-center gap-4 text-xs font-black uppercase tracking-widest text-stone-600 mt-2">
@@ -249,7 +256,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 2: Nearby Settlement Relations */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={2} />
             <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 uppercase text-black flex items-center gap-2"><Globe /> Nearby Settlement Relations</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {village.settlementRelations.map((rel, idx) => (
@@ -266,7 +274,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 3: The Cycle of Tradition: Local Festivals */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={3} />
             <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 uppercase text-black flex items-center gap-2"><CalendarDays /> The Cycle of Tradition: Local Festivals</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {village.festivals.map((fest, idx) => (
@@ -293,7 +302,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 4: Current Climate, Local Atmosphere, Geography, and Current events */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={4} />
             <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 uppercase text-black flex items-center gap-2"><CloudRain /> Atmospheric Status</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
               <div className="p-6 bg-white/30 border-2 border-stone-800 rounded-lg shadow-sm">
@@ -321,7 +331,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 5: Local Chart (Map) */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={5} />
             <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-8 pb-2 uppercase text-black flex items-center gap-2"><Map /> Local Chart (Map)</h3>
             <div className="w-full aspect-[16/9] bg-stone-900/10 border-4 border-stone-800 flex items-center justify-center overflow-hidden relative group rounded-sm shadow-2xl">
               {village.mapUrl ? (
@@ -340,7 +351,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 6: Campaign Hooks & Points of Interest, Landmarks and Local Quests */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={6} />
             <h3 className="text-3xl font-bold medieval-font border-b-2 border-stone-800 mb-10 pb-2 uppercase text-black flex items-center gap-2"><Compass /> Campaign Hooks & Points of Interest</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
@@ -376,7 +388,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 7: Nearby Crawl in a BOX */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={7} />
             <div className="flex justify-between items-center border-b-2 border-stone-800 mb-8 pb-2">
               <h3 className="text-3xl font-bold medieval-font text-black flex items-center gap-2 uppercase"><Boxes /> Nearby Crawl in a Box</h3>
               <button onClick={handleGeneratePOI} className="bg-stone-800 text-amber-500 text-xs px-6 py-2 rounded-lg no-print font-bold hover:bg-stone-700 transition-all uppercase tracking-widest">{poiLoading ? "Excavating..." : village.poi ? "Regenerate Dungeon" : "Draft Dungeon"}</button>
@@ -422,6 +435,7 @@ const App: React.FC = () => {
 
           {/* PAGE 8: The Black Secret */}
           <section className="page-break-before bg-stone-950 text-red-600 p-24 border-[12px] border-double border-red-950 shadow-2xl relative text-center overflow-hidden">
+            <PageNumber n={8} />
             <div className="absolute inset-0 opacity-10 pointer-events-none">
               <div className="grid grid-cols-10 gap-2 p-2">
                 {Array(100).fill(0).map((_, i) => <Skull key={i} size={40} />)}
@@ -434,7 +448,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 9: Master Resident Dossiers */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={9} />
             <h3 className="text-5xl font-bold medieval-font border-b-4 border-stone-800 mb-12 pb-4 text-black flex items-center gap-4 uppercase"><UserCircle size={48} /> Master Resident Dossiers</h3>
             <div className="space-y-24">
               {village.residents.map((npc, idx) => {
@@ -524,7 +539,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 10: Marketplace Ledger */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={10} />
             <h3 className="text-4xl font-bold medieval-font border-b-2 border-stone-800 mb-10 pb-2 uppercase text-black flex items-center gap-3"><ShoppingBag size={40} /> Marketplace Ledger</h3>
             <div className="grid grid-cols-1 gap-10">
               {village.businesses.map((biz, b) => (
@@ -539,7 +555,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-4 mb-8">
                     {biz.marketItems.map((item, i) => (
-                      <div key={i} className="flex justify-between items-center text-base border-b-2 border-dashed border-stone-300 pb-1 hover:border-stone-800 transition-colors">
+                      <div key={i} className="flex justify-between items-center text-base border-b-2 border-dashed border-stone-400 pb-1 hover:border-stone-800 transition-colors">
                         <div className="flex items-center gap-3 font-black text-black">
                           <CircleDot size={10} className="text-stone-400" />
                           <span>{item.name}</span>
@@ -562,7 +578,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 11: Random Encounter Archives */}
-          <section className="parchment p-12 page-break-before shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-12 page-break-before shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={11} />
             <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-10 pb-4 text-black flex items-center gap-4 uppercase"><Compass size={44} /> Random Encounter Archives</h3>
             <div className="space-y-16">
               {[
@@ -623,7 +640,8 @@ const App: React.FC = () => {
           </section>
 
           {/* PAGE 12: Campaign Chronicle */}
-          <section className="parchment p-16 page-break-before no-print:hidden break-inside-avoid shadow-2xl border-2 border-stone-800/20">
+          <section className="parchment p-16 page-break-before no-print:hidden break-inside-avoid shadow-2xl relative border-2 border-stone-800/20">
+            <PageNumber n={12} />
             <h3 className="text-5xl font-bold medieval-font border-b-4 border-stone-800 mb-10 pb-4 text-black uppercase flex items-center gap-4"><BookOpen size={48} /> Campaign Chronicle</h3>
             <p className="text-xs font-black uppercase text-stone-500 mb-8 tracking-widest">Journal your party's deeds, deaths, and discoveries in the Shadowdark.</p>
             <div className="p-12 bg-white/40 border-4 border-dashed border-stone-400 rounded-sm min-h-[700px] shadow-inner relative">
