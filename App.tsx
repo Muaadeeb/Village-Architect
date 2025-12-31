@@ -103,7 +103,7 @@ const PC_HOOKS = [
   "You are a hunter following the trail of a beast that has been terrorizing the region.",
   "Sent to deliver a crate of expensive wine to a local shop owner for a private party.",
   "You have a premonition that the village is about to be destroyed.",
-  "Looking for a teacher who can help you master a strange power you've discovered.",
+  "Looking for a teacher who can help you master a strange power you'discover.",
   "You are a halfling looking for a community that won't judge your 'special' talents.",
   "Searching for the 'Heart of the Village' – a gemstone rumored to keep the river flowing.",
   "You are a merchant looking to open a new trade route through this isolated valley.",
@@ -675,24 +675,27 @@ const App: React.FC = () => {
   const getRelationshipStyles = (rawScore: number) => {
     const score = Math.max(1, Math.min(10, Math.round(rawScore)));
     if (score >= 8) return { bg: 'bg-emerald-100', border: 'border-emerald-600', text: 'text-emerald-900', icon: <Heart size={14} className="text-emerald-700" />, effects: 'animate-pulse-subtle' };
-    if (score <= 3) return { bg: 'bg-rose-100', border: 'border-rose-600', text: 'text-rose-900', icon: <Swords size={14} className="text-rose-700" />, effects: 'matrix-desaturated' };
+    if (score <= 3) return { bg: 'bg-rose-100', border: 'border-rose-600', text: 'text-rose-900', icon: <Swords size={14} className="text-rose-700" />, effects: '' };
     return { bg: 'bg-stone-100', border: 'border-stone-400', text: 'text-stone-800', icon: <Minus size={14} className="text-stone-600" />, effects: '' };
   };
 
   const getStandingCategory = (npc: DetailedNPC) => {
-    const avg = npc.relationships.reduce((acc, r) => acc + r.score, 0) / (npc.relationships.length || 1);
-    if (avg <= 3.5) return { label: 'Pariah', color: 'text-red-900', icon: <Frown size={12}/> };
-    if (avg >= 7.5) return { label: 'Pillar', color: 'text-amber-800', icon: <Crown size={12}/> };
+    const totalScore = npc.relationships.reduce((acc, r) => acc + r.score, 0);
+    const avg = totalScore / (npc.relationships.length || 1);
+    
+    // Scale 1-10: avg <= 4 is poor standing, >= 7.5 is excellent.
+    if (avg <= 4.0) return { label: 'Pariah', color: 'text-red-950', icon: <Frown size={12}/> };
+    if (avg >= 7.5) return { label: 'Pillar', color: 'text-amber-900', icon: <Crown size={12}/> };
     return { label: 'Resident', color: 'text-stone-900', icon: <Users size={12}/> };
   };
 
   const getAttitudeColor = (attitude: string) => {
     switch(attitude) {
-      case 'Friendly': return 'text-emerald-900 bg-emerald-100';
-      case 'Hostile': return 'text-red-900 bg-red-100';
-      case 'Wary': return 'text-orange-900 bg-orange-100';
-      case 'Bizarre': return 'text-purple-900 bg-purple-100';
-      default: return 'text-stone-900 bg-stone-100';
+      case 'Friendly': return 'text-emerald-950 bg-emerald-100';
+      case 'Hostile': return 'text-red-950 bg-red-100';
+      case 'Wary': return 'text-orange-950 bg-orange-100';
+      case 'Bizarre': return 'text-purple-950 bg-purple-100';
+      default: return 'text-stone-950 bg-stone-100';
     }
   };
 
@@ -759,7 +762,7 @@ const App: React.FC = () => {
                 <div className="flex items-center justify-center gap-4 text-xs font-bold uppercase tracking-[0.2em] opacity-80"><span>Village Dossier</span><div className="w-2 h-2 rounded-full bg-stone-800"></div><span>Shadowdark RPG</span></div>
               </div>
               <div className="mb-12 flex flex-col md:flex-row gap-8">
-                <div className="flex-1"><div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase"><Scroll className="w-6 h-6" /> Narrative Manifest</div><p className="text-2xl italic font-serif leading-relaxed text-stone-900 bg-white/30 p-8 border-l-8 border-stone-800 rounded-r shadow-inner">"{village.description}"</p></div>
+                <div className="flex-1"><div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase"><Scroll className="w-6 h-6" /> Narrative Manifest</div><p className="text-2xl italic font-serif leading-relaxed text-stone-950 bg-white/30 p-8 border-l-8 border-stone-800 rounded-r shadow-inner font-bold">"{village.description}"</p></div>
                 <div className="w-full md:w-64 break-inside-avoid">
                   <div className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-4 pb-1 uppercase"><Activity className="w-6 h-6" /> Town Morale</div>
                   {(() => {
@@ -786,7 +789,7 @@ const App: React.FC = () => {
                            </div>
                         </div>
                         <div className="text-[10px] font-black bg-white/40 px-2 py-0.5 rounded inline-block mb-2 text-stone-800 uppercase tracking-widest">{rel.status}</div>
-                        <p className="text-sm italic leading-tight text-stone-900 font-serif">"{rel.description}"</p>
+                        <p className="text-sm italic font-bold leading-tight text-stone-950 font-serif">"{rel.description}"</p>
                       </div>
                     );
                   })}
@@ -820,7 +823,7 @@ const App: React.FC = () => {
                           <p className="text-[9px] font-black text-amber-900 uppercase mb-1 flex items-center gap-1">
                             <BookOpen size={10} /> The Old Lore
                           </p>
-                          <p className="text-xs italic text-stone-800 leading-tight font-serif bg-stone-200/40 p-2 rounded">
+                          <p className="text-xs italic text-stone-950 leading-tight font-serif bg-stone-200/40 p-2 rounded font-bold">
                             "{fest.lore}"
                           </p>
                         </div>
@@ -828,7 +831,7 @@ const App: React.FC = () => {
                           <p className="text-[9px] font-black text-stone-500 uppercase mb-1 flex items-center gap-1">
                             <RefreshCw size={10} /> Modern Practice
                           </p>
-                          <p className="text-xs text-stone-700 leading-snug">
+                          <p className="text-xs text-stone-950 leading-snug font-bold">
                             {fest.modernPractice}
                           </p>
                         </div>
@@ -841,7 +844,7 @@ const App: React.FC = () => {
               <div className="mb-12 break-inside-avoid">
                 <h3 className="flex items-center gap-2 text-2xl font-bold medieval-font border-b-2 border-stone-800 mb-6 pb-1 uppercase"><Calendar className="w-6 h-6" /> Current Events</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {village.currentEvents.map((event, idx) => (<div key={idx} className="bg-amber-800/5 p-4 border-l-4 border-amber-900 shadow-sm relative overflow-hidden group"><div className="text-[10px] font-black text-amber-900/40 mb-1 uppercase">SITUATION {idx + 1}</div><p className="text-base italic text-stone-900 font-bold leading-tight">"{event}"</p><ZapOff className="absolute -bottom-2 -right-2 w-8 h-8 text-amber-900/10" /></div>))}
+                  {village.currentEvents.map((event, idx) => (<div key={idx} className="bg-amber-800/5 p-4 border-l-4 border-amber-900 shadow-sm relative overflow-hidden group"><div className="text-[10px] font-black text-amber-900/40 mb-1 uppercase">SITUATION {idx + 1}</div><p className="text-base italic text-stone-950 font-bold leading-tight">"{event}"</p><ZapOff className="absolute -bottom-2 -right-2 w-8 h-8 text-amber-900/10" /></div>))}
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 break-inside-avoid">
@@ -883,10 +886,10 @@ const App: React.FC = () => {
                                 const isRolled = category.roll === rollVal;
                                 return (
                                   <tr key={eIdx} className={`transition-colors duration-500 ${isRolled ? 'bg-amber-400 font-black' : 'hover:bg-amber-100/30'}`}>
-                                    <td className="py-2 px-3 text-center border-r border-stone-300 font-black">{rollVal}</td>
-                                    <td className="py-2 px-3 font-bold flex items-center gap-2"><span className="text-stone-500">{enc.icon}</span> {enc.who}</td>
+                                    <td className="py-2 px-3 text-center border-r border-stone-300 font-black text-stone-950">{rollVal}</td>
+                                    <td className="py-2 px-3 font-bold flex items-center gap-2 text-black"><span className="text-stone-800">{enc.icon}</span> {enc.who}</td>
                                     <td className="py-2 px-3 text-center"><span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${getAttitudeColor(enc.attitude)}`}>{enc.attitude}</span></td>
-                                    <td className="py-2 px-3 italic text-stone-900 leading-snug">{enc.text}</td>
+                                    <td className="py-2 px-3 italic text-stone-950 font-bold leading-snug">{enc.text}</td>
                                   </tr>
                                 );
                               })}
@@ -905,11 +908,11 @@ const App: React.FC = () => {
                 {village.businesses.map((business, bIdx) => (
                   <div key={bIdx} className="p-6 bg-white/50 border-2 border-stone-300 rounded shadow-md break-inside-avoid relative overflow-visible">
                     <div className="flex justify-between items-start mb-4"><h4 className="font-bold text-stone-900 medieval-font text-2xl uppercase tracking-tighter">{business.name}</h4><span className="text-[10px] font-black bg-stone-800 text-white px-3 py-1 rounded uppercase">{business.type}</span></div>
-                    <p className="text-xs italic text-stone-600 mb-3 border-b border-stone-200 pb-2">Proprietor: <span className="font-bold text-stone-900">{business.owner.name}</span></p>
-                    <p className="text-base text-stone-700 mb-4 leading-relaxed font-serif">{business.description}</p>
+                    <p className="text-xs italic text-stone-700 mb-3 border-b border-stone-200 pb-2">Proprietor: <span className="font-bold text-stone-950">{business.owner.name}</span></p>
+                    <p className="text-base text-stone-950 mb-4 leading-relaxed font-serif font-bold">{business.description}</p>
                     <div className="space-y-4">
-                      <div className="bg-amber-100/60 p-3 rounded border-l-4 border-amber-800 shadow-inner"><p className="text-[10px] font-black text-amber-900 uppercase mb-1">Local Rumor</p><p className="text-sm italic text-amber-900 leading-tight">"{business.rumor}"</p></div>
-                      <div className="p-4 border-2 border-dashed border-stone-400 rounded bg-white/40"><label className="text-[9px] font-black text-stone-500 uppercase block mb-2 flex items-center gap-1"><Edit2 size={10} /> GM Establishment Notes</label><textarea className="w-full text-base bg-transparent border-none focus:ring-0 italic text-stone-800 min-h-[80px] resize-none leading-relaxed" placeholder="Record shop secrets here..." value={business.gmNotes} onChange={(e) => updateBusinessGMNotes(bIdx, e.target.value)} /></div>
+                      <div className="bg-amber-100/60 p-3 rounded border-l-4 border-amber-800 shadow-inner"><p className="text-[10px] font-black text-amber-900 uppercase mb-1">Local Rumor</p><p className="text-sm italic text-amber-950 leading-tight font-bold">"{business.rumor}"</p></div>
+                      <div className="p-4 border-2 border-dashed border-stone-400 rounded bg-white/40"><label className="text-[9px] font-black text-stone-500 uppercase block mb-2 flex items-center gap-1"><Edit2 size={10} /> GM Establishment Notes</label><textarea className="w-full text-base bg-transparent border-none focus:ring-0 italic text-stone-950 font-bold min-h-[80px] resize-none leading-relaxed" placeholder="Record shop secrets here..." value={business.gmNotes} onChange={(e) => updateBusinessGMNotes(bIdx, e.target.value)} /></div>
                     </div>
                   </div>
                 ))}
@@ -921,16 +924,16 @@ const App: React.FC = () => {
               <div className="grid grid-cols-1 gap-12 mb-12">
                 <div className="break-inside-avoid">
                   <h4 className="text-xl font-bold medieval-font mb-4 flex items-center gap-2"><Castle /> Landmarks</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">{village.landmarks.map((l, i) => (<div key={i} className="p-5 bg-white/40 border-2 border-stone-300 rounded shadow-sm break-inside-avoid"><h5 className="font-bold text-stone-900 medieval-font text-xl mb-1">{l.name}</h5><p className="text-sm italic text-stone-600 mb-4 leading-snug">{l.description}</p><div className="bg-amber-800/10 p-3 rounded text-sm font-bold text-amber-900 border-l-4 border-amber-900 italic">"{l.encounterHook}"</div></div>))}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">{village.landmarks.map((l, i) => (<div key={i} className="p-5 bg-white/40 border-2 border-stone-300 rounded shadow-sm break-inside-avoid"><h5 className="font-bold text-stone-900 medieval-font text-xl mb-1">{l.name}</h5><p className="text-sm italic text-stone-950 mb-4 leading-snug font-bold">{l.description}</p><div className="bg-amber-800/10 p-3 rounded text-sm font-bold text-amber-950 border-l-4 border-amber-900 italic">"{l.encounterHook}"</div></div>))}</div>
                 </div>
                 <div className="break-inside-avoid">
                   <h4 className="text-xl font-bold medieval-font mb-4 flex items-center gap-2"><Scroll /> Local Quests</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{village.mainQuests.map((q, i) => (<div key={i} className="p-4 bg-stone-800/5 border-l-8 border-stone-800 rounded-r shadow-sm"><h5 className="font-bold text-base text-stone-900 uppercase tracking-tighter mb-1">{q.title}</h5><p className="text-sm italic text-stone-600 mb-2 leading-tight">{q.description}</p><div className="flex items-center gap-2"><span className="text-[10px] font-black bg-stone-800 text-amber-400 px-3 py-1 rounded-full uppercase">Reward: {q.reward}</span></div></div>))}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{village.mainQuests.map((q, i) => (<div key={i} className="p-4 bg-stone-800/5 border-l-8 border-stone-800 rounded-r shadow-sm"><h5 className="font-bold text-base text-stone-900 uppercase tracking-tighter mb-1">{q.title}</h5><p className="text-sm italic text-stone-950 mb-2 leading-tight font-bold">{q.description}</p><div className="flex items-center gap-2"><span className="text-[10px] font-black bg-stone-800 text-amber-400 px-3 py-1 rounded-full uppercase">Reward: {q.reward}</span></div></div>))}</div>
                 </div>
               </div>
             </section>
 
-            {/* Restored NPC Section */}
+            {/* Restored NPC Section with Fixes */}
             <section className="page-break-before print:print-page-border">
               <div className="flex flex-col md:flex-row justify-between items-end border-b-4 border-stone-800 mb-12 pb-4 gap-4">
                 <h3 className="text-4xl font-bold medieval-font flex items-center gap-2 uppercase tracking-wider border-none p-0">
@@ -955,7 +958,7 @@ const App: React.FC = () => {
                             <button onClick={(e) => { e.stopPropagation(); playVoice(idx, npc); }} className="absolute bottom-4 right-4 p-4 bg-amber-600 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all no-print disabled:opacity-50 z-10">{voiceLoading[idx] ? <RefreshCw className="animate-spin" size={24} /> : <Volume2 size={24} />}</button>
                           </div>
                           <h4 className="text-4xl font-bold medieval-font leading-none uppercase tracking-tighter mb-2">{npc.name}</h4>
-                          <p className="text-xs font-black text-stone-500 uppercase tracking-widest mb-4">{npc.sex} • {npc.race} • {npc.role}</p>
+                          <p className="text-xs font-black text-stone-600 uppercase tracking-widest mb-4">{npc.sex} • {npc.race} • {npc.role}</p>
                           <div className="flex flex-col gap-3 w-full px-4">
                             <div className={`text-xs font-black px-4 py-2 bg-white rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${standing.color}`}>{standing.icon} {standing.label}</div>
                             <div className={`text-xs font-black px-4 py-2 ${alignDetails.bg} rounded border-2 border-stone-800 shadow-sm flex items-center justify-center gap-2 ${alignDetails.color}`}>{alignDetails.icon} {npc.alignment}</div>
@@ -965,15 +968,15 @@ const App: React.FC = () => {
                            <div className="grid grid-cols-1 gap-10">
                               <div>
                                  <h5 className="text-xs font-black uppercase text-stone-400 mb-3 tracking-[0.2em]">Psychological Profile</h5>
-                                 <p className="italic text-xl text-stone-800 border-l-8 border-stone-800 pl-6 mb-6 leading-relaxed font-serif">"{npc.personality}"</p>
+                                 <p className="italic text-xl text-stone-950 border-l-8 border-stone-800 pl-6 mb-6 leading-relaxed font-serif font-bold">"{npc.personality}"</p>
                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                                    <div className="px-4 py-2 bg-indigo-800 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase"><Goal size={12} /> {npc.motivation}</div>
-                                    <div className="px-4 py-2 bg-stone-800 text-amber-400 text-xs font-bold rounded flex items-center justify-center gap-2 uppercase"><Fingerprint size={12} /> {npc.trait}</div>
-                                    <div className="px-4 py-2 bg-rose-900 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase"><Shield size={12} /> AC {npc.stats.ac} | HP {npc.stats.hp}</div>
+                                    <div className="px-4 py-2 bg-indigo-900 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase shadow-sm"><Goal size={12} /> {npc.motivation}</div>
+                                    <div className="px-4 py-2 bg-stone-950 text-amber-400 text-xs font-bold rounded flex items-center justify-center gap-2 uppercase shadow-sm"><Fingerprint size={12} /> {npc.trait}</div>
+                                    <div className="px-4 py-2 bg-rose-950 text-white text-xs font-bold rounded flex items-center justify-center gap-2 uppercase shadow-sm"><Shield size={12} /> AC {npc.stats.ac} | HP {npc.stats.hp}</div>
                                  </div>
                                  <div className="bg-red-50/80 p-4 border-2 border-red-200 rounded-sm">
                                     <h6 className="text-[10px] font-black text-red-900 uppercase mb-2 tracking-widest">Alignment Shadow Secret</h6>
-                                    <p className="text-sm italic text-red-800 font-serif leading-snug">{npc.secret}</p>
+                                    <p className="text-sm italic text-red-950 font-serif leading-snug font-bold">{npc.secret}</p>
                                  </div>
                               </div>
                               <div>
@@ -981,7 +984,7 @@ const App: React.FC = () => {
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] md:max-h-none overflow-y-auto pr-2 custom-scrollbar print:max-h-none print:overflow-visible h-auto">
                                     {npc.relationships.map((rel, ridx) => {
                                        const styles = getRelationshipStyles(rel.score);
-                                       return (<div key={ridx} className={`p-3 rounded border-2 transition-all duration-500 ${styles.bg} ${styles.border} ${styles.effects} break-inside-avoid flex flex-col justify-between shadow-sm`}><div className="flex justify-between font-black text-[10px] uppercase mb-1 items-center gap-1"><span className="flex items-center gap-1.5 truncate"><span className="flex-shrink-0">{styles.icon}</span> <span className="truncate">{rel.targetName}</span></span><span className={`${styles.text} whitespace-nowrap bg-white/50 px-1 rounded`}>{rel.score} • {rel.feeling}</span></div><p className="italic text-xs opacity-80 leading-tight font-serif text-stone-950 font-bold">"{rel.reason}"</p></div>);
+                                       return (<div key={ridx} className={`p-3 rounded border-2 transition-all duration-500 ${styles.bg} ${styles.border} ${styles.effects} break-inside-avoid flex flex-col justify-between shadow-sm`}><div className="flex justify-between font-black text-[10px] uppercase mb-1 items-center gap-1"><span className="flex items-center gap-1.5 truncate"><span className="flex-shrink-0 text-stone-800">{styles.icon}</span> <span className="truncate text-stone-950">{rel.targetName}</span></span><span className={`${styles.text} whitespace-nowrap bg-white/50 px-1 rounded`}>{rel.score} • {rel.feeling}</span></div><p className="italic text-xs opacity-90 leading-tight font-serif text-stone-950 font-bold">"{rel.reason}"</p></div>);
                                     })}
                                  </div>
                               </div>
@@ -996,7 +999,7 @@ const App: React.FC = () => {
 
             <section className="page-break-before bg-stone-900 text-stone-100 p-12 border-8 border-double border-red-900 shadow-2xl relative overflow-visible break-inside-avoid"><h3 className="text-4xl font-bold medieval-font mb-6 text-red-500 flex items-center gap-3 border-none pb-0 uppercase tracking-tighter"><Skull className="w-12 h-12" /> The Black Secret</h3><p className="text-3xl italic font-serif leading-relaxed text-red-200">{village.darkSecret}</p><div className="absolute top-2 right-4 text-[10px] font-black uppercase tracking-[0.5em] opacity-30">Eyes Only</div></section>
 
-            <section className="page-break-before print:print-page-border no-print:hidden break-inside-avoid h-auto overflow-visible"><h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-4 uppercase tracking-wider"><BookOpen size={36} /> Campaign Chronicle</h3><div className="p-10 bg-white/40 border-4 border-dashed border-stone-400 rounded-sm h-auto min-h-[400px]"><textarea className="w-full h-full min-h-[400px] bg-transparent focus:ring-0 border-none italic text-2xl font-serif text-stone-800 leading-relaxed outline-none resize-none" placeholder="The chronicle of your deeds begins here..." value={editableNotes} onChange={(e) => setEditableNotes(e.target.value)} /></div></section>
+            <section className="page-break-before print:print-page-border no-print:hidden break-inside-avoid h-auto overflow-visible"><h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-4 uppercase tracking-wider"><BookOpen size={36} /> Campaign Chronicle</h3><div className="p-10 bg-white/40 border-4 border-dashed border-stone-400 rounded-sm h-auto min-h-[400px]"><textarea className="w-full h-full min-h-[400px] bg-transparent focus:ring-0 border-none italic text-2xl font-serif text-stone-950 font-bold leading-relaxed outline-none resize-none" placeholder="The chronicle of your deeds begins here..." value={editableNotes} onChange={(e) => setEditableNotes(e.target.value)} /></div></section>
           </div>
         </div>
       )}

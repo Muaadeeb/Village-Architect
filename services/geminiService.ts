@@ -26,11 +26,14 @@ export const generateVillageDetails = async (
     7. Exactly 6-8 Festivals:
        - 1 or 2 per season (Spring, Summer, Fall, Winter).
        - 2 "Major" festivals that occur twice a year (Equinoxes or Solstices).
-       - Each must have: name, season, timing (Beginning/Middle/End of season), lore (dark origins), and modernPractice (what it has evolved into today).
+       - Each must have: name, season, timing (Beginning/Middle/End of season), lore (dark origins), and modernPractice.
     8. Exactly 12 Businesses: Gritty names, rumors, encounterHooks, gmNotes, and exactly 5 marketItems each.
     9. Two major landmarks.
     10. Exactly 15 NPCs: 12 shop owners + 3 others. 
-       - Detailed attributes: sex, alignment, motivation, secret, combat stats, and a full relationship matrix for ALL other 14 NPCs.
+       - Detailed attributes: sex, alignment, motivation, secret, combat stats.
+       - IMPORTANT: Provide a full relationship matrix for ALL other 14 NPCs.
+       - RELATIONSHIP SCORES: Must be an integer between 1 (Extreme Hate/Fear) and 10 (Total Trust/Love). 
+       - Provide a VAST MIX of scores (some high, some low, some neutral) so the village feels like a real community with friends and enemies.
     11. Main Quests (4) and Side Treks (10).
     12. Current Events (3).
     13. GM Notes.
