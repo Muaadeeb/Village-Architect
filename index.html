@@ -37,7 +37,7 @@
         @media print {
             @page {
                 size: portrait;
-                margin: 0.5in; /* Standard safe margin */
+                margin: 0.5in; /* AGREED MARGIN */
             }
 
             * {
@@ -47,7 +47,7 @@
             }
 
             html, body {
-                background-color: #fff !important;
+                background-color: var(--parchment-bg) !important;
                 color: #000 !important;
                 margin: 0 !important;
                 padding: 0 !important;
@@ -58,7 +58,6 @@
 
             #root {
                 width: 100% !important;
-                background-color: #fff !important;
             }
 
             .no-print {
@@ -68,7 +67,7 @@
             .parchment {
                 background-color: var(--parchment-bg) !important;
                 box-shadow: none !important;
-                border: 1px solid var(--sepia-border) !important;
+                border: 1px solid #000 !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 width: 100% !important;
@@ -76,18 +75,16 @@
                 overflow: visible !important;
                 height: auto !important;
                 background-image: none !important;
-                min-height: auto !important; /* Remove fixed height constraint */
             }
 
             section {
                 page-break-after: always !important;
                 break-after: page !important;
-                padding: 0.25in !important; /* Agreed tighter padding */
+                padding: 0.25in !important; /* AGREED PADDING */
                 margin: 0 !important;
-                display: flex !important;
-                flex-direction: column !important;
+                display: block !important;
                 box-sizing: border-box !important;
-                min-height: 9in !important; /* Standard height to fill page without overflowing */
+                min-height: auto !important; /* REMOVED FORCED HEIGHT */
             }
 
             .page-break-before {
@@ -103,23 +100,10 @@
             /* Adjust text sizes for print legibility */
             h2 { font-size: 3.5rem !important; }
             h3 { font-size: 2rem !important; }
-            p { font-size: 1rem !important; line-height: 1.4 !important; }
+            p { font-size: 1rem !important; line-height: 1.3 !important; }
 
-            /* Grid Layout Preservation */
             .grid {
                 display: grid !important;
-            }
-
-            /* Ensure NPC Cards don't split across pages */
-            .npc-section {
-                page-break-after: always !important;
-                break-after: page !important;
-            }
-
-            /* Reset charts for print */
-            .recharts-responsive-container {
-                width: 100% !important;
-                height: 300px !important;
             }
         }
 
