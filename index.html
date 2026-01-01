@@ -33,11 +33,11 @@
             border: 2px solid var(--sepia-border);
         }
 
-        /* PRINT SPECIFIC STYLES */
+        /* PRINT SPECIFIC STYLES - CRITICAL FOR PDF QUALITY */
         @media print {
             @page {
                 size: portrait;
-                margin: 0.5in;
+                margin: 0.4in;
             }
 
             * {
@@ -47,8 +47,8 @@
             }
 
             html, body {
-                background-color: var(--parchment-bg) !important;
-                color: var(--ink-black) !important;
+                background-color: #fff !important;
+                color: #000 !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 width: 100% !important;
@@ -58,7 +58,7 @@
 
             #root {
                 width: 100% !important;
-                background-color: var(--parchment-bg) !important;
+                background-color: #fff !important;
             }
 
             .no-print {
@@ -68,24 +68,25 @@
             .parchment {
                 background-color: var(--parchment-bg) !important;
                 box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
+                border: 1px solid #000 !important;
                 margin: 0 !important;
+                padding: 0 !important;
                 width: 100% !important;
                 max-width: none !important;
                 overflow: visible !important;
                 height: auto !important;
                 background-image: none !important;
+                min-height: 10.2in !important; /* Forces sections to occupy a full page */
             }
 
             section {
                 page-break-after: always !important;
                 break-after: page !important;
-                padding: 0 !important;
+                padding: 0.4in !important;
                 margin: 0 !important;
-                min-height: 100vh;
-                display: flex;
-                flex-direction: column;
+                display: flex !important;
+                flex-direction: column !important;
+                box-sizing: border-box !important;
             }
 
             .page-break-before {
@@ -98,38 +99,29 @@
                 break-inside: avoid !important;
             }
 
-            /* Fix text colors */
-            .text-black { color: #000 !important; }
-            .text-stone-500 { color: #666 !important; }
-            
-            /* Backgrounds for Print */
-            .bg-white { background-color: #fff !important; }
-            .bg-stone-800 { background-color: #1c1917 !important; }
-            .bg-stone-100 { background-color: #f5f5f4 !important; }
-            .bg-red-100 { background-color: #fee2e2 !important; }
-            .bg-emerald-100 { background-color: #d1fae5 !important; }
-            .bg-blue-100 { background-color: #dbeafe !important; }
-            .bg-amber-100 { background-color: #fef3c7 !important; }
+            /* Adjust text sizes for print legibility on paper */
+            h2 { font-size: 3.5rem !important; }
+            h3 { font-size: 2rem !important; }
+            p { font-size: 1rem !important; line-height: 1.4 !important; }
 
-            /* Grid fixes */
+            /* Grid Layout Preservation */
             .grid {
                 display: grid !important;
             }
 
-            /* NPC Dossier Print Specifics */
-            .npc-card-container {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                margin-bottom: 2rem !important;
+            /* Ensure NPC Cards don't split across pages */
+            .npc-section {
+                page-break-after: always !important;
+                break-after: page !important;
             }
 
-            /* Ensure background color is printed on every page */
-            body {
-                background-color: var(--parchment-bg) !important;
+            /* Reset charts for print */
+            .recharts-responsive-container {
+                width: 100% !important;
+                height: 300px !important;
             }
         }
 
-        /* Smooth scroll etc */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
