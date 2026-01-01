@@ -68,7 +68,7 @@ const ENCOUNTERS_NIGHT_INSIDE = [
 ];
 
 const UNIQUE_MONSTERS = [
-  "A patch of darkness detaches from a wall (Shadow).", "Rubbery-skinned undead dragging a limb (Ghoul).", "A massive rat with mangy fur (Giant Rat).", "Lumbering brute chewing on a raw horse leg (Ogre).", "A half-man, half-wolf predator (Werewolf).", "A puddle of acidic slime moving toward metal (Gray Ooze).", "Rattling bones rising from refuse (Skeleton).", "A bloated, water-logged corpse (Zombie).", "A green figure aiming a blowgun (Goblin).", "A hairy brute with a heavy mace (Bugbear).", "Ancient warrior with life-draining eyes (Wight).", "A mosquito-bird hybrid diving for a neck (Stirge).", "A massive arachnid dropping from a web (Giant Spider).", "A translucent horror that bypasses armor (Wraith).", "A rubbery-skinned giant with regeneration (Troll).", "A beast firing iron spikes from its tail (Manticore).", "An eight-legged lizard with a petrifying stare (Basilisk).", "A skeletal mage chanting necrotic words (Lich Apprentice).", "A towering brute looking for a snack (Hill Giant).", "A corrosive mass that splits when struck (Black Pudding).", "A multi-headed serpent with acidic breath (Hydra).", "A winged lion with a human face (Chimera).", "A floating eye with smaller eyestalks (Beholder Kin).", "A massive, armored toxic centipede (Giant Centipede).", "A creature disguised as a treasure chest (Mimic).", "A winged serpent that hums with static (Couatl).", "A heap of rotting vegetation moving (Shambling Mound).", "A creature made of living flame (Fire Elemental).", "A spirit bound to rusted plate (Animated Armor).", "A massive bear with an owl head (Owlbear).", "A tiny, mischievous demon (Imp).", "A half-man, half-bull with a great axe (Minotaur).", "A floating skull wreathed in green fire (Flameskull).", "A beautiful woman with snakes for hair (Medusa).", "A giant scorpion with a purple glowing stinger.", "A swarm of tiny, blood-drinking bats.", "A creature made of clay and dirt (Golem).", "A headless rider on a phantom steed (Dullahan).", "A massive, burrowing worm (Ankheg).", "A group of tiny aggressive lizardfolk (Kobolds).", "A woman with the lower body of a spider (Drider).", "A massive eagle with a 30-foot wingspan.", "A creature that looks like a man but has no face (Doppelganger).", "A floating entity with tentacles (Mind Flayer).", "A massive toad that can swallow a PC whole.", "A spirit that screams like dying men (Banshee).", "A group of small stone-eating creatures (Xorn).", "A massive multi-colored winged lizard (Wyvern).", "A creature of shadow that drains strength.", "A giant constrictor snake hiding in rafters.", "A rusted clockwork soldier clicking rhythmically.", "A group of primitives with bone spears.", "A massive crab with barnacle eyes.", "A floating jellyfish drifting through air (Gas Spore).", "A creature made of crawling insects.", "A man-sized moth with hypnotic patterns.", "A giant owl watching silently from a tree.", "A group of feral blue dwarfs (Dark Creepers).", "A massive elk with antlers of obsidian.", "A creature that mimics a crying baby.", "A swarm of glowing beetles that burn.", "A massive one-eyed giant throwing boulders (Cyclops).", "A spirit that possesses party shadows.", "A creature made of animated bloody chains.", "A giant intelligent raven speaking riddles.", "A group of cultists with masks of skin.", "A massive burrowing mole with iron claws.", "A floating translucent brain (Intellect Devourer).", "A creature looking like a heap of coins.", "A giant bat with a deafening sonar cry.", "A group of undead sailors with seawater.", "A massive white-furred ape (Yeti).", "A creature made of sharp jagged glass shards.", "A giant wasp with a dagger-sized stinger.", "A group of small imps that steal light (Darkmantle).", "A massive three-eyed poisonous toad.", "A spirit bound to a mirror showing death.", "A giant multi-colored humming centipede.", "A group of ghouls in wedding finery.", "A massive stone-skinned boar with tusks.", "A creature made of living pulsing shadows.", "A giant dragonfly that hovers silently.", "A group of small mechanical spiders.", "A massive white worm that breathes frost.", "A spirit looking like a lost loved one.", "A giant black wolf with glowing eyes.", "A group of skeletons playing rusted trumpets.", "A massive armored beetle spitting acid.", "A creature made of interlocking bones.", "A giant blue-skinned four-armed humanoid.", "A spirit that drains heat from the room.", "A giant translucent slug leaving salt trails.", "A group of tiny flying demons with teeth.", "A massive winged gargoyle like a statue.", "A creature with no body, only a head.", "A giant red-eyed salamander dripping lava.", "A spirit making a PC forget their name.", "A giant multi-legged lizard climbing walls.", "A group of zombies with an iron coffin.", "A massive ancient shadow swallowing light."
+  "A patch of darkness detaches from a wall (Shadow).", "Rubbery-skinned undead dragging a limb (Ghoul).", "A massive rat with mangy fur (Giant Rat).", "Lumbering brute chewing on a raw horse leg (Ogre).", "A half-man, half-wolf predator (Werewolf).", "A puddle of acidic slime moving toward metal (Gray Ooze).", "Rattling bones rising from refuse (Skeleton).", "A bloated, water-logged corpse (Zombie).", "A green figure aiming a blowgun (Goblin).", "A hairy brute with a heavy mace (Bugbear).", "Ancient warrior with life-draining eyes (Wight).", "A mosquito-bird hybrid diving for a neck (Stirge).", "A massive arachnid dropping from a web (Giant Spider).", "A translucent horror that bypasses armor (Wraith).", "A rubbery-skinned giant with regeneration (Troll).", "A beast firing iron spikes from its tail (Manticore).", "An eight-legged lizard with a petrifying stare (Basilisk).", "A skeletal mage chanting necrotic words (Lich Apprentice).", "A towering brute looking for a snack (Hill Giant).", "A corrosive mass that splits when struck (Black Pudding).", "A multi-headed serpent with acidic breath (Hydra).", "A winged lion with a human face (Chimera).", "A floating eye with smaller eyestalks (Beholder Kin).", "A massive, armored toxic centipede (Giant Centipede).", "A creature disguised as a treasure chest (Mimic).", "A winged serpent that hums with static (Couatl).", "A heap of rotting vegetation moving (Shambling Mound).", "A creature made of living flame (Fire Elemental).", "A spirit bound to rusted plate (Animated Armor).", "A massive bear with an owl head (Owlbear).", "A tiny, mischievous demon (Imp).", "A half-man, half-bull with a great axe (Minotaur).", "A floating skull wreathed in green fire (Flameskull).", "A beautiful woman with snakes for hair (Medusa).", "A giant scorpion with a purple glowing stinger.", "A swarm of tiny, blood-drinking bats.", "A creature made of clay and dirt (Golem).", "A headless rider on a phantom steed (Dullahan).", "A massive, burrowing worm (Ankheg).", "A group of tiny aggressive lizardfolk (Kobolds).", "A woman with the lower body of a spider (Drider).", "A massive eagle with a 30-foot wingspan.", "A creature that looks like a man but has no face (Doppelganger).", "A floating entity with tentacles (Mind Flayer).", "A massive toad that can swallow a PC whole.", "A spirit that screams like dying men (Banshee).", "A group of small stone-eating creatures (Xorn).", "A massive multi-colored winged lizard (Wyvern).", "A creature of shadow that drains strength.", "A giant constrictor snake hiding in rafters.", "A rusted clockwork soldier clicking rhythmically.", "A group of primitives with bone spears.", "A massive crab with barnacle eyes.", "A floating jellyfish drifting through air (Gas Spore).", "A creature made of crawling insects.", "A man-sized moth with hypnotic patterns.", "A giant owl watching silently from a tree.", "A group of feral blue dwarfs (Dark Creepers).", "A massive elk with antlers of obsidian.", "A creature that mimics a crying baby.", "A swarm of glowing beetles that burn.", "A massive one-eyed giant throwing boulders (Cyclops).", "A spirit that possesses party shadows.", "A creature made of animated bloody chains.", "A giant intelligent raven speaking riddles.", "A group of cultists with masks of skin.", "A massive burrowing mole with iron claws.", "A floating translucent brain (Intellect Devourer).", "A creature looking like a heap of coins.", "A giant bat with a deafening sonar cry.", "A group of undead sailors with seawater.", "A massive white-furred ape (Yeti).", "A creature made of sharp jagged glass shards.", "A giant wasp with a dagger-sized stinger.", "A group of small imps that steal light (Darkmantle).", "A massive three-eyed poisonous toad.", "A spirit bound to a mirror showing death.", "A giant multi-colored humming centipede.", "A group of ghouls in wedding finery.", "A massive stone-skinned boar with tusks.", "A creature made of living pulsing shadows.", "A giant dragonfly that can hover silently.", "A group of small mechanical spiders.", "A massive white worm that breathes frost.", "A spirit looking like a lost loved one.", "A giant black wolf with glowing eyes.", "A group of skeletons playing rusted trumpets.", "A massive armored beetle spitting acid.", "A creature made of interlocking bones.", "A giant blue-skinned four-armed humanoid.", "A spirit that drains heat from the room.", "A giant translucent slug leaving salt trails.", "A group of tiny flying demons with teeth.", "A massive winged gargoyle like a statue.", "A creature with no body, only a head.", "A giant red-eyed salamander dripping lava.", "A spirit making a PC forget their name.", "A giant multi-legged lizard climbing walls.", "A group of zombies with an iron coffin.", "A massive ancient shadow swallowing light."
 ];
 
 const ENCOUNTERS_MONSTERS = UNIQUE_MONSTERS.map((m, i) => ({
@@ -132,37 +132,37 @@ const App: React.FC = () => {
       {village && (
         <div className="w-full flex flex-col items-center gap-0">
           
-          {/* PAGE 1: TITLE & CENSUS */}
+          {/* PAGE 1: TITLE & CENSUS - TIGHTENED FOR PDF */}
           <section className="parchment relative w-full max-w-5xl">
             <PageNumber n={1} />
-            <div className="text-center mb-16 border-b-8 border-double border-stone-800 pb-10">
-              <h2 className="text-9xl font-bold medieval-font uppercase text-black mb-4">{village.name}</h2>
-              <div className="flex items-center justify-center gap-6 text-xl font-black uppercase tracking-[0.6em] text-stone-600">
+            <div className="text-center mb-8 border-b-8 border-double border-stone-800 pb-6">
+              <h2 className="text-8xl font-bold medieval-font uppercase text-black leading-none mb-2">{village.name}</h2>
+              <div className="flex items-center justify-center gap-4 text-base font-black uppercase tracking-[0.5em] text-stone-600">
                 <span>Shadowdark RPG Dossier</span>
-                <div className="w-3 h-3 rounded-full bg-stone-800"></div>
+                <div className="w-2 h-2 rounded-full bg-stone-800"></div>
                 <span>Volume I</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
-              <div className="space-y-12">
-                <h3 className="text-3xl font-bold medieval-font border-b-4 border-stone-800 pb-2 uppercase text-black">Narrative Manifest</h3>
-                <p className="text-3xl italic font-serif leading-relaxed text-black bg-white/40 p-12 border-l-[12px] border-stone-800 shadow-inner font-bold">"{village.description}"</p>
-                <div className="p-10 bg-stone-100 border-4 border-stone-800 rounded-lg flex flex-col items-center shadow-xl break-inside-avoid">
-                  <h4 className="text-sm font-black uppercase text-stone-500 mb-2">Town Morale</h4>
-                  <div className="text-7xl font-black medieval-font uppercase text-black">{village.morale}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+              <div className="space-y-8">
+                <h3 className="text-2xl font-bold medieval-font border-b-4 border-stone-800 pb-1 uppercase text-black">Narrative Manifest</h3>
+                <p className="text-2xl italic font-serif leading-relaxed text-black bg-white/40 p-10 border-l-[10px] border-stone-800 shadow-inner font-bold">"{village.description}"</p>
+                <div className="p-8 bg-stone-100 border-4 border-stone-800 rounded-lg flex flex-col items-center shadow-xl break-inside-avoid">
+                  <h4 className="text-xs font-black uppercase text-stone-500 mb-1 tracking-widest">Town Morale</h4>
+                  <div className="text-6xl font-black medieval-font uppercase text-black">{village.morale}</div>
                 </div>
               </div>
-              <div className="space-y-12 break-inside-avoid">
-                <h3 className="text-3xl font-bold medieval-font border-b-4 border-stone-800 pb-2 uppercase text-black">Census</h3>
-                <div className="h-[400px] w-full bg-white/30 p-8 border-4 border-stone-800 rounded shadow-inner">
+              <div className="space-y-8 break-inside-avoid">
+                <h3 className="text-2xl font-bold medieval-font border-b-4 border-stone-800 pb-1 uppercase text-black">Census</h3>
+                <div className="h-[350px] w-full bg-white/30 p-6 border-4 border-stone-800 rounded shadow-inner">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={chartData} innerRadius={70} outerRadius={110} dataKey="value" stroke="#fff" strokeWidth={3}>
+                      <Pie data={chartData} innerRadius={60} outerRadius={100} dataKey="value" stroke="#fff" strokeWidth={2}>
                         {chartData.map((e, i) => <Cell key={i} fill={e.color} />)}
                       </Pie>
                       <Legend layout="vertical" align="right" verticalAlign="middle" iconType="square" 
-                              formatter={(val, entry: any) => <span className="text-lg font-black text-black uppercase ml-2">{val}: {entry.payload.value}</span>} />
+                              formatter={(val, entry: any) => <span className="text-sm font-black text-black uppercase ml-1">{val}: {entry.payload.value}</span>} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -173,16 +173,16 @@ const App: React.FC = () => {
           {/* PAGE 2: RELATIONS */}
           <section className="parchment relative w-full max-w-5xl">
             <PageNumber n={2} />
-            <h3 className="text-5xl font-bold medieval-font border-b-4 border-stone-800 mb-12 pb-4 uppercase text-black flex items-center gap-4"><Globe size={48} /> Nearby Settlement Relations</h3>
-            <div className="grid grid-cols-2 gap-12">
+            <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-3 uppercase text-black flex items-center gap-4"><Globe size={40} /> Nearby Settlement Relations</h3>
+            <div className="grid grid-cols-2 gap-8">
               {village.settlementRelations.map((rel, idx) => (
-                <div key={idx} className="p-10 bg-white/40 border-4 border-stone-800 rounded-lg shadow-lg flex flex-col break-inside-avoid h-full">
-                  <div className="flex justify-between items-center mb-6">
-                    <h4 className="text-4xl font-bold medieval-font text-black">{rel.settlementName}</h4>
-                    <span className={`text-sm font-black px-4 py-1.5 rounded border-4 uppercase ${rel.type === 'Harmful' ? 'bg-red-100 border-red-800 text-red-900' : 'bg-stone-200 border-stone-800 text-stone-900'}`}>{rel.type}</span>
+                <div key={idx} className="p-8 bg-white/40 border-4 border-stone-800 rounded-lg shadow-lg flex flex-col break-inside-avoid h-full">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-3xl font-bold medieval-font text-black">{rel.settlementName}</h4>
+                    <span className={`text-xs font-black px-3 py-1 rounded border-2 uppercase ${rel.type === 'Harmful' ? 'bg-red-100 border-red-800 text-red-900' : 'bg-stone-200 border-stone-800 text-stone-900'}`}>{rel.type}</span>
                   </div>
-                  <p className="text-xs font-black uppercase text-stone-500 mb-6 italic tracking-[0.2em] border-b border-stone-300 pb-2">Status: {rel.status}</p>
-                  <p className="text-xl italic text-black font-bold leading-relaxed">"{rel.description}"</p>
+                  <p className="text-xs font-black uppercase text-stone-500 mb-4 italic border-b border-stone-300 pb-1">Status: {rel.status}</p>
+                  <p className="text-lg italic text-black font-bold leading-relaxed">"{rel.description}"</p>
                 </div>
               ))}
             </div>
@@ -191,23 +191,23 @@ const App: React.FC = () => {
           {/* PAGE 3: FESTIVALS */}
           <section className="parchment relative w-full max-w-5xl">
             <PageNumber n={3} />
-            <h3 className="text-5xl font-bold medieval-font border-b-4 border-stone-800 mb-12 pb-4 uppercase text-black flex items-center gap-4"><CalendarDays size={48} /> Cycle of Tradition: Local Festivals</h3>
-            <div className="grid grid-cols-2 gap-8">
+            <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-3 uppercase text-black flex items-center gap-4"><CalendarDays size={40} /> Cycle of Tradition: Local Festivals</h3>
+            <div className="grid grid-cols-2 gap-6">
               {village.festivals.map((fest, idx) => (
-                <div key={idx} className="p-8 bg-white/40 border-4 border-stone-400 rounded-sm relative break-inside-avoid">
-                  <div className="flex justify-between items-center mb-4 border-b-2 border-stone-300 pb-2">
-                    <span className="font-bold text-black uppercase medieval-font text-3xl">{fest.name}</span>
+                <div key={idx} className="p-6 bg-white/40 border-2 border-stone-400 rounded-sm relative break-inside-avoid">
+                  <div className="flex justify-between items-center mb-3 border-b border-stone-300 pb-1">
+                    <span className="font-bold text-black uppercase medieval-font text-2xl">{fest.name}</span>
                     {getSeasonIcon(fest.season)}
                   </div>
-                  <p className="text-sm font-black text-stone-600 uppercase mb-4">{fest.timing} of {fest.season}</p>
-                  <div className="space-y-6">
+                  <p className="text-xs font-black text-stone-600 uppercase mb-3">{fest.timing} of {fest.season}</p>
+                  <div className="space-y-4">
                     <div>
-                      <p className="text-xs font-black text-amber-950 uppercase tracking-widest mb-1">Ancient Lore</p>
-                      <p className="text-lg italic font-bold text-stone-950 leading-snug">"{fest.lore}"</p>
+                      <p className="text-[10px] font-black text-amber-950 uppercase tracking-widest mb-0.5">Ancient Lore</p>
+                      <p className="text-base italic font-bold text-stone-950 leading-snug">"{fest.lore}"</p>
                     </div>
-                    <div className="bg-stone-100 p-4 border-2 border-stone-300 rounded">
-                      <p className="text-[10px] font-black text-stone-500 uppercase mb-1">Modern Ritual</p>
-                      <p className="text-base font-bold text-stone-900">Practice: {fest.modernPractice}</p>
+                    <div className="bg-stone-100 p-3 border border-stone-300 rounded">
+                      <p className="text-[9px] font-black text-stone-500 uppercase">Modern Ritual</p>
+                      <p className="text-sm font-bold text-stone-900">Practice: {fest.modernPractice}</p>
                     </div>
                   </div>
                 </div>
@@ -218,99 +218,99 @@ const App: React.FC = () => {
           {/* PAGE 4: MAP */}
           <section className="parchment relative w-full max-w-5xl flex flex-col justify-center">
             <PageNumber n={4} />
-            <h3 className="text-5xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-4 uppercase text-black"><Map size={48} className="inline mr-4" /> Local Chart (Map)</h3>
-            <p className="text-xl italic font-black text-stone-600 mb-8">Top-down street map of {village.name} detailing shops and structures.</p>
-            <div className="w-full aspect-[4/3] md:aspect-[16/9] bg-stone-900/10 border-[10px] border-stone-800 rounded shadow-2xl overflow-hidden relative">
+            <h3 className="text-4xl font-bold medieval-font border-b-4 border-stone-800 mb-6 pb-3 uppercase text-black"><Map size={40} className="inline mr-4" /> Local Chart (Map)</h3>
+            <p className="text-lg italic font-black text-stone-600 mb-6">Hand-drawn street map of {village.name} detailing shops and points of survival.</p>
+            <div className="w-full aspect-[16/9] bg-stone-900/10 border-8 border-stone-800 rounded shadow-2xl overflow-hidden relative">
               {village.mapUrl && <img src={village.mapUrl} className="w-full h-full object-cover" />}
             </div>
           </section>
 
-          {/* PAGE 5: BLACK SECRET */}
+          {/* PAGE 5: BLACK SECRET - INCREASED CONTRAST FOR PRINT */}
           <section className="parchment relative w-full max-w-5xl bg-stone-950 flex flex-col items-center justify-center text-center">
             <PageNumber n={5} />
             <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
-               <div className="grid grid-cols-12 gap-8 p-10">{Array(144).fill(0).map((_, i) => <Skull key={i} size={48} className="text-red-900" />)}</div>
+               <div className="grid grid-cols-10 gap-6 p-8">{Array(80).fill(0).map((_, i) => <Skull key={i} size={40} className="text-red-900" />)}</div>
             </div>
-            <div className="relative z-10 p-20">
-               <h3 className="text-8xl font-bold medieval-font mb-16 text-red-900 flex items-center justify-center gap-8 uppercase"><Skull size={100} /> The Black Secret</h3>
-               <p className="text-7xl italic font-serif leading-tight text-red-200 font-bold drop-shadow-[0_4px_10px_rgba(0,0,0,1)]">"{village.darkSecret}"</p>
+            <div className="relative z-10 p-16">
+               <h3 className="text-7xl font-bold medieval-font mb-12 text-red-700 flex items-center justify-center gap-6 uppercase"><Skull size={80} /> The Black Secret</h3>
+               <p className="text-6xl italic font-serif leading-tight text-red-300 font-bold drop-shadow-[0_4px_10px_rgba(0,0,0,1)]">"{village.darkSecret}"</p>
             </div>
           </section>
 
-          {/* PAGE 6+: NPC DOSSIERS - ONE PER PAGE */}
+          {/* NPC DOSSIERS - ONE PER PAGE */}
           {village.residents.map((npc, idx) => (
             <section key={idx} className="parchment relative w-full max-w-5xl npc-section">
               <PageNumber n={6 + idx} />
-              <div className="flex flex-col gap-10">
-                <div className="p-10 border-4 border-stone-800 bg-white/60 rounded-sm shadow-2xl flex flex-col md:flex-row gap-12 items-start break-inside-avoid">
+              <div className="flex flex-col gap-6">
+                <div className="p-8 border-4 border-stone-800 bg-white/60 rounded-sm shadow-2xl flex flex-col md:flex-row gap-8 items-start break-inside-avoid">
                   {/* IDENTITY */}
                   <div className="w-full md:w-1/3 flex flex-col items-center shrink-0">
-                    <div className="relative w-full aspect-square bg-stone-900/10 mb-8 border-8 border-stone-800 overflow-hidden shadow-2xl">
-                      {npc.portraitUrl ? <img src={npc.portraitUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center opacity-10"><UserCircle size={140} /></div>}
+                    <div className="relative w-full aspect-square bg-stone-900/10 mb-6 border-6 border-stone-800 overflow-hidden shadow-2xl">
+                      {npc.portraitUrl ? <img src={npc.portraitUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center opacity-10"><UserCircle size={100} /></div>}
                     </div>
-                    <h4 className="text-6xl font-bold medieval-font text-black uppercase leading-tight mb-2 text-center">{npc.name}</h4>
-                    <p className="text-lg font-black text-stone-600 uppercase mb-8 tracking-[0.3em]">{npc.sex} • {npc.race} • {npc.role}</p>
-                    <div className="flex flex-col gap-4 w-full">
-                      <div className={`text-sm font-black px-6 py-4 border-4 border-stone-800 rounded bg-white w-full flex items-center justify-center gap-4 shadow-md ${getStandingCategory(npc).color}`}>{getStandingCategory(npc).icon} {getStandingCategory(npc).label}</div>
-                      <div className={`text-sm font-black px-6 py-4 border-4 rounded w-full flex items-center justify-center gap-4 uppercase tracking-[0.3em] shadow-md ${npc.alignment === 'Lawful' ? 'bg-blue-100 border-blue-800 text-blue-900' : npc.alignment === 'Chaotic' ? 'bg-red-100 border-red-800 text-red-900' : 'bg-stone-100 border-stone-800 text-stone-900'}`}><Scale size={20}/> {npc.alignment}</div>
+                    <h4 className="text-5xl font-bold medieval-font text-black uppercase leading-tight mb-1 text-center">{npc.name}</h4>
+                    <p className="text-base font-black text-stone-600 uppercase mb-6 tracking-[0.25em]">{npc.sex} • {npc.race} • {npc.role}</p>
+                    <div className="flex flex-col gap-3 w-full">
+                      <div className={`text-xs font-black px-5 py-3 border-2 border-stone-800 rounded bg-white w-full flex items-center justify-center gap-3 shadow-md ${getStandingCategory(npc).color}`}>{getStandingCategory(npc).icon} {getStandingCategory(npc).label}</div>
+                      <div className={`text-xs font-black px-5 py-3 border-2 rounded w-full flex items-center justify-center gap-3 uppercase tracking-[0.3em] shadow-md ${npc.alignment === 'Lawful' ? 'bg-blue-100 border-blue-800 text-blue-900' : npc.alignment === 'Chaotic' ? 'bg-red-100 border-red-800 text-red-900' : 'bg-stone-100 border-stone-800 text-stone-900'}`}><Scale size={16}/> {npc.alignment}</div>
                     </div>
                   </div>
 
                   {/* DETAILS */}
-                  <div className="flex-1 space-y-10">
+                  <div className="flex-1 space-y-6">
                     <div>
-                      <h5 className="text-xs font-black uppercase text-stone-500 mb-4 tracking-[0.4em] flex items-center gap-3"><BookOpen size={20}/> Psychological Profile</h5>
-                      <p className="italic text-4xl text-black font-bold leading-relaxed border-l-[12px] border-stone-800 pl-10 bg-white/40 p-10 rounded shadow-inner">"{npc.personality}"</p>
+                      <h5 className="text-[10px] font-black uppercase text-stone-500 mb-2 tracking-[0.4em] flex items-center gap-3"><BookOpen size={16}/> Psychological Profile</h5>
+                      <p className="italic text-3xl text-black font-bold leading-relaxed border-l-[10px] border-stone-800 pl-8 bg-white/40 p-8 rounded shadow-inner">"{npc.personality}"</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-8">
-                      <div className="p-8 bg-stone-800 text-amber-500 rounded-lg border-4 border-stone-900 shadow-2xl">
-                        <span className="block opacity-60 mb-2 uppercase text-xs tracking-[0.3em]">Motivation</span>
-                        <p className="text-xl font-bold flex items-center gap-3"><Goal size={24}/> {npc.motivation}</p>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="p-6 bg-stone-800 text-amber-500 rounded-lg border-2 border-stone-900 shadow-xl">
+                        <span className="block opacity-60 mb-1 uppercase text-[9px] tracking-[0.3em]">Motivation</span>
+                        <p className="text-lg font-bold flex items-center gap-2 truncate"><Goal size={18}/> {npc.motivation}</p>
                       </div>
-                      <div className="p-8 bg-stone-800 text-amber-500 rounded-lg border-4 border-stone-900 shadow-2xl">
-                        <span className="block opacity-60 mb-2 uppercase text-xs tracking-[0.3em]">Characteristic</span>
-                        <p className="text-xl font-bold flex items-center gap-3"><Fingerprint size={24}/> {npc.trait}</p>
+                      <div className="p-6 bg-stone-800 text-amber-500 rounded-lg border-2 border-stone-900 shadow-xl">
+                        <span className="block opacity-60 mb-1 uppercase text-[9px] tracking-[0.3em]">Characteristic</span>
+                        <p className="text-lg font-bold flex items-center gap-2 truncate"><Fingerprint size={18}/> {npc.trait}</p>
                       </div>
                       
-                      {/* STATS */}
-                      <div className="p-8 bg-white border-4 border-stone-800 rounded shadow-2xl flex justify-around items-center">
+                      {/* STATS BOX */}
+                      <div className="p-6 bg-white border-4 border-stone-800 rounded shadow-2xl flex justify-around items-center">
                         <div className="flex flex-col items-center">
-                          <Shield size={40} className="text-stone-800 mb-2" />
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-sm uppercase font-bold text-stone-500">AC</span>
-                            <span className="text-5xl font-black">{npc.stats.ac}</span>
+                          <Shield size={32} className="text-stone-800 mb-1" />
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-xs uppercase font-bold text-stone-500">AC</span>
+                            <span className="text-4xl font-black">{npc.stats.ac}</span>
                           </div>
                         </div>
-                        <div className="w-1 h-16 bg-stone-200 rounded-full"></div>
+                        <div className="w-0.5 h-12 bg-stone-200 rounded-full"></div>
                         <div className="flex flex-col items-center">
-                          <Heart size={40} className="text-red-700 mb-2" />
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-sm uppercase font-bold text-stone-500">HP</span>
-                            <span className="text-5xl font-black">{npc.stats.hp}</span>
+                          <Heart size={32} className="text-red-700 mb-1" />
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-xs uppercase font-bold text-stone-500">HP</span>
+                            <span className="text-4xl font-black">{npc.stats.hp}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="p-8 bg-red-100 text-red-950 rounded border-4 border-red-800 shadow-2xl border-dashed">
-                        <span className="block opacity-70 mb-2 uppercase text-xs tracking-[0.3em] text-red-800">Shadow Secret</span>
-                        <p className="text-lg font-bold italic"><Skull size={24} className="inline mr-3 text-red-900"/> {npc.secret}</p>
+                      <div className="p-6 bg-red-100 text-red-950 rounded border-2 border-red-800 shadow-2xl border-dashed">
+                        <span className="block opacity-70 mb-1 uppercase text-[9px] tracking-[0.3em] text-red-800">Shadow Secret</span>
+                        <p className="text-base font-bold italic line-clamp-2"><Skull size={18} className="inline mr-2 text-red-900"/> {npc.secret}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* SOCIAL MATRIX - REMAINS ON SAME PAGE */}
+                {/* SOCIAL MATRIX - FULL WIDTH */}
                 <div className="w-full">
-                  <h5 className="text-lg font-black uppercase text-stone-500 mb-6 tracking-[0.5em] flex items-center gap-4 border-b-8 border-stone-300 pb-3"><Swords size={28}/> Social Matrix Connections</h5>
-                  <div className="grid grid-cols-4 gap-4">
+                  <h5 className="text-sm font-black uppercase text-stone-500 mb-4 tracking-[0.4em] flex items-center gap-3 border-b-4 border-stone-300 pb-2"><Swords size={20}/> Social Matrix Connections</h5>
+                  <div className="grid grid-cols-4 gap-3">
                     {npc.relationships.slice(0, 12).map((rel, r) => (
-                      <div key={r} className={`p-4 border-2 rounded shadow-lg flex flex-col h-[110px] break-inside-avoid transition-all bg-white/80 ${getRelationshipStyles(rel.score).bg} ${getRelationshipStyles(rel.score).border}`}>
-                        <div className="flex justify-between items-start text-xs font-black text-black uppercase mb-2">
-                          <span className="truncate w-[70%] flex items-center gap-1">{getRelationshipStyles(rel.score).icon} {rel.targetName}</span>
-                          <span className="bg-white px-2 border rounded font-black text-sm">{rel.score}</span>
+                      <div key={r} className={`p-3 border-2 rounded shadow flex flex-col min-h-[100px] break-inside-avoid bg-white/80 ${getRelationshipStyles(rel.score).bg} ${getRelationshipStyles(rel.score).border}`}>
+                        <div className="flex justify-between items-start text-[10px] font-black text-black uppercase mb-1">
+                          <span className="truncate w-[70%] flex items-center gap-1 font-bold">{getRelationshipStyles(rel.score).icon} {rel.targetName}</span>
+                          <span className="bg-white px-1.5 border rounded font-black text-base leading-none">{rel.score}</span>
                         </div>
-                        <p className="text-[11px] italic font-bold text-stone-900 leading-tight line-clamp-3 mt-auto">"{rel.reason}"</p>
+                        <p className="text-[10px] italic font-bold text-stone-900 leading-tight line-clamp-3 mt-auto">"{rel.reason}"</p>
                       </div>
                     ))}
                   </div>
@@ -321,28 +321,28 @@ const App: React.FC = () => {
 
           {/* LEDGER PAGE */}
           <section className="parchment relative w-full max-w-5xl">
-            <h3 className="text-6xl font-bold medieval-font border-b-8 border-stone-800 mb-12 pb-6 uppercase text-black flex items-center gap-6"><ShoppingBag size={64} /> Marketplace Ledger</h3>
-            <div className="grid grid-cols-1 gap-12">
+            <h3 className="text-5xl font-bold medieval-font border-b-4 border-stone-800 mb-8 pb-3 uppercase text-black flex items-center gap-5"><ShoppingBag size={48} /> Marketplace Ledger</h3>
+            <div className="grid grid-cols-1 gap-8">
               {village.businesses.slice(0, 4).map((biz, b) => (
-                <div key={b} className="p-10 bg-white/60 border-4 border-stone-800 rounded shadow-2xl break-inside-avoid">
-                  <div className="flex justify-between items-end border-b-8 border-stone-800 pb-6 mb-10">
-                    <div><h4 className="text-5xl font-bold medieval-font text-black uppercase">{biz.name}</h4><p className="text-sm font-black text-stone-500 uppercase mt-2 tracking-widest">{biz.type}</p></div>
-                    <span className="text-lg font-black uppercase text-stone-700 bg-white px-8 py-3 border-4 border-stone-800 rounded-full shadow-xl">Proprietor: {biz.owner.name}</span>
+                <div key={b} className="p-8 bg-white/60 border-4 border-stone-800 rounded shadow-2xl break-inside-avoid">
+                  <div className="flex justify-between items-end border-b-4 border-stone-800 pb-4 mb-6">
+                    <div><h4 className="text-4xl font-bold medieval-font text-black uppercase">{biz.name}</h4><p className="text-xs font-black text-stone-500 uppercase tracking-widest">{biz.type}</p></div>
+                    <span className="text-sm font-black uppercase text-stone-700 bg-white px-6 py-2 border-2 border-stone-800 rounded-full shadow-lg">Proprietor: {biz.owner.name}</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-x-20 gap-y-8 mb-10">
+                  <div className="grid grid-cols-2 gap-x-12 gap-y-6 mb-6">
                     {biz.marketItems.map((item, i) => (
-                      <div key={i} className="flex justify-between items-center text-2xl border-b-4 border-dashed border-stone-300 pb-3">
-                        <div className="flex items-center gap-4 font-black">
-                          <CircleDot size={16} className="text-stone-400" />
-                          <span>{item.name}</span>
+                      <div key={i} className="flex justify-between items-center text-xl border-b-2 border-dashed border-stone-300 pb-2">
+                        <div className="flex items-center gap-3 font-black">
+                          <CircleDot size={12} className="text-stone-400" />
+                          <span className="text-lg">{item.name}</span>
                         </div>
-                        <span className="font-black medieval-font text-4xl">{item.price}</span>
+                        <span className="font-black medieval-font text-3xl">{item.price}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="p-8 bg-amber-100/60 rounded border-l-[16px] border-amber-800 shadow-inner flex gap-8 items-center">
-                    <ShieldAlert className="text-amber-900 shrink-0" size={48} />
-                    <p className="text-2xl italic font-bold text-amber-950">"{biz.rumor}"</p>
+                  <div className="p-6 bg-amber-100/60 rounded border-l-[12px] border-amber-800 shadow-inner flex gap-6 items-center">
+                    <ShieldAlert className="text-amber-900 shrink-0" size={32} />
+                    <p className="text-xl italic font-bold text-amber-950">"{biz.rumor}"</p>
                   </div>
                 </div>
               ))}
@@ -351,23 +351,23 @@ const App: React.FC = () => {
 
           {/* TABLES PAGE */}
           <section className="parchment relative w-full max-w-5xl">
-             <h3 className="text-6xl font-bold medieval-font border-b-8 border-stone-800 mb-16 pb-6 text-black flex items-center gap-8 uppercase"><Compass size={64} /> Random Encounter Archives</h3>
-             <div className="grid grid-cols-1 gap-20">
+             <h3 className="text-5xl font-bold medieval-font border-b-6 border-stone-800 mb-10 pb-4 text-black flex items-center gap-6 uppercase"><Compass size={48} /> Random Encounter Archives</h3>
+             <div className="grid grid-cols-1 gap-12">
                 {[
                   { title: "Day: Inside Walls", table: ENCOUNTERS_DAY_INSIDE, size: 20 },
                   { title: "Night: Inside Walls", table: ENCOUNTERS_NIGHT_INSIDE, size: 20 }
                 ].map((cat, ci) => (
                   <div key={ci} className="break-inside-avoid">
-                    <h4 className="text-5xl font-bold medieval-font text-black uppercase mb-10 border-l-[16px] border-stone-800 pl-8">{cat.title}</h4>
-                    <table className="w-full text-left font-serif border-8 border-stone-800 shadow-2xl">
-                      <thead className="bg-stone-800 text-amber-500 font-black uppercase text-xl">
-                        <tr><th className="py-6 px-8 border-r-4 border-stone-700 w-32">d{cat.size}</th><th className="py-6 px-8">Encounter Detail</th></tr>
+                    <h4 className="text-3xl font-bold medieval-font text-black uppercase mb-6 border-l-[12px] border-stone-800 pl-6">{cat.title}</h4>
+                    <table className="w-full text-left font-serif border-4 border-stone-800 shadow-xl">
+                      <thead className="bg-stone-800 text-amber-500 font-black uppercase text-base">
+                        <tr><th className="py-4 px-6 border-r-2 border-stone-700 w-24">d{cat.size}</th><th className="py-4 px-6">Encounter Detail</th></tr>
                       </thead>
-                      <tbody className="bg-white/80 text-2xl">
+                      <tbody className="bg-white/80 text-xl">
                         {cat.table.map((e, ei) => (
-                          <tr key={ei} className="border-b-2 border-stone-200">
-                            <td className="py-6 px-8 text-center border-r-4 border-stone-300 font-black">{ei+1}</td>
-                            <td className="py-6 px-8 font-bold italic">"{e.text}"</td>
+                          <tr key={ei} className="border-b border-stone-200">
+                            <td className="py-4 px-6 text-center border-r-2 border-stone-300 font-black">{ei+1}</td>
+                            <td className="py-4 px-6 font-bold italic leading-tight">"{e.text}"</td>
                           </tr>
                         ))}
                       </tbody>
@@ -384,7 +384,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 bg-stone-900/98 z-50 flex items-center justify-center flex-col gap-10 p-12 backdrop-blur-md">
           <Flame className="w-48 h-48 text-amber-500 animate-pulse" />
           <h2 className="text-6xl medieval-font text-amber-500 text-center uppercase tracking-widest drop-shadow-2xl">Manifesting Dossier...</h2>
-          <p className="text-stone-400 italic text-center max-w-2xl text-2xl animate-pulse">Forging the dark destiny of this village. The ancient ink flows heavy...</p>
+          <p className="text-stone-400 italic text-center max-w-2xl text-2xl animate-pulse">TheOracle is deep in thought, mapping the Shadowdark. Please wait while the ancient ink flows...</p>
         </div>
       )}
     </div>
@@ -393,9 +393,9 @@ const App: React.FC = () => {
 
 const getStandingCategory = (npc: DetailedNPC) => {
   const avg = npc.relationships.reduce((a, r) => a + r.score, 0) / (npc.relationships.length || 1);
-  if (avg <= 4.0) return { label: 'Pariah', color: 'text-red-950', icon: <Frown size={24} className="text-red-900" /> };
-  if (avg >= 7.0) return { label: 'Pillar', color: 'text-amber-950 font-black', icon: <Crown size={24} className="text-amber-700" /> };
-  return { label: 'Resident', color: 'text-stone-950', icon: <Users size={24} className="text-stone-800" /> };
+  if (avg <= 4.0) return { label: 'Pariah', color: 'text-red-950', icon: <Frown size={20} className="text-red-900" /> };
+  if (avg >= 7.0) return { label: 'Pillar', color: 'text-amber-950 font-black', icon: <Crown size={20} className="text-amber-700" /> };
+  return { label: 'Resident', color: 'text-stone-950', icon: <Users size={20} className="text-stone-800" /> };
 };
 
 const getRelationshipStyles = (score: number) => {
@@ -406,11 +406,11 @@ const getRelationshipStyles = (score: number) => {
 
 const getSeasonIcon = (season: string) => {
   switch(season) {
-    case 'Spring': return <Sprout className="text-emerald-700" size={36} />;
-    case 'Summer': return <Sun className="text-amber-700" size={36} />;
-    case 'Fall': return <Leaf className="text-orange-800" size={36} />;
-    case 'Winter': return <Snowflake className="text-blue-700" size={36} />;
-    default: return <Star className="text-purple-700" size={36} />;
+    case 'Spring': return <Sprout className="text-emerald-700" size={32} />;
+    case 'Summer': return <Sun className="text-amber-700" size={32} />;
+    case 'Fall': return <Leaf className="text-orange-800" size={32} />;
+    case 'Winter': return <Snowflake className="text-blue-700" size={32} />;
+    default: return <Star className="text-purple-700" size={32} />;
   }
 };
 
