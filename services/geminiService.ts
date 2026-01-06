@@ -1,5 +1,6 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { VillageData, DetailedNPC, PointOfInterest } from "../types";
+import { VillageData, DetailedNPC, PointOfInterest, DemographicEntry } from "../types";
 
 export const generateVillageDetails = async (
   villageName: string,
@@ -20,21 +21,22 @@ export const generateVillageDetails = async (
     3. Dark Secret: The village's core rot or hidden horror.
     4. Morale: A single metric ('Hopeful', 'Fearful', 'Resentful', 'Apathetic', 'Defiant').
     5. Weather: A single short thematic phrase.
-    6. Exactly 4 Nearby Settlement Relations: 
+    6. Demographics: Break down the population into 4-6 distinct racial groups totaling ${popCount}.
+    7. Exactly 4 Nearby Settlement Relations: 
        - Focus on resource scarcity, border skirmishes, and espionage.
        - Each entry: settlementName, type ('Good', 'Neutral', 'Harmful'), status, description.
-    7. Exactly 6-8 Festivals:
+    8. Exactly 6-8 Festivals:
        - name, season ('Spring', 'Summer', 'Fall', 'Winter', 'Major'), timing, lore (dark origins), and modernPractice.
-    8. Exactly 12 Businesses: Gritty names, rumors, encounterHooks, gmNotes, and exactly 5 marketItems each.
-    9. Two major landmarks.
-    10. Exactly 15 NPCs: 
+    9. Exactly 12 Businesses: Gritty names, rumors, encounterHooks, gmNotes, and exactly 5 marketItems each.
+    10. Two major landmarks.
+    11. Exactly 15 NPCs: 
        - Attributes: name, race, sex, role, alignment ('Lawful', 'Neutral', 'Chaotic').
        - Psychology: personality, motivation, trait (Characteristic), secret (Alignment Shadow Secret).
        - Stats: hp, ac.
        - IMPORTANT: Relationship matrix for ALL other 14 NPCs. Scores 1-10 (Varied mix).
-    11. Main Quests (4) and Side Treks (10).
-    12. Current Events (3).
-    13. GM Notes.
+    12. Main Quests (4) and Side Treks (10).
+    13. Current Events (3).
+    14. GM Notes.
 
     Output JSON schema:
     {
@@ -44,6 +46,9 @@ export const generateVillageDetails = async (
       "morale": "Hopeful|Fearful|Resentful|Apathetic|Defiant",
       "weather": "string",
       "darkSecret": "string",
+      "demographics": [
+        { "race": "string", "count": number }
+      ],
       "settlementRelations": [
         { "settlementName": "string", "type": "Good|Neutral|Harmful", "status": "string", "description": "string" }
       ],
@@ -86,8 +91,7 @@ export const generateVillageDetails = async (
   return {
     ...rawJson,
     name: villageName,
-    population: popCount,
-    demographics: demographics
+    population: popCount
   };
 };
 

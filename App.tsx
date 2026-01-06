@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { generateVillageDetails, generateVillageMap, generatePOI } from './services/geminiService';
-import { VillageData, PointOfInterest } from './types';
+import { VillageData, PointOfInterest, DemographicEntry } from './types';
 import { Scroll, RefreshCw, Flame, Printer, Compass } from 'lucide-react';
 
 // modular utilities
@@ -36,24 +36,29 @@ const App: React.FC = () => {
   const [village, setVillage] = useState<VillageData | null>(null);
   const [poi, setPoi] = useState<PointOfInterest | undefined>(undefined);
   const [editableNotes, setEditableNotes] = useState("");
-  const [manualDemo, setManualDemo] = useState({ h: 170, ha: 16, d: 8, e: 4, o: 0 });
+  const [manualDemo, setManualDemo] = useState<DemographicEntry[]>([]);
   
   const handleGenerate = async () => {
     setLoading(true);
     try {
       const pop = Math.floor(Math.random() * 100 + 200);
-      const demo = { humans: Math.floor(pop*0.8), halflings: Math.floor(pop*0.1), dwarves: Math.floor(pop*0.05), elves: Math.floor(pop*0.03), others: [] };
-      const data = await generateVillageDetails("Cinderglade", pop, demo);
+      const initialDemo = { humans: Math.floor(pop*0.8), halflings: Math.floor(pop*0.1), dwarves: Math.floor(pop*0.05), elves: Math.floor(pop*0.03), others: [] };
+      const data = await generateVillageDetails("Cinderglade", pop, initialDemo);
       setVillage(data);
       setEditableNotes(data.gmNotes || "");
-      setManualDemo({ h: data.demographics.humans, ha: data.demographics.halflings, d: data.demographics.dwarves, e: data.demographics.elves, o: 0 });
+      setManualDemo(data.demographics);
       setPoi(undefined);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
 
   const handleManualRedraw = () => {
     if (!village) return;
-    setVillage({ ...village, population: manualDemo.h + manualDemo.ha + manualDemo.d + manualDemo.e, demographics: { ...village.demographics, humans: manualDemo.h, halflings: manualDemo.ha, dwarves: manualDemo.d, elves: manualDemo.e } });
+    const totalPop = manualDemo.reduce((sum, d) => sum + d.count, 0);
+    setVillage({ 
+      ...village, 
+      population: totalPop, 
+      demographics: [...manualDemo] 
+    });
   };
 
   const handleGenerateMap = async () => {

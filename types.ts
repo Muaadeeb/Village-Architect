@@ -1,3 +1,4 @@
+
 export interface NPC {
   name: string;
   race: string;
@@ -93,18 +94,17 @@ export interface Festival {
   modernPractice: string;
 }
 
+export interface DemographicEntry {
+  race: string;
+  count: number;
+}
+
 export interface VillageData {
   name: string;
   population: number;
   description: string;
   morale: 'Hopeful' | 'Fearful' | 'Resentful' | 'Apathetic' | 'Defiant';
-  demographics: {
-    humans: number;
-    halflings: number;
-    dwarves: number;
-    elves: number;
-    others: { race: string; count: number }[];
-  };
+  demographics: DemographicEntry[];
   geography: string;
   atmosphere: string;
   weather: string;
