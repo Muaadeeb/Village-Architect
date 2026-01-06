@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, Label } from 'recharts';
 import { VillageData, DemographicEntry } from '../types';
 import { Plus, Trash2, Users } from 'lucide-react';
 
@@ -71,10 +71,42 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               stroke="#fff" 
               strokeWidth={3}
               animationDuration={800}
+              cx="50%"
+              cy="50%"
             >
               {chartData.map((e, i) => (
                 <Cell key={`cell-${i}`} fill={e.color} />
               ))}
+              <Label 
+                position="center"
+                content={({ viewBox }) => {
+                  const { cx, cy } = viewBox as any;
+                  return (
+                    <g>
+                      <text
+                        x={cx}
+                        y={cy - 12}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-stone-500 font-black uppercase tracking-widest"
+                        style={{ fontSize: '10px' }}
+                      >
+                        Total Pop
+                      </text>
+                      <text
+                        x={cx}
+                        y={cy + 18}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-black font-black medieval-font"
+                        style={{ fontSize: '36px' }}
+                      >
+                        {village.population}
+                      </text>
+                    </g>
+                  );
+                }}
+              />
             </Pie>
             <Tooltip 
               contentStyle={{ backgroundColor: '#1a1a1a', border: 'none', color: '#fff', borderRadius: '4px', fontWeight: 'bold' }}
@@ -93,10 +125,6 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
             />
           </PieChart>
         </ResponsiveContainer>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none hidden md:block">
-          <p className="text-[10px] font-black uppercase text-stone-500 tracking-widest">Total Pop</p>
-          <p className="text-3xl font-black medieval-font">{village.population}</p>
-        </div>
       </div>
 
       {/* Manual Entry Section - Dynamic Inputs */}
