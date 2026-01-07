@@ -138,19 +138,19 @@ const App: React.FC = () => {
           />
           <button 
             onClick={() => fileInputRef.current?.click()} 
-            title="Load Village JSON"
+            title="Import Village JSON"
             className="bg-stone-800 text-stone-300 px-4 py-2 rounded-lg font-bold border border-stone-700 hover:bg-stone-700 transition-all shadow-lg flex items-center gap-2"
           >
-            <Upload size={18} /> <span className="hidden sm:inline">Load</span>
+            <Upload size={18} /> <span className="hidden sm:inline">Import</span>
           </button>
           
           {village && (
             <button 
               onClick={saveVillage} 
-              title="Save Village JSON"
+              title="Download Village JSON"
               className="bg-stone-800 text-stone-300 px-4 py-2 rounded-lg font-bold border border-stone-700 hover:bg-stone-700 transition-all shadow-lg flex items-center gap-2"
             >
-              <Download size={18} /> <span className="hidden sm:inline">Save</span>
+              <Download size={18} /> <span className="hidden sm:inline">Download</span>
             </button>
           )}
 
