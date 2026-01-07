@@ -11,18 +11,17 @@ interface Props {
   onRedraw: () => void;
 }
 
-// Vibrant Primary and Secondary Color Palette for RPG demographics
 const RACE_COLORS = [
-  '#1a1a1a', // Black
-  '#ef4444', // Red
-  '#3b82f6', // Blue
-  '#10b981', // Green
-  '#f59e0b', // Amber
-  '#8b5cf6', // Purple
-  '#ec4899', // Pink
-  '#06b6d4', // Cyan
-  '#78350f', // Brown
-  '#71717a', // Zinc
+  '#1a1a1a', 
+  '#ef4444', 
+  '#3b82f6', 
+  '#10b981', 
+  '#f59e0b', 
+  '#8b5cf6', 
+  '#ec4899', 
+  '#06b6d4', 
+  '#78350f', 
+  '#71717a',
 ];
 
 export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualDemo, onRedraw }) => {
@@ -55,12 +54,11 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
 
   return (
     <div className="space-y-4 break-inside-avoid">
-      <h3 className="text-2xl font-bold medieval-font border-b-4 border-stone-800 pb-2 uppercase text-black flex items-center gap-3">
-        <Users size={24} className="shrink-0" /> Census
+      <h3 className="text-3xl font-bold medieval-font border-b-4 border-stone-800 pb-2 uppercase text-black flex items-center gap-3">
+        <Users size={28} className="shrink-0" /> Census
       </h3>
       
-      {/* Chart Section */}
-      <div className="h-[480px] w-full bg-white/30 p-4 border-4 border-stone-800 rounded shadow-inner flex items-center justify-center">
+      <div className="dossier-card h-[400px] w-full p-8 flex flex-col items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie 
@@ -69,7 +67,7 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               outerRadius={120} 
               dataKey="value" 
               stroke="#fff" 
-              strokeWidth={3}
+              strokeWidth={4}
               animationDuration={800}
               cx="50%" 
               cy="45%"
@@ -89,7 +87,7 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               verticalAlign="bottom" 
               iconType="circle"
               formatter={(val, entry: any) => (
-                <span className="text-[10px] font-black text-stone-800 uppercase ml-1">
+                <span className="text-[11px] font-black text-stone-800 uppercase ml-1">
                   {val}: {entry.payload.value}
                 </span>
               )} 
@@ -98,63 +96,40 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
         </ResponsiveContainer>
       </div>
 
-      {/* Manual Entry Section - Dynamic Inputs */}
-      <div className="no-print p-6 bg-stone-800/5 border-2 border-dashed border-stone-400 rounded-lg">
-        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="no-print p-6 bg-stone-800/5 border-2 border-dashed border-stone-400 rounded-lg mt-4">
+        <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
           {manualDemo.map((demo, idx) => (
             <div key={idx} className="flex gap-2 items-end group">
               <div className="flex-1">
-                <label className="text-[9px] font-black uppercase text-stone-500 flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: RACE_COLORS[idx % RACE_COLORS.length] }}></div>
-                  Race Designation
-                </label>
+                <label className="text-[9px] font-black uppercase text-stone-500">Designation</label>
                 <input 
-                  className="w-full border-2 border-stone-800 px-3 py-1.5 rounded text-xs font-bold bg-white focus:ring-2 focus:ring-amber-500 outline-none transition-all" 
+                  className="w-full border-2 border-stone-800 px-3 py-1.5 rounded text-xs font-bold" 
                   type="text" 
                   value={demo.race} 
                   onChange={e => handleRaceChange(idx, 'race', e.target.value)}
-                  placeholder="e.g. Human"
                 />
               </div>
               <div className="w-24">
                 <label className="text-[9px] font-black uppercase text-stone-500">Count</label>
                 <input 
-                  className="w-full border-2 border-stone-800 px-3 py-1.5 rounded text-xs font-bold bg-white focus:ring-2 focus:ring-amber-500 outline-none transition-all" 
+                  className="w-full border-2 border-stone-800 px-3 py-1.5 rounded text-xs font-bold" 
                   type="number" 
                   value={demo.count} 
                   onChange={e => handleRaceChange(idx, 'count', parseInt(e.target.value) || 0)}
                 />
               </div>
               {manualDemo.length > 1 && (
-                <button 
-                  onClick={() => removeRace(idx)} 
-                  className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
-                  title="Remove Entry"
-                >
+                <button onClick={() => removeRace(idx)} className="p-2 text-stone-400 hover:text-red-600">
                   <Trash2 size={18} />
                 </button>
               )}
             </div>
           ))}
         </div>
-
-        <div className="flex gap-3 mt-6">
-          {manualDemo.length < 10 && (
-            <button 
-              onClick={addRace} 
-              className="flex-1 bg-stone-200 text-stone-700 py-2.5 rounded uppercase font-black text-xs flex items-center justify-center gap-2 hover:bg-stone-300 transition-all border border-stone-300 shadow-sm"
-            >
-              <Plus size={16} /> Add Race
-            </button>
-          )}
-          <button 
-            onClick={onRedraw} 
-            className="flex-[2] bg-stone-800 text-amber-500 py-2.5 rounded uppercase font-black text-xs shadow-lg hover:bg-stone-700 hover:scale-[1.02] active:scale-[0.98] transition-all border border-stone-950 flex items-center justify-center gap-2"
-          >
-            Update Manifest
-          </button>
+        <div className="flex gap-3 mt-4">
+          <button onClick={addRace} className="flex-1 bg-stone-200 text-stone-700 py-2 rounded uppercase font-black text-xs">Add Caste</button>
+          <button onClick={onRedraw} className="flex-[2] bg-stone-800 text-amber-500 py-2 rounded uppercase font-black text-xs">Commit Manifest</button>
         </div>
-        <p className="text-[9px] font-black uppercase text-stone-400 mt-4 text-center italic tracking-widest">Shadowdark Census Protocol: Maximum 10 Castes</p>
       </div>
     </div>
   );

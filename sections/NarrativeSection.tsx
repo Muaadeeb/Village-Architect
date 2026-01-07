@@ -1,12 +1,14 @@
 
 import React from 'react';
-import { PageNumber } from '../VillageUtils';
 
 export const NarrativeSection: React.FC<{ description: string }> = ({ description }) => (
   <div className="space-y-4 break-inside-avoid">
-    <h3 className="text-2xl font-bold medieval-font border-b-4 border-stone-800 pb-1 uppercase text-black">Narrative Manifest</h3>
-    <p className="text-2xl italic font-serif leading-relaxed text-black bg-white/40 p-10 border-l-[10px] border-stone-800 shadow-inner font-bold">
-      "{description}"
-    </p>
+    <h3 className="text-3xl font-bold medieval-font border-b-4 border-stone-800 pb-2 uppercase text-black">Narrative Manifest</h3>
+    <div className="dossier-card p-10 relative">
+      <div className="absolute top-0 left-0 w-2 h-full bg-stone-800"></div>
+      <p className="text-2xl italic font-serif leading-relaxed text-black font-bold">
+        "{description}"
+      </p>
+    </div>
   </div>
 );

@@ -6,19 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadowdark Village Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,700;1,400&family=MedievalSharp&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,700;1,400;1,700&family=MedievalSharp&display=swap" rel="stylesheet">
     <style>
         :root {
-            --parchment-bg: #fef3c7;
-            --ink-black: #1a1a1a;
-            --sepia-border: #d4a373;
-            --shadowdark-red: #7f1d1d;
+            --dossier-bg: #f5f5f5;
+            --ink-black: #0c0a09;
+            --stone-grey: #44403c;
+            --danger-red: #7f1d1d;
         }
 
         body {
             font-family: 'Crimson Pro', serif;
-            background-color: #0f172a;
-            color: #e2e8f0;
+            background-color: #1c1917;
+            color: var(--ink-black);
             min-height: 100vh;
         }
 
@@ -26,19 +26,25 @@
             font-family: 'MedievalSharp', cursive;
         }
 
+        /* Dossier Style */
         .parchment {
-            background-color: var(--parchment-bg);
+            background-color: var(--dossier-bg);
             color: var(--ink-black);
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            background-image: url("https://www.transparenttextures.com/patterns/old-paper.png");
-            border: 2px solid var(--sepia-border);
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            border: 1px solid #ddd;
         }
 
-        /* PRINT SPECIFIC STYLES - CRITICAL FOR PDF QUALITY */
+        .dossier-card {
+            background-color: #fff;
+            border: 4px solid var(--ink-black);
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+        }
+
+        /* PRINT SPECIFIC STYLES - STANDARDIZED MARGINS */
         @media print {
             @page {
-                size: portrait;
-                margin: 0 !important; /* REMOVE WHITE FRAME: ALLOW COLOR TO BLEED TO EDGE */
+                size: A4 portrait;
+                margin: 0 !important;
             }
 
             * {
@@ -48,47 +54,35 @@
             }
 
             html, body {
-                background-color: var(--parchment-bg) !important;
-                color: #000 !important;
+                background-color: #fff !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
-
-            #root {
-                width: 100% !important;
+                width: 210mm !important;
+                height: 297mm !important;
             }
 
             .no-print {
                 display: none !important;
             }
 
-            /* EVERY SECTION IS A PAGE */
             section {
                 page-break-after: always !important;
                 break-after: page !important;
-                padding: 0.75in !important; /* INTERNAL MARGIN: PROTECTS TEXT FROM BORDER */
+                padding: 40px !important; /* Fixed Internal Margin for PDF */
                 margin: 0 !important;
                 display: flex !important;
                 flex-direction: column !important;
                 box-sizing: border-box !important;
-                min-height: 100vh !important; /* FILL THE ENTIRE PAPER HEIGHT */
-                width: 100vw !important;
+                height: 297mm !important; /* Fixed Height per Page */
+                width: 210mm !important;
                 position: relative !important;
-                border: none !important; /* REMOVE WEB BORDER IN PRINT */
+                border: none !important;
+                background-color: var(--dossier-bg) !important;
             }
 
-            .parchment {
-                background-color: var(--parchment-bg) !important;
-                box-shadow: none !important;
-                background-image: none !important; /* REMOVE TEXTURE TO KEEP PRINT CLEAN */
-            }
-
-            /* Dark pages like Black Secret should still bleed to edge */
+            /* Deep Black Pages */
             section.bg-stone-950 {
-                background-color: #0c0a09 !important;
+                background-color: var(--ink-black) !important;
                 color: #ef4444 !important;
             }
 
@@ -97,9 +91,10 @@
                 break-inside: avoid !important;
             }
 
-            h2 { font-size: 4rem !important; }
-            h3 { font-size: 2.25rem !important; }
-            p { font-size: 1.1rem !important; line-height: 1.4 !important; }
+            /* Standardized Typography for Print */
+            h2 { font-size: 5rem !important; margin-bottom: 1rem !important; }
+            h3 { font-size: 2.5rem !important; }
+            p { font-size: 1.15rem !important; line-height: 1.5 !important; }
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
