@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, Label } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { VillageData, DemographicEntry } from '../types';
 import { Plus, Trash2, Users } from 'lucide-react';
 
@@ -78,38 +78,6 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               {chartData.map((e, i) => (
                 <Cell key={`cell-${i}`} fill={e.color} />
               ))}
-              <Label 
-                position="center"
-                content={(props: any) => {
-                  const { viewBox } = props;
-                  if (!viewBox) return null;
-                  const { cx, cy } = viewBox;
-                  return (
-                    <g>
-                      // <text
-                      //   x={cx}
-                      //   y={cy - 12}
-                      //   textAnchor="middle"
-                      //   dominantBaseline="middle"
-                      //   className="fill-stone-500 font-black uppercase tracking-widest"
-                      //   style={{ fontSize: '12px', fontWeight: 900 }}
-                      // >
-                      //   TOTAL POP
-                      // </text>
-                      // <text
-                      //   x={cx}
-                      //   y={cy + 28}
-                      //   textAnchor="middle"
-                      //   dominantBaseline="middle"
-                      //   className="fill-black font-black medieval-font"
-                      //   style={{ fontSize: '56px', fontWeight: 900 }}
-                      // >
-                      //   {village.population}
-                      // </text>
-                    </g>
-                  );
-                }}
-              />
             </Pie>
             <Tooltip 
               contentStyle={{ backgroundColor: '#1a1a1a', border: 'none', color: '#fff', borderRadius: '4px', fontWeight: 'bold' }}
