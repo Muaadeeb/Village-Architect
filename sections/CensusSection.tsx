@@ -86,26 +86,26 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
                   const { cx, cy } = viewBox;
                   return (
                     <g>
-                      <text
-                        x={cx}
-                        y={cy - 12}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="fill-stone-500 font-black uppercase tracking-widest"
-                        style={{ fontSize: '12px', fontWeight: 900 }}
-                      >
-                        TOTAL POP
-                      </text>
-                      <text
-                        x={cx}
-                        y={cy + 28}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="fill-black font-black medieval-font"
-                        style={{ fontSize: '56px', fontWeight: 900 }}
-                      >
-                        {village.population}
-                      </text>
+                      // <text
+                      //   x={cx}
+                      //   y={cy - 12}
+                      //   textAnchor="middle"
+                      //   dominantBaseline="middle"
+                      //   className="fill-stone-500 font-black uppercase tracking-widest"
+                      //   style={{ fontSize: '12px', fontWeight: 900 }}
+                      // >
+                      //   TOTAL POP
+                      // </text>
+                      // <text
+                      //   x={cx}
+                      //   y={cy + 28}
+                      //   textAnchor="middle"
+                      //   dominantBaseline="middle"
+                      //   className="fill-black font-black medieval-font"
+                      //   style={{ fontSize: '56px', fontWeight: 900 }}
+                      // >
+                      //   {village.population}
+                      // </text>
                     </g>
                   );
                 }}
