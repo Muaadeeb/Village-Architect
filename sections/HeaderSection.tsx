@@ -12,11 +12,14 @@ interface Props {
 }
 
 export const HeaderSection: React.FC<Props> = ({ village, manualDemo, setManualDemo, onRedraw }) => {
+  // Fix: Helper function to extract counts from the demographics array since DemographicEntry[] does not have direct properties for races.
+  const getCount = (race: string) => village.demographics.find(d => d.race.toLowerCase() === race.toLowerCase())?.count || 0;
+
   const chartData = [
-    { name: 'Humans', value: village.demographics.humans, color: '#1a1a1a' },
-    { name: 'Halflings', value: village.demographics.halflings, color: '#44403c' },
-    { name: 'Dwarves', value: village.demographics.dwarves, color: '#78716c' },
-    { name: 'Elves', value: village.demographics.elves, color: '#a8a29e' },
+    { name: 'Humans', value: getCount('Humans'), color: '#1a1a1a' },
+    { name: 'Halflings', value: getCount('Halflings'), color: '#44403c' },
+    { name: 'Dwarves', value: getCount('Dwarves'), color: '#78716c' },
+    { name: 'Elves', value: getCount('Elves'), color: '#a8a29e' },
   ].filter(d => d.value > 0);
 
   return (

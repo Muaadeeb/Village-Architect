@@ -55,12 +55,12 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
 
   return (
     <div className="space-y-4 break-inside-avoid">
-      <h3 className="text-2xl font-bold medieval-font border-b-4 border-stone-800 pb-1 uppercase text-black flex items-center gap-3">
-        <Users size={24} /> Census
+      <h3 className="text-2xl font-bold medieval-font border-b-4 border-stone-800 pb-2 uppercase text-black flex items-center gap-3">
+        <Users size={24} className="shrink-0" /> Census
       </h3>
       
       {/* Chart Section */}
-      <div className="h-[380px] w-full bg-white/30 p-6 border-4 border-stone-800 rounded shadow-inner relative">
+      <div className="h-[380px] w-full bg-white/30 p-4 border-4 border-stone-800 rounded shadow-inner flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie 
@@ -71,41 +71,25 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               stroke="#fff" 
               strokeWidth={3}
               animationDuration={800}
-              cx="50%"
+              cx="40%"
               cy="50%"
             >
               {chartData.map((e, i) => (
                 <Cell key={`cell-${i}`} fill={e.color} />
               ))}
               <Label 
-                position="center"
-                content={({ viewBox }) => {
-                  const { cx, cy } = viewBox as any;
-                  return (
-                    <g>
-                      <text
-                        x={cx}
-                        y={cy - 12}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="fill-stone-500 font-black uppercase tracking-widest"
-                        style={{ fontSize: '10px' }}
-                      >
-                        Total Pop
-                      </text>
-                      <text
-                        x={cx}
-                        y={cy + 18}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="fill-black font-black medieval-font"
-                        style={{ fontSize: '36px' }}
-                      >
-                        {village.population}
-                      </text>
-                    </g>
-                  );
-                }}
+                value="TOTAL POP" 
+                position="center" 
+                dy={-20}
+                className="fill-stone-500 font-black uppercase tracking-widest" 
+                style={{ fontSize: '10px' }}
+              />
+              <Label 
+                value={village.population} 
+                position="center" 
+                dy={15}
+                className="fill-black font-black medieval-font" 
+                style={{ fontSize: '42px' }}
               />
             </Pie>
             <Tooltip 
@@ -117,6 +101,7 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               align="right" 
               verticalAlign="middle" 
               iconType="circle"
+              wrapperStyle={{ paddingLeft: '20px' }}
               formatter={(val, entry: any) => (
                 <span className="text-xs font-black text-black uppercase ml-1">
                   {val}: {entry.payload.value}
