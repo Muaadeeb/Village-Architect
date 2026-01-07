@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { generateVillageDetails, generateVillageMap, generatePOI } from './services/geminiService';
 import { VillageData, PointOfInterest, DemographicEntry } from './types';
-import { Scroll, RefreshCw, Flame, Printer, Compass } from 'lucide-react';
+import { Scroll, RefreshCw, Flame, Printer, Compass, Download, Upload } from 'lucide-react';
 
 // modular utilities
 import { PageNumber } from './VillageUtils';
@@ -37,6 +37,7 @@ const App: React.FC = () => {
   const [poi, setPoi] = useState<PointOfInterest | undefined>(undefined);
   const [editableNotes, setEditableNotes] = useState("");
   const [manualDemo, setManualDemo] = useState<DemographicEntry[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleGenerate = async () => {
     setLoading(true);
@@ -79,11 +80,80 @@ const App: React.FC = () => {
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
 
+  const saveVillage = () => {
+    if (!village) return;
+    const villageToSave = {
+      ...village,
+      gmNotes: editableNotes,
+      poi: poi // include POI if it exists
+    };
+    const blob = new Blob([JSON.stringify(villageToSave, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${village.name.replace(/\s+/g, '_')}_Dossier.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const loadVillage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target?.result as string) as VillageData;
+        setVillage(data);
+        setManualDemo(data.demographics || []);
+        setEditableNotes(data.gmNotes || "");
+        if (data.poi) {
+          setPoi(data.poi);
+        } else {
+          setPoi(undefined);
+        }
+        // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      } catch (err) {
+        alert("Failed to load village: Invalid JSON file.");
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center">
       <div className="w-full max-w-6xl flex justify-between items-center p-8 no-print">
         <h1 className="text-4xl font-bold medieval-font text-amber-500 flex items-center gap-3"><Flame /> Shadowdark Architect</h1>
         <div className="flex gap-4">
+          <input 
+            type="file" 
+            accept=".json" 
+            ref={fileInputRef} 
+            onChange={loadVillage} 
+            className="hidden" 
+          />
+          <button 
+            onClick={() => fileInputRef.current?.click()} 
+            title="Load Village JSON"
+            className="bg-stone-800 text-stone-300 px-4 py-2 rounded-lg font-bold border border-stone-700 hover:bg-stone-700 transition-all shadow-lg flex items-center gap-2"
+          >
+            <Upload size={18} /> <span className="hidden sm:inline">Load</span>
+          </button>
+          
+          {village && (
+            <button 
+              onClick={saveVillage} 
+              title="Save Village JSON"
+              className="bg-stone-800 text-stone-300 px-4 py-2 rounded-lg font-bold border border-stone-700 hover:bg-stone-700 transition-all shadow-lg flex items-center gap-2"
+            >
+              <Download size={18} /> <span className="hidden sm:inline">Save</span>
+            </button>
+          )}
+
           <button onClick={() => window.print()} className="bg-stone-800 text-amber-500 px-5 py-2 rounded-lg font-bold border border-amber-900/50 hover:bg-stone-700 transition-all shadow-lg"><Printer size={20} /></button>
           <button onClick={handleGenerate} className="bg-amber-600 text-white px-8 py-2 rounded-lg font-bold medieval-font text-xl shadow-xl hover:bg-amber-700 transition-all flex items-center gap-2">{loading ? <RefreshCw className="animate-spin" /> : <Scroll />} Manifest Village</button>
         </div>
