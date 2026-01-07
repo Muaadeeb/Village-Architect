@@ -60,36 +60,54 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
       </h3>
       
       {/* Chart Section */}
-      <div className="h-[380px] w-full bg-white/30 p-4 border-4 border-stone-800 rounded shadow-inner flex items-center justify-center">
+      <div className="h-[400px] w-full bg-white/30 p-4 border-4 border-stone-800 rounded shadow-inner flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie 
               data={chartData} 
-              innerRadius={70} 
-              outerRadius={110} 
+              innerRadius={75} 
+              outerRadius={115} 
               dataKey="value" 
               stroke="#fff" 
               strokeWidth={3}
               animationDuration={800}
-              cx="40%"
+              cx="45%" 
               cy="50%"
+              paddingAngle={2}
             >
               {chartData.map((e, i) => (
                 <Cell key={`cell-${i}`} fill={e.color} />
               ))}
               <Label 
-                value="TOTAL POP" 
-                position="center" 
-                dy={-20}
-                className="fill-stone-500 font-black uppercase tracking-widest" 
-                style={{ fontSize: '10px' }}
-              />
-              <Label 
-                value={village.population} 
-                position="center" 
-                dy={15}
-                className="fill-black font-black medieval-font" 
-                style={{ fontSize: '42px' }}
+                position="center"
+                content={(props: any) => {
+                  const { viewBox } = props;
+                  const { cx, cy } = viewBox;
+                  return (
+                    <g>
+                      <text
+                        x={cx}
+                        y={cy - 15}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-stone-500 font-black uppercase tracking-widest"
+                        style={{ fontSize: '11px', fontWeight: 900 }}
+                      >
+                        TOTAL POP
+                      </text>
+                      <text
+                        x={cx}
+                        y={cy + 22}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-black font-black medieval-font"
+                        style={{ fontSize: '48px', fontWeight: 900 }}
+                      >
+                        {village.population}
+                      </text>
+                    </g>
+                  );
+                }}
               />
             </Pie>
             <Tooltip 
@@ -101,9 +119,9 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               align="right" 
               verticalAlign="middle" 
               iconType="circle"
-              wrapperStyle={{ paddingLeft: '20px' }}
+              wrapperStyle={{ paddingLeft: '30px' }}
               formatter={(val, entry: any) => (
-                <span className="text-xs font-black text-black uppercase ml-1">
+                <span className="text-xs font-black text-stone-800 uppercase ml-1">
                   {val}: {entry.payload.value}
                 </span>
               )} 
@@ -119,20 +137,21 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
             <div key={idx} className="flex gap-2 items-end group">
               <div className="flex-1">
                 <label className="text-[9px] font-black uppercase text-stone-500 flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: RACE_COLORS[idx % RACE_COLORS.length] }}></div>
-                  Race Name
+                  <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: RACE_COLORS[idx % RACE_COLORS.length] }}></div>
+                  Race Designation
                 </label>
                 <input 
-                  className="w-full border-2 border-stone-800 px-2 py-1 rounded text-xs font-bold bg-white" 
+                  className="w-full border-2 border-stone-800 px-3 py-1.5 rounded text-xs font-bold bg-white focus:ring-2 focus:ring-amber-500 outline-none transition-all" 
                   type="text" 
                   value={demo.race} 
                   onChange={e => handleRaceChange(idx, 'race', e.target.value)}
+                  placeholder="e.g. Human"
                 />
               </div>
               <div className="w-24">
                 <label className="text-[9px] font-black uppercase text-stone-500">Count</label>
                 <input 
-                  className="w-full border-2 border-stone-800 px-2 py-1 rounded text-xs font-bold bg-white" 
+                  className="w-full border-2 border-stone-800 px-3 py-1.5 rounded text-xs font-bold bg-white focus:ring-2 focus:ring-amber-500 outline-none transition-all" 
                   type="number" 
                   value={demo.count} 
                   onChange={e => handleRaceChange(idx, 'count', parseInt(e.target.value) || 0)}
@@ -141,33 +160,33 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               {manualDemo.length > 1 && (
                 <button 
                   onClick={() => removeRace(idx)} 
-                  className="p-1.5 text-stone-400 hover:text-red-600 transition-colors"
-                  title="Remove Race"
+                  className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                  title="Remove Entry"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
                 </button>
               )}
             </div>
           ))}
         </div>
 
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-3 mt-6">
           {manualDemo.length < 10 && (
             <button 
               onClick={addRace} 
-              className="flex-1 bg-stone-200 text-stone-700 py-2 rounded uppercase font-bold text-xs flex items-center justify-center gap-2 hover:bg-stone-300 transition-all"
+              className="flex-1 bg-stone-200 text-stone-700 py-2.5 rounded uppercase font-black text-xs flex items-center justify-center gap-2 hover:bg-stone-300 transition-all border border-stone-300 shadow-sm"
             >
-              <Plus size={14} /> Add Race
+              <Plus size={16} /> Add Race
             </button>
           )}
           <button 
             onClick={onRedraw} 
-            className="flex-[2] bg-stone-800 text-amber-500 py-2 rounded uppercase font-bold text-xs shadow-lg hover:bg-stone-700 transition-all"
+            className="flex-[2] bg-stone-800 text-amber-500 py-2.5 rounded uppercase font-black text-xs shadow-lg hover:bg-stone-700 hover:scale-[1.02] active:scale-[0.98] transition-all border border-stone-950 flex items-center justify-center gap-2"
           >
-            Re-Draw Census Chart
+            Update Manifest
           </button>
         </div>
-        <p className="text-[9px] font-black uppercase text-stone-400 mt-2 text-center italic">Up to 10 distinct racial groups supported</p>
+        <p className="text-[9px] font-black uppercase text-stone-400 mt-4 text-center italic tracking-widest">Shadowdark Census Protocol: Maximum 10 Castes</p>
       </div>
     </div>
   );
