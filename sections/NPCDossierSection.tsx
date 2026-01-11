@@ -17,7 +17,7 @@ export const NPCDossierSection: React.FC<Props> = ({ npc, page }) => {
         <div className="p-6 border-4 border-stone-800 bg-white/60 rounded-sm shadow-2xl flex flex-col md:flex-row gap-6 items-start break-inside-avoid">
           {/* IDENTITY */}
           <div className="w-full md:w-1/4 flex flex-col items-center shrink-0">
-            <div className="relative w-full aspect-square bg-stone-900/10 mb-4 border-6 border-stone-800 overflow-hidden shadow-2xl">
+            <div className="npc-portrait-wrap relative w-full aspect-square bg-stone-900/10 mb-4 border-6 border-stone-800 overflow-hidden shadow-2xl">
               {npc.portraitUrl ? <img src={npc.portraitUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center opacity-10"><UserCircle size={80} /></div>}
             </div>
             <h4 className="text-4xl font-bold medieval-font text-black uppercase leading-tight mb-1 text-center">{npc.name}</h4>
@@ -29,7 +29,7 @@ export const NPCDossierSection: React.FC<Props> = ({ npc, page }) => {
           </div>
 
           {/* DETAILS */}
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-4 w-full">
             <div>
               <h5 className="text-[9px] font-black uppercase text-stone-500 mb-1 tracking-[0.4em] flex items-center gap-2"><BookOpen size={14}/> Psychological Profile</h5>
               <p className="italic text-2xl text-black font-bold leading-relaxed border-l-8 border-stone-800 pl-6 bg-white/40 p-4 rounded shadow-inner">"{npc.personality}"</p>
