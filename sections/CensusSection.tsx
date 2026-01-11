@@ -58,8 +58,8 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
         <Users size={28} className="shrink-0" /> Census
       </h3>
       
-      <div className="dossier-card h-[400px] w-full p-8 flex flex-col items-center justify-center">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="dossier-card min-h-[400px] w-full p-8 flex flex-col items-center justify-center bg-white">
+        <ResponsiveContainer width="100%" height={350}>
           <PieChart>
             <Pie 
               data={chartData} 
@@ -68,7 +68,7 @@ export const CensusSection: React.FC<Props> = ({ village, manualDemo, setManualD
               dataKey="value" 
               stroke="#fff" 
               strokeWidth={4}
-              animationDuration={800}
+              isAnimationActive={false} /* CRITICAL: Disabled animation for print stability */
               cx="50%" 
               cy="45%"
               paddingAngle={2}

@@ -187,8 +187,10 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* PAGE 2: RELATIONS & FESTIVALS */}
+          {/* PAGE 2: RELATIONS */}
           <RelationsSection relations={village.settlementRelations} page={2} />
+          
+          {/* PAGE 3: FESTIVALS */}
           <FestivalsSection festivals={village.festivals} page={3} />
 
           {/* PAGE 4: MAP */}
@@ -197,7 +199,7 @@ const App: React.FC = () => {
           {/* PAGE 5: BLACK SECRET */}
           <BlackSecretSection secret={village.darkSecret} page={5} />
 
-          {/* LANDMARKS & QUESTS PAGE */}
+          {/* PAGE 6: LANDMARKS & QUESTS */}
           <section className="parchment relative w-full max-w-5xl">
             <PageNumber n={6} />
             <div className="space-y-12">
@@ -206,10 +208,10 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* POI / CRAWL IN A BOX */}
+          {/* PAGE 7+: POI / CRAWL IN A BOX */}
           <CrawlBoxSection poi={poi} page={7} onGenerate={handleGeneratePOI} loading={loading} />
 
-          {/* NPC DOSSIERS */}
+          {/* NPC DOSSIERS - Each starts a new page */}
           {village.residents.map((npc, idx) => (
             <NPCDossierSection key={idx} npc={npc} page={8 + idx} />
           ))}
@@ -217,14 +219,18 @@ const App: React.FC = () => {
           {/* MARKETPLACE LEDGER */}
           <MarketLedgerSection businesses={village.businesses} page={8 + village.residents.length} />
 
-          {/* ENCOUNTER ARCHIVES */}
+          {/* ENCOUNTER ARCHIVES - Split to allow natural breaking */}
           <section className="parchment relative w-full max-w-5xl">
              <h3 className="text-5xl font-bold medieval-font border-b-6 border-stone-800 mb-10 pb-4 text-black flex items-center gap-6 uppercase"><Compass size={48} /> Random Encounter Archives</h3>
              <div className="grid grid-cols-1 gap-12">
                 <EncountersDaySection />
                 <EncountersNightSection />
-                <MonstersSection />
              </div>
+          </section>
+
+          {/* MONSTER TABLE - Dedicated section for long d100 table */}
+          <section className="parchment relative w-full max-w-5xl">
+             <MonstersSection />
           </section>
 
           {/* WEATHER ARCHIVES */}
@@ -239,12 +245,12 @@ const App: React.FC = () => {
           </section>
 
           {/* CHRONICLE */}
-          <ChronicleSection notes={editableNotes} onChange={setEditableNotes} page={9 + village.residents.length} />
+          <ChronicleSection notes={editableNotes} onChange={setEditableNotes} page={9 + village.residents.length + 1} />
         </div>
       )}
 
       {loading && (
-        <div className="fixed inset-0 bg-stone-900/98 z-50 flex items-center justify-center flex-col gap-10 p-12 backdrop-blur-md">
+        <div className="fixed inset-0 bg-stone-900/98 z-50 flex items-center justify-center flex-col gap-10 p-12 backdrop-blur-md no-print">
           <Flame className="w-48 h-48 text-amber-500 animate-pulse" />
           <h2 className="text-6xl medieval-font text-amber-500 text-center uppercase tracking-widest drop-shadow-2xl">Manifesting Dossier...</h2>
           <p className="text-stone-400 italic text-center max-w-2xl text-2xl animate-pulse">The Oracle is deep in thought, mapping the Shadowdark. Please wait while the ancient ink flows...</p>

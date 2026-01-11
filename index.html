@@ -40,11 +40,11 @@
             box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
         }
 
-        /* PRINT SPECIFIC STYLES - STANDARDIZED MARGINS */
+        /* PRINT SPECIFIC STYLES - ROBUST PDF GENERATION */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0 !important;
+                margin: 15mm !important;
             }
 
             * {
@@ -57,8 +57,8 @@
                 background-color: #fff !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 210mm !important;
-                height: 297mm !important;
+                height: auto !important;
+                width: auto !important;
             }
 
             .no-print {
@@ -66,24 +66,51 @@
             }
 
             section {
-                page-break-after: always !important;
-                break-after: page !important;
-                padding: 40px !important; /* Fixed Internal Margin for PDF */
+                page-break-before: always !important;
+                break-before: page !important;
+                padding: 20px 0 !important;
                 margin: 0 !important;
-                display: flex !important;
-                flex-direction: column !important;
+                display: block !important;
                 box-sizing: border-box !important;
-                height: 297mm !important; /* Fixed Height per Page */
-                width: 210mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                width: 100% !important;
                 position: relative !important;
                 border: none !important;
-                background-color: var(--dossier-bg) !important;
+                background-color: transparent !important;
+                box-shadow: none !important;
             }
 
-            /* Deep Black Pages */
-            section.bg-stone-950 {
-                background-color: var(--ink-black) !important;
-                color: #ef4444 !important;
+            section:first-of-type {
+                page-break-before: avoid !important;
+                break-before: avoid !important;
+            }
+
+            /* Keep the parchment background even in print if possible, or force white */
+            .parchment {
+                background-color: var(--dossier-bg) !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            /* Table fixes for long archives */
+            table {
+                page-break-inside: auto !important;
+                width: 100% !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+                page-break-after: auto !important;
+            }
+            thead {
+                display: table-header-group !important;
+            }
+
+            /* Ensure charts show up */
+            .recharts-responsive-container {
+                height: 350px !important;
+                width: 100% !important;
+                display: block !important;
             }
 
             .break-inside-avoid {
@@ -91,10 +118,16 @@
                 break-inside: avoid !important;
             }
 
-            /* Standardized Typography for Print */
+            /* Deep Black Pages Correction for Print */
+            section.bg-stone-950 {
+                background-color: var(--ink-black) !important;
+                color: #ff0000 !important;
+                min-height: 260mm !important; /* Force full page for the secret */
+            }
+
             h2 { font-size: 5rem !important; margin-bottom: 1rem !important; }
             h3 { font-size: 2.5rem !important; }
-            p { font-size: 1.15rem !important; line-height: 1.5 !important; }
+            p { font-size: 1.1rem !important; line-height: 1.4 !important; }
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
